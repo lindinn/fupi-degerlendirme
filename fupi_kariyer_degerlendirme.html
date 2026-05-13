@@ -363,9 +363,10 @@ function showResults(){
   const baskinDriver=fcDefs.reduce((a,b)=>(fc[a.k]||0)>=(fc[b.k]||0)?a:b);
 
   document.getElementById('profile-chip-wrap').innerHTML=`<div class="profile-chip">${baskinKKO.name} · ${baskinDriver.l}</div>`;
-  document.getElementById('ai-out').textContent=generateInterpretation(kko,fc,baskinKKO,baskinDriver);
+  const yorum=generateInterpretation(kko,fc,baskinKKO,baskinDriver);
+  document.getElementById('ai-out').textContent=yorum;
 
-  saveData(kko,fc,baskinKKO.name,baskinDriver.l);
+  saveData(kko,fc,baskinKKO.name,baskinDriver.l,yorum);
 }
 
 function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
@@ -428,7 +429,7 @@ function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
   return `${kkoDesc}\n\n${uyum}\n\n${gucluMap}\n\n${oneriMap}`;
 }
 
-async function saveData(kko,fc,baskinKKO,baskinDriver){
+async function saveData(kko,fc,baskinKKO,baskinDriver,yorum){
   const note=document.getElementById("save-note");
   note.textContent="Veriler kaydediliyor...";
   try{
@@ -440,7 +441,8 @@ async function saveData(kko,fc,baskinKKO,baskinDriver){
       kko_uzman:kko.find(k=>k.f===3).avg.toFixed(2),
       kko_dogrusal:kko.find(k=>k.f===4).avg.toFixed(2),
       zs_dogrusal:fc.D,zs_sarmal:fc.S,zs_uzman:fc.U,zs_gecisken:fc.G,
-      baskin_kko:baskinKKO,baskin_driver:baskinDriver
+      baskin_kko:baskinKKO,baskin_driver:baskinDriver,
+      yorum:yorum
     });
     await fetch(WEBHOOK+"?"+params.toString(),{method:"GET",mode:"no-cors"});
     note.textContent="✓ Yanıtların kaydedildi.";

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPi — Danışman Paneli</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
+  :root{--dark:#0f0f1a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--orange:#F5A623;--orange-dim:rgba(245,166,35,0.12);--text:#e8e8f0;--muted:#7a7a9a;--faint:#3a3a5a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh}
+  body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(245,166,35,0.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+  /* LOGIN */
+  .login-wrap{max-width:380px;margin:8vh auto 0;padding:2rem;background:var(--card);border:.5px solid var(--border);border-radius:16px;position:relative;z-index:1}
+  .login-title{font-size:20px;font-weight:500;color:#fff;margin-bottom:.35rem}
+  .login-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+  .field-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;display:block}
+  .field-input{width:100%;background:rgba(255,255,255,0.03);border:.5px solid var(--border);border-radius:8px;padding:.7rem 1rem;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s;margin-bottom:1rem}
+  .field-input:focus{border-color:var(--orange)}
+  .btn-main{background:var(--orange);color:#0f0f1a;border:none;border-radius:10px;padding:.65rem 1.5rem;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%;transition:opacity .15s}
+  .btn-main:hover{opacity:.88}
+  .login-err{font-size:12px;color:#e07b7b;margin-top:.75rem;display:none}
+
+  /* PANEL */
+  .wrap{max-width:1000px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+  .screen{display:none}.screen.active{display:block}
+  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;margin-bottom:2rem;border-bottom:.5px solid var(--border)}
+  .header-left{display:flex;align-items:center;gap:12px}
+  .panel-badge{font-size:10px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+  .btn-sm{background:transparent;color:var(--muted);border:.5px solid var(--border);border-radius:8px;padding:.4rem .9rem;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+  .btn-sm:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+  .btn-refresh{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3);border-radius:8px;padding:.4rem .9rem;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+  .btn-refresh:hover{background:rgba(245,166,35,.2)}
+
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:2rem}
+  .stat-box{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
+  .stat-num{font-size:28px;font-weight:500;color:#fff;margin-bottom:2px;font-family:'DM Mono',monospace}
+  .stat-lbl{font-size:11px;color:var(--muted)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:.6rem .75rem;text-align:left;border-bottom:.5px solid var(--border);font-weight:500;white-space:nowrap}
+  td{padding:.75rem .75rem;border-bottom:.5px solid rgba(255,255,255,.04);color:var(--text);vertical-align:middle}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  .chip{display:inline-block;font-size:11px;padding:2px 9px;border-radius:12px;font-weight:500;white-space:nowrap}
+  .chip-g{background:rgba(245,166,35,.15);color:#F5A623}
+  .chip-s{background:rgba(127,119,221,.15);color:#7F77DD}
+  .chip-u{background:rgba(29,158,117,.15);color:#1D9E75}
+  .chip-d{background:rgba(55,138,221,.15);color:#378ADD}
+  .btn-pdf{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3);border-radius:6px;padding:.35rem .8rem;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;font-weight:500}
+  .btn-pdf:hover{background:rgba(245,166,35,.2)}
+  .empty{text-align:center;padding:3rem;color:var(--muted);font-size:14px;line-height:1.8}
+  .loading-msg{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- GİRİŞ -->
+<div id="login-screen" class="screen active">
+  <div class="login-wrap">
+    <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPi" style="height:48px;width:auto;margin-bottom:1.5rem;display:block">
+    <div class="login-title">Danışman Paneli</div>
+    <div class="login-sub">Devam etmek için şifrenizi girin.</div>
+    <label class="field-label">Şifre</label>
+    <input class="field-input" type="password" id="pw-input" placeholder="••••••••">
+    <button class="btn-main" onclick="login()">Giriş yap</button>
+    <div class="login-err" id="login-err">Şifre yanlış. Tekrar deneyin.</div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel-screen" class="screen">
+<div class="wrap">
+  <div class="header">
+    <div class="header-left">
+      <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPi" style="height:40px;width:auto">
+      <div>
+        <div class="panel-badge">Danışman Paneli</div>
+        <div style="font-size:12px;color:var(--muted)" id="panel-date"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-refresh" onclick="loadData()">↻ Yenile</button>
+      <button class="btn-sm" onclick="logout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Toplam kayıt</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-baskin">—</div><div class="stat-lbl">En yaygın profil</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-son">—</div><div class="stat-lbl">Son katılımcı</div></div>
+  </div>
+
+  <div id="table-wrap"><div class="loading-msg">Yükleniyor...</div></div>
+</div>
+</div>
+
+<script>
+const SIFRE = "Claude2026!";
+const WEBHOOK = "https://script.google.com/macros/s/AKfycbzAlSvreppeCCjnor6cEbceVXt_XKl9CMTB0WN2uGkuOJijFfnPfpAvwWfzP4PxlASx_A/exec";
+
+let tumKayitlar = [];
+
+document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+
+function login(){
+  if(document.getElementById('pw-input').value === SIFRE){
+    document.getElementById('login-err').style.display='none';
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('panel-screen').classList.add('active');
+    document.getElementById('panel-date').textContent = new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+    loadData();
+  } else {
+    document.getElementById('login-err').style.display='block';
+  }
+}
+
+function logout(){
+  document.getElementById('panel-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('pw-input').value='';
+}
+
+async function loadData(){
+  document.getElementById('table-wrap').innerHTML='<div class="loading-msg">Veriler yükleniyor...</div>';
+  try {
+    const res = await fetch(WEBHOOK+'?action=read');
+    const raw = await res.json();
+
+    if(!raw || raw.length < 2){
+      document.getElementById('table-wrap').innerHTML='<div class="empty">Henüz kayıt yok.<br><small>Öğrenciler formu doldurdukça burada görünecek.</small></div>';
+      document.getElementById('stat-total').textContent='0';
+      return;
+    }
+
+    // İlk satır başlık
+    const headers = raw[0];
+    const rows = raw.slice(1);
+
+    tumKayitlar = rows.map(r => ({
+      tarih: r[0]||'',
+      ad_soyad: r[1]||'',
+      kko_gecisken: r[2]||'',
+      kko_sarmal: r[3]||'',
+      kko_uzman: r[4]||'',
+      kko_dogrusal: r[5]||'',
+      zs_gecisken: r[6]||'',
+      zs_sarmal: r[7]||'',
+      zs_uzman: r[8]||'',
+      zs_dogrusal: r[9]||'',
+      baskin_kko: r[10]||'',
+      baskin_driver: r[11]||'',
+      yorum: r[12]||''
+    }));
+
+    // İstatistikler
+    document.getElementById('stat-total').textContent = tumKayitlar.length;
+    const profiller = tumKayitlar.map(r=>r.baskin_kko).filter(Boolean);
+    const sayim = {};
+    profiller.forEach(p=>sayim[p]=(sayim[p]||0)+1);
+    const enCok = Object.entries(sayim).sort((a,b)=>b[1]-a[1])[0];
+    document.getElementById('stat-baskin').textContent = enCok ? enCok[0] : '—';
+    const son = tumKayitlar[tumKayitlar.length-1];
+    document.getElementById('stat-son').textContent = son.ad_soyad || '—';
+
+    renderTable();
+  } catch(err) {
+    document.getElementById('table-wrap').innerHTML='<div class="empty">Veriler yüklenemedi. Sayfayı yenileyin.</div>';
+  }
+}
+
+function chipClass(val){
+  const v=(val||'').toLowerCase();
+  if(v.includes('geçişken')) return 'chip-g';
+  if(v.includes('sarmal')) return 'chip-s';
+  if(v.includes('uzman')) return 'chip-u';
+  if(v.includes('doğrusal')) return 'chip-d';
+  return '';
+}
+
+function renderTable(){
+  const wrap = document.getElementById('table-wrap');
+  const rows = [...tumKayitlar].reverse().map((r,i) => `
+    <tr>
+      <td style="color:var(--faint);font-family:'DM Mono',monospace;font-size:11px">${tumKayitlar.length-i}</td>
+      <td style="font-weight:500;white-space:nowrap">${r.ad_soyad||'—'}</td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${r.tarih||'—'}</td>
+      <td><span class="chip ${chipClass(r.baskin_kko)}">${r.baskin_kko||'—'}</span></td>
+      <td><span class="chip ${chipClass(r.baskin_driver)}">${r.baskin_driver||'—'}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${r.kko_gecisken||'—'} / ${r.kko_sarmal||'—'} / ${r.kko_uzman||'—'} / ${r.kko_dogrusal||'—'}</td>
+      <td><button class="btn-pdf" onclick="downloadPDF(tumKayitlar[${tumKayitlar.length-1-i}])">⬇ PDF</button></td>
+    </tr>`).join('');
+
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>#</th><th>Ad Soyad</th><th>Tarih</th><th>Baskın KKÖ</th><th>Baskın Driver</th><th>KKÖ (G/S/U/D)</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function downloadPDF(r){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const W=210, M=20, CW=W-M*2;
+  let y = M;
+
+  // Header band
+  doc.setFillColor(15,15,26);
+  doc.rect(0,0,W,48,'F');
+  doc.setFillColor(245,166,35);
+  doc.rect(0,0,4,48,'F');
+  doc.setTextColor(245,166,35);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','bold');
+  doc.text('FUPi KARİYER TASARIMI — fupi.com.tr', M, 16);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18);
+  doc.text('Kariyer Profil Raporu', M, 29);
+  doc.setTextColor(150,150,170);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Kariyer Kalıpları Değerlendirme Sistemi', M, 38);
+  doc.text(r.tarih||'', W-M, 38, {align:'right'});
+  y = 60;
+
+  // Öğrenci kutusu
+  doc.setFillColor(245,166,35,25);
+  doc.setDrawColor(245,166,35,180);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(M, y, CW, 16, 3, 3, 'FD');
+  doc.setTextColor(120,90,0);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','bold');
+  doc.text('ÖĞRENCİ', M+5, y+6);
+  doc.setTextColor(30,20,0);
+  doc.setFontSize(13);
+  doc.text(r.ad_soyad||'—', M+5, y+13);
+  y += 24;
+
+  // Profil özeti
+  doc.setTextColor(120,120,140);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','bold');
+  doc.text('BASKИН KARİYER PROFİLİ', M, y);
+  y += 5;
+
+  const chipColors = {
+    'Geçişken':[245,166,35], 'Sarmal':[127,119,221],
+    'Uzman':[29,158,117], 'Doğrusal':[55,138,221]
+  };
+  const kkoColor = chipColors[r.baskin_kko] || [150,150,150];
+  const drColor = chipColors[r.baskin_driver] || [150,150,150];
+
+  doc.setFillColor(kkoColor[0], kkoColor[1], kkoColor[2], 20);
+  doc.setDrawColor(kkoColor[0], kkoColor[1], kkoColor[2], 120);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(M, y, CW/2-5, 12, 2, 2, 'FD');
+  doc.setTextColor(kkoColor[0]*.6, kkoColor[1]*.6, kkoColor[2]*.6);
+  doc.setFontSize(8);
+  doc.text('KKÖ', M+4, y+5);
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text(r.baskin_kko||'—', M+4, y+10.5);
+
+  doc.setFillColor(drColor[0], drColor[1], drColor[2], 20);
+  doc.setDrawColor(drColor[0], drColor[1], drColor[2], 120);
+  doc.roundedRect(M+CW/2+5, y, CW/2-5, 12, 2, 2, 'FD');
+  doc.setTextColor(drColor[0]*.6, drColor[1]*.6, drColor[2]*.6);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','normal');
+  doc.text('Driver', M+CW/2+9, y+5);
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text(r.baskin_driver||'—', M+CW/2+9, y+10.5);
+  y += 20;
+
+  // KKÖ Puanları
+  doc.setTextColor(120,120,140);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','bold');
+  doc.text('KARİYER KALIPLARI ÖLÇEĞİ (KKÖ) — 1-5 Likert ortalaması', M, y);
+  y += 5;
+
+  const kkoItems=[
+    {lbl:'Geçişken', val:parseFloat(r.kko_gecisken||0), color:[245,166,35]},
+    {lbl:'Sarmal', val:parseFloat(r.kko_sarmal||0), color:[127,119,221]},
+    {lbl:'Uzman', val:parseFloat(r.kko_uzman||0), color:[29,158,117]},
+    {lbl:'Doğrusal', val:parseFloat(r.kko_dogrusal||0), color:[55,138,221]}
+  ];
+
+  kkoItems.forEach(item=>{
+    doc.setTextColor(60,60,80);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','normal');
+    doc.text(item.lbl, M, y+4.5);
+    doc.setFillColor(235,235,242);
+    doc.roundedRect(M+32, y, CW-55, 5, 1, 1, 'F');
+    const pct = Math.min(Math.max(item.val/5,0),1);
+    if(pct>0){
+      doc.setFillColor(...item.color);
+      doc.roundedRect(M+32, y, (CW-55)*pct, 5, 1, 1, 'F');
+    }
+    const lvl = item.val<2.5?'Düşük':item.val<3.5?'Orta':'Yüksek';
+    doc.setTextColor(...item.color);
+    doc.setFont('helvetica','bold');
+    doc.text(item.val.toFixed(1)+'/5  '+lvl, M+32+(CW-55)+3, y+4.5);
+    y+=9;
+  });
+  y+=5;
+
+  // ZS Puanları
+  doc.setTextColor(120,120,140);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','bold');
+  doc.text('ZORUNLU SEÇİM — DRIVER KARİYER TİPLERİ', M, y);
+  y+=5;
+
+  const zsToplam = (parseInt(r.zs_gecisken||0)+parseInt(r.zs_sarmal||0)+parseInt(r.zs_uzman||0)+parseInt(r.zs_dogrusal||0)) || 24;
+  const zsItems=[
+    {lbl:'Geçişken', val:parseInt(r.zs_gecisken||0), color:[245,166,35]},
+    {lbl:'Sarmal', val:parseInt(r.zs_sarmal||0), color:[127,119,221]},
+    {lbl:'Uzman', val:parseInt(r.zs_uzman||0), color:[29,158,117]},
+    {lbl:'Doğrusal', val:parseInt(r.zs_dogrusal||0), color:[55,138,221]}
+  ];
+
+  zsItems.forEach(item=>{
+    doc.setTextColor(60,60,80);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','normal');
+    doc.text(item.lbl, M, y+4.5);
+    doc.setFillColor(235,235,242);
+    doc.roundedRect(M+32, y, CW-55, 5, 1, 1, 'F');
+    const pct = item.val/zsToplam;
+    if(pct>0){
+      doc.setFillColor(...item.color);
+      doc.roundedRect(M+32, y, (CW-55)*pct, 5, 1, 1, 'F');
+    }
+    doc.setTextColor(...item.color);
+    doc.setFont('helvetica','bold');
+    doc.text(item.val+' / '+zsToplam, M+32+(CW-55)+3, y+4.5);
+    y+=9;
+  });
+  y+=6;
+
+  // Yorum
+  if(r.yorum && r.yorum.trim()){
+    doc.setTextColor(120,120,140);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','bold');
+    doc.text('KİŞİSEL KARİYER ANALİZİ', M, y);
+    y+=5;
+    const yorumLines = doc.splitTextToSize(r.yorum, CW-10);
+    const yorumH = yorumLines.length*4.8+10;
+    doc.setFillColor(252,247,238);
+    doc.setDrawColor(245,166,35,80);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(M, y, CW, yorumH, 3, 3, 'FD');
+    doc.setFillColor(245,166,35);
+    doc.rect(M, y, 3, yorumH, 'F');
+    doc.setTextColor(60,50,20);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.5);
+    doc.text(yorumLines, M+7, y+7);
+    y += yorumH+6;
+  }
+
+  // Footer
+  doc.setFillColor(15,15,26);
+  doc.rect(0,274,W,23,'F');
+  doc.setFillColor(245,166,35);
+  doc.rect(0,274,W,1,'F');
+  doc.setTextColor(100,100,120);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','normal');
+  doc.text('FUPi Kariyer Tasarımı — fupi.com.tr', M, 283);
+  doc.text('Bu rapor FUPi Kariyer Kalıpları Değerlendirme Sistemi tarafından otomatik oluşturulmuştur.', M, 289);
+  const bugun = new Date().toLocaleDateString('tr-TR');
+  doc.text('Rapor tarihi: '+bugun, W-M, 289, {align:'right'});
+
+  const ad = (r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_ğüşıöçĞÜŞİÖÇ]/g,'');
+  doc.save('FUPi_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf');
+}
+</script>
+</body>
+</html>
