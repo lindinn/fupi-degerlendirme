@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FUPi — Danışman Paneli</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
   :root{--dark:#0f0f1a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--orange:#F5A623;--orange-dim:rgba(245,166,35,0.12);--text:#e8e8f0;--muted:#7a7a9a;--faint:#3a3a5a}
@@ -200,247 +201,231 @@ function renderTable(){
   </table>`;
 }
 
-function tr(s){
-  if(!s) return '';
-  return String(s)
-    .replace(/\u011f/g,'g').replace(/\u011e/g,'G')  // ğ Ğ
-    .replace(/\u00fc/g,'u').replace(/\u00dc/g,'U')  // ü Ü
-    .replace(/\u015f/g,'s').replace(/\u015e/g,'S')  // ş Ş
-    .replace(/\u0131/g,'i').replace(/\u0130/g,'I')  // ı İ
-    .replace(/\u00f6/g,'o').replace(/\u00d6/g,'O')  // ö Ö
-    .replace(/\u00e7/g,'c').replace(/\u00c7/g,'C')  // ç Ç
-    .replace(/ğ/g,'g').replace(/Ğ/g,'G')
-    .replace(/ü/g,'u').replace(/Ü/g,'U')
-    .replace(/ş/g,'s').replace(/Ş/g,'S')
-    .replace(/ı/g,'i').replace(/İ/g,'I')
-    .replace(/ö/g,'o').replace(/Ö/g,'O')
-    .replace(/ç/g,'c').replace(/Ç/g,'C');
-}
 
-function downloadPDF(r){
-  const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
-  const W=210, M=20, CW=W-M*2;
-  let y = M;
+const FONT_URL = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
 
-  // Header band
-  doc.setFillColor(15,15,26);
-  doc.rect(0,0,W,48,'F');
-  doc.setFillColor(245,166,35);
-  doc.rect(0,0,4,48,'F');
-  doc.setTextColor(245,166,35);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','bold');
-  doc.text('FUPi KARIYER TASARIMI — fupi.com.tr', M, 16);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(18);
-  doc.text('Kariyer Profil Raporu', M, 29);
-  doc.setTextColor(150,150,170);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','normal');
-  doc.text('Kariyer Kaliplari Degerlendirme Sistemi', M, 38);
-  doc.text(tr(r.tarih)||'', W-M, 38, {align:'right'});
-  y = 60;
+async function downloadPDF(r) {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
 
-  // İsim kutusu
-  doc.setFillColor(40,35,15);
-  doc.setDrawColor(245,166,35,180);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(M, y, CW, 16, 3, 3, 'FD');
-  doc.setTextColor(180,130,30);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','bold');
-  doc.text('ISIM', M+5, y+6);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(13);
-  doc.text(tr(r.ad_soyad)||'—', M+5, y+13);
-  y += 24;
+  // Font yükle
+  let fontBytes;
+  try {
+    const res = await fetch(FONT_URL);
+    fontBytes = await res.arrayBuffer();
+  } catch(e) {
+    alert('Font yuklenemedi. Lutfen tekrar deneyin.');
+    return;
+  }
 
-  // Profil özeti
-  doc.setTextColor(120,120,140);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','bold');
-  doc.text('BASKIN KARIYER PROFILI', M, y);
-  y += 5;
+  const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
+
+  // Roboto embed et
+  let font, fontBold;
+  try {
+    font = await doc.embedFont(fontBytes);
+    fontBold = await doc.embedFont(fontBytes); // aynı font, bold olmayacak ama Türkçe çalışacak
+  } catch(e) {
+    // Fallback: Helvetica
+    font = await doc.embedFont(StandardFonts.Helvetica);
+    fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  }
+
+  const pageW = 595, pageH = 842, M = 56, CW = pageW - M*2;
+
+  function addPage() {
+    const p = doc.addPage([pageW, pageH]);
+    return { p, y: pageH - M };
+  }
+
+  let { p, y } = addPage();
+
+  const orange = rgb(245/255, 166/255, 35/255);
+  const dark = rgb(15/255, 15/255, 26/255);
+  const white = rgb(1,1,1);
+  const muted = rgb(0.47,0.47,0.6);
+  const faint = rgb(0.23,0.23,0.35);
+  const textCol = rgb(0.23,0.2,0.08);
+
+  function drawText(page, text, x, yPos, size, color, bold) {
+    page.drawText(String(text||''), {
+      x, y: yPos, size, font: bold ? fontBold : font, color
+    });
+  }
+
+  function measureText(text, size) {
+    return font.widthOfTextAtSize(String(text||''), size);
+  }
+
+  // HEADER
+  p.drawRectangle({ x:0, y:pageH-136, width:pageW, height:136, color:dark });
+  p.drawRectangle({ x:0, y:pageH-136, width:4, height:136, color:orange });
+  drawText(p, 'FUPi KARIYER TASARIMI — fupi.com.tr', M, pageH-40, 9, orange, true);
+  drawText(p, 'Kariyer Profil Raporu', M, pageH-72, 18, white, true);
+  drawText(p, 'Kariyer Kaliplari Degerlendirme Sistemi', M, pageH-100, 9, muted, false);
+  const tarihStr = String(r.tarih||'');
+  drawText(p, tarihStr, pageW-M-measureText(tarihStr,9), pageH-100, 9, muted, false);
+  y = pageH - 160;
+
+  // İSİM KUTUSU
+  p.drawRectangle({ x:M, y:y-44, width:CW, height:44, color:rgb(0.16,0.14,0.06), borderColor:orange, borderWidth:1, borderOpacity:0.7 });
+  drawText(p, 'ISIM', M+14, y-18, 8, orange, true);
+  drawText(p, String(r.ad_soyad||'—'), M+14, y-36, 13, white, true);
+  y -= 62;
+
+  // BASKIN PROFİL
+  drawText(p, 'BASKIN KARIYER PROFILI', M, y, 8, muted, true);
+  y -= 14;
 
   const chipColors = {
-    'Geçişken':[245,166,35], 'Sarmal':[127,119,221],
-    'Uzman':[29,158,117], 'Doğrusal':[55,138,221]
+    'Geçişken': rgb(245/255,166/255,35/255),
+    'Sarmal': rgb(127/255,119/255,221/255),
+    'Uzman': rgb(29/255,158/255,117/255),
+    'Doğrusal': rgb(55/255,138/255,221/255)
   };
-  const kkoColor = chipColors[r.baskin_kko] || [150,150,150];
-  const drColor = chipColors[r.baskin_driver] || [150,150,150];
+  const kkoCol = chipColors[r.baskin_kko] || muted;
+  const drCol = chipColors[r.baskin_driver] || muted;
 
-  doc.setFillColor(kkoColor[0], kkoColor[1], kkoColor[2], 20);
-  doc.setDrawColor(kkoColor[0], kkoColor[1], kkoColor[2], 120);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(M, y, CW/2-5, 12, 2, 2, 'FD');
-  doc.setTextColor(kkoColor[0]*.6, kkoColor[1]*.6, kkoColor[2]*.6);
-  doc.setFontSize(8);
-  doc.text('KKO', M+4, y+5);
-  doc.setFontSize(11);
-  doc.setFont('helvetica','bold');
-  doc.text(tr(r.baskin_kko)||'—', M+4, y+10.5);
+  p.drawRectangle({ x:M, y:y-32, width:CW/2-14, height:32, color:rgb(0.12,0.1,0.04), borderColor:kkoCol, borderWidth:0.8 });
+  drawText(p, 'KKO', M+11, y-13, 8, kkoCol, true);
+  drawText(p, String(r.baskin_kko||'—'), M+11, y-27, 11, kkoCol, true);
 
-  doc.setFillColor(drColor[0], drColor[1], drColor[2], 20);
-  doc.setDrawColor(drColor[0], drColor[1], drColor[2], 120);
-  doc.roundedRect(M+CW/2+5, y, CW/2-5, 12, 2, 2, 'FD');
-  doc.setTextColor(drColor[0]*.6, drColor[1]*.6, drColor[2]*.6);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','normal');
-  doc.text('Driver', M+CW/2+9, y+5);
-  doc.setFontSize(11);
-  doc.setFont('helvetica','bold');
-  doc.text(tr(r.baskin_driver)||'—', M+CW/2+9, y+10.5);
-  y += 20;
+  p.drawRectangle({ x:M+CW/2+14, y:y-32, width:CW/2-14, height:32, color:rgb(0.1,0.1,0.16), borderColor:drCol, borderWidth:0.8 });
+  drawText(p, 'Driver', M+CW/2+25, y-13, 8, drCol, true);
+  drawText(p, String(r.baskin_driver||'—'), M+CW/2+25, y-27, 11, drCol, true);
+  y -= 50;
 
-  // KKÖ Puanları
-  doc.setTextColor(120,120,140);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','bold');
-  doc.text('KARIYER KALIPLARI OLCEGI (KKO) — 1-5 Likert ortalamasi', M, y);
-  y += 5;
+  // KKÖ BARLAR
+  drawText(p, 'KARIYER KALIPLARI OLCEGI (KKO) — 1-5 Likert ortalamasi', M, y, 8, muted, true);
+  y -= 14;
 
-  const kkoItems=[
-    {lbl:'Geçişken', val:parseFloat(r.kko_gecisken||0), color:[245,166,35]},
-    {lbl:'Sarmal', val:parseFloat(r.kko_sarmal||0), color:[127,119,221]},
-    {lbl:'Uzman', val:parseFloat(r.kko_uzman||0), color:[29,158,117]},
-    {lbl:'Doğrusal', val:parseFloat(r.kko_dogrusal||0), color:[55,138,221]}
+  const kkoItems = [
+    { lbl:'Gecisken', val:parseFloat(r.kko_gecisken||0), color:rgb(245/255,166/255,35/255) },
+    { lbl:'Sarmal', val:parseFloat(r.kko_sarmal||0), color:rgb(127/255,119/255,221/255) },
+    { lbl:'Uzman', val:parseFloat(r.kko_uzman||0), color:rgb(29/255,158/255,117/255) },
+    { lbl:'Dogrusal', val:parseFloat(r.kko_dogrusal||0), color:rgb(55/255,138/255,221/255) }
   ];
 
-  kkoItems.forEach(item=>{
-    doc.setTextColor(60,60,80);
-    doc.setFontSize(9);
-    doc.setFont('helvetica','normal');
-    doc.text(tr(item.lbl), M, y+4.5);
-    doc.setFillColor(235,235,242);
-    doc.roundedRect(M+32, y, CW-55, 5, 1, 1, 'F');
+  for(const item of kkoItems) {
+    drawText(p, item.lbl, M, y, 9, rgb(0.37,0.37,0.5), false);
+    const barX = M+90, barW = CW-130, barH = 10;
+    p.drawRectangle({ x:barX, y:y-10, width:barW, height:barH, color:rgb(0.92,0.92,0.95) });
     const pct = Math.min(Math.max(item.val/5,0),1);
-    if(pct>0){
-      doc.setFillColor(...item.color);
-      doc.roundedRect(M+32, y, (CW-55)*pct, 5, 1, 1, 'F');
-    }
+    if(pct > 0) p.drawRectangle({ x:barX, y:y-10, width:barW*pct, height:barH, color:item.color });
     const lvl = item.val<2.5?'Dusuk':item.val<3.5?'Orta':'Yuksek';
-    doc.setTextColor(...item.color);
-    doc.setFont('helvetica','bold');
-    doc.text(item.val.toFixed(1)+'/5  '+lvl, M+32+(CW-55)+3, y+4.5);
-    y+=9;
-  });
-  y+=5;
+    drawText(p, item.val.toFixed(1)+'/5  '+lvl, barX+barW+8, y, 9, item.color, true);
+    y -= 22;
+  }
+  y -= 8;
 
-  // ZS Puanları
-  doc.setTextColor(120,120,140);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','bold');
-  doc.text('ZORUNLU SECIM — DRIVER KARIYER TIPLERI', M, y);
-  y+=5;
+  // ZS BARLAR
+  drawText(p, 'ZORUNLU SECIM — DRIVER KARIYER TIPLERI', M, y, 8, muted, true);
+  y -= 14;
 
   const zsToplam = (parseInt(r.zs_gecisken||0)+parseInt(r.zs_sarmal||0)+parseInt(r.zs_uzman||0)+parseInt(r.zs_dogrusal||0)) || 24;
-  const zsItems=[
-    {lbl:'Geçişken', val:parseInt(r.zs_gecisken||0), color:[245,166,35]},
-    {lbl:'Sarmal', val:parseInt(r.zs_sarmal||0), color:[127,119,221]},
-    {lbl:'Uzman', val:parseInt(r.zs_uzman||0), color:[29,158,117]},
-    {lbl:'Doğrusal', val:parseInt(r.zs_dogrusal||0), color:[55,138,221]}
+  const zsItems = [
+    { lbl:'Gecisken', val:parseInt(r.zs_gecisken||0), color:rgb(245/255,166/255,35/255) },
+    { lbl:'Sarmal', val:parseInt(r.zs_sarmal||0), color:rgb(127/255,119/255,221/255) },
+    { lbl:'Uzman', val:parseInt(r.zs_uzman||0), color:rgb(29/255,158/255,117/255) },
+    { lbl:'Dogrusal', val:parseInt(r.zs_dogrusal||0), color:rgb(55/255,138/255,221/255) }
   ];
 
-  zsItems.forEach(item=>{
-    doc.setTextColor(60,60,80);
-    doc.setFontSize(9);
-    doc.setFont('helvetica','normal');
-    doc.text(tr(item.lbl), M, y+4.5);
-    doc.setFillColor(235,235,242);
-    doc.roundedRect(M+32, y, CW-55, 5, 1, 1, 'F');
-    const pct = item.val/zsToplam;
-    if(pct>0){
-      doc.setFillColor(...item.color);
-      doc.roundedRect(M+32, y, (CW-55)*pct, 5, 1, 1, 'F');
-    }
-    doc.setTextColor(...item.color);
-    doc.setFont('helvetica','bold');
-    doc.text(item.val+' / '+zsToplam, M+32+(CW-55)+3, y+4.5);
-    y+=9;
-  });
-  y+=6;
+  for(const item of zsItems) {
+    drawText(p, item.lbl, M, y, 9, rgb(0.37,0.37,0.5), false);
+    const barX = M+90, barW = CW-130, barH = 10;
+    p.drawRectangle({ x:barX, y:y-10, width:barW, height:barH, color:rgb(0.92,0.92,0.95) });
+    const pct2 = item.val/zsToplam;
+    if(pct2 > 0) p.drawRectangle({ x:barX, y:y-10, width:barW*pct2, height:barH, color:item.color });
+    drawText(p, item.val+' / '+zsToplam, barX+barW+8, y, 9, item.color, true);
+    y -= 22;
+  }
+  y -= 12;
 
-  // Yorum
-  if(r.yorum && r.yorum.trim()){
-    // Yeni sayfaya geç eğer yeterli alan yoksa
-    if(y > 200){ doc.addPage(); y = M; }
+  // YORUM
+  if(r.yorum && r.yorum.trim()) {
+    drawText(p, 'KISISEL KARIYER ANALIZI', M, y, 8, muted, true);
+    y -= 14;
 
-    doc.setTextColor(120,120,140);
-    doc.setFontSize(8);
-    doc.setFont('helvetica','bold');
-    doc.text('KISISEL KARIYER ANALIZI', M, y);
-    y+=5;
+    // Yorumu satırlara böl
+    const words = String(r.yorum).split(' ');
+    const lines = [];
+    let current = '';
+    const maxW = CW - 28;
 
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(60,50,20);
-
-    const maxW = CW - 14;
-    const yorumLines = doc.splitTextToSize(tr(r.yorum), maxW);
-    const lineH = 4.8;
-    const pageH = 274; // footer üstü
-
-    // Satır satır yaz, sayfa dolunca yeni sayfa aç
-    let boxStartY = y;
-    let boxLines = [];
-
-    yorumLines.forEach(line => {
-      if(y + lineH > pageH - 10){
-        // Mevcut kutuyu çiz
-        const boxH = boxLines.length * lineH + 10;
-        doc.setFillColor(252,247,238);
-        doc.setDrawColor(245,166,35,80);
-        doc.setLineWidth(0.2);
-        doc.roundedRect(M, boxStartY, CW, boxH, 3, 3, 'FD');
-        doc.setFillColor(245,166,35);
-        doc.rect(M, boxStartY, 3, boxH, 'F');
-        doc.setTextColor(60,50,20);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(8.5);
-        doc.text(boxLines, M+7, boxStartY+7);
-
-        doc.addPage();
-        y = M;
-        boxStartY = y;
-        boxLines = [];
+    for(const word of words) {
+      const test = current ? current+' '+word : word;
+      if(font.widthOfTextAtSize(test, 9) > maxW) {
+        if(current) lines.push(current);
+        current = word;
+      } else {
+        current = test;
       }
-      boxLines.push(line);
-      y += lineH;
+    }
+    if(current) lines.push(current);
+
+    // Paragrafları da koru
+    const paraLines = [];
+    String(r.yorum).split('\n').forEach(para => {
+      if(!para.trim()) { paraLines.push(''); return; }
+      const ws = para.split(' ');
+      let cur = '';
+      for(const w of ws) {
+        const t = cur ? cur+' '+w : w;
+        if(font.widthOfTextAtSize(t, 9) > maxW) {
+          if(cur) paraLines.push(cur);
+          cur = w;
+        } else { cur = t; }
+      }
+      if(cur) paraLines.push(cur);
+      paraLines.push('');
     });
 
-    // Kalan satırları yaz
-    if(boxLines.length > 0){
-      const boxH = boxLines.length * lineH + 10;
-      doc.setFillColor(252,247,238);
-      doc.setDrawColor(245,166,35,80);
-      doc.setLineWidth(0.2);
-      doc.roundedRect(M, boxStartY, CW, boxH, 3, 3, 'FD');
-      doc.setFillColor(245,166,35);
-      doc.rect(M, boxStartY, 3, boxH, 'F');
-      doc.setTextColor(60,50,20);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(8.5);
-      doc.text(boxLines, M+7, boxStartY+7);
-      y = boxStartY + boxH + 6;
+    // Kutu yüksekliği hesapla ve çiz
+    const lineH = 14;
+    const boxH = paraLines.length * lineH + 20;
+    const boxY = y - boxH;
+
+    // Sayfa taşıyorsa yeni sayfa
+    if(boxY < M + 40) {
+      const newPg = addPage();
+      p = newPg.p;
+      y = newPg.y;
+      drawText(p, 'KISISEL KARIYER ANALIZI (devam)', M, y, 8, muted, true);
+      y -= 14;
+    }
+
+    const finalBoxH = paraLines.length * lineH + 20;
+    p.drawRectangle({ x:M, y:y-finalBoxH, width:CW, height:finalBoxH, color:rgb(0.99,0.97,0.93), borderColor:orange, borderWidth:0.5, borderOpacity:0.4 });
+    p.drawRectangle({ x:M, y:y-finalBoxH, width:3, height:finalBoxH, color:orange });
+
+    let textY = y - 14;
+    for(const line of paraLines) {
+      if(line) drawText(p, line, M+14, textY, 9, textCol, false);
+      textY -= lineH;
     }
   }
 
-  // Footer
-  doc.setFillColor(15,15,26);
-  doc.rect(0,274,W,23,'F');
-  doc.setFillColor(245,166,35);
-  doc.rect(0,274,W,1,'F');
-  doc.setTextColor(100,100,120);
-  doc.setFontSize(8);
-  doc.setFont('helvetica','normal');
-  doc.text('FUPi Kariyer Tasarimi — fupi.com.tr', M, 283);
-  doc.text('Bu rapor FUPi Kariyer Kaliplari Degerlendirme Sistemi tarafindan olusturulmustur.', M, 289);
+  // FOOTER (son sayfa)
+  const pages = doc.getPages();
+  const lastPage = pages[pages.length-1];
+  lastPage.drawRectangle({ x:0, y:0, width:pageW, height:56, color:dark });
+  lastPage.drawRectangle({ x:0, y:56, width:pageW, height:1, color:orange });
+  drawText(lastPage, 'FUPi Kariyer Tasarimi — fupi.com.tr', M, 36, 8, muted, false);
+  drawText(lastPage, 'Bu rapor FUPi Kariyer Kaliplari Degerlendirme Sistemi tarafindan otomatik olusturulmustur.', M, 22, 7, faint, false);
   const bugun = new Date().toLocaleDateString('tr-TR');
-  doc.text('Rapor tarihi: '+bugun, W-M, 289, {align:'right'});
+  const raporStr = 'Rapor tarihi: '+bugun;
+  drawText(lastPage, raporStr, pageW-M-measureText(raporStr,8), 22, 8, muted, false);
 
-  const ad = (r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_ğüşıöçĞÜŞİÖÇ]/g,'');
-  doc.save('FUPi_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf');
+  const pdfBytes = await doc.save();
+  const blob = new Blob([pdfBytes], { type:'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ad = (r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  a.href = url;
+  a.download = 'FUPi_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 }
 </script>
 </body>
