@@ -85,6 +85,11 @@
     <div class="intro-box"><div class="intro-box-num">Bölüm 2</div><div class="intro-box-title">Kariyer Tercihleri</div><div class="intro-box-sub">24 madde · ikili tercih</div></div>
   </div>
   <p style="font-size:12px;color:var(--muted);margin-bottom:1.5rem">Doğru ya da yanlış cevap yoktur. İçgüdüsel ilk tepkini seç.</p>
+  <div style="margin-bottom:1rem">
+    <label style="font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.5rem">Ad Soyad</label>
+    <input id="ad-soyad" type="text" placeholder="Adını ve soyadını yaz..." style="width:100%;background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
+    <p class="warn" id="ad-warn" style="display:none;margin-top:.4rem">Lütfen adını ve soyadını yaz.</p>
+  </div>
   <button class="btn-main" onclick="startSurvey()">Değerlendirmeye başla →</button>
 </div>
 
@@ -218,7 +223,12 @@ let kkoAns={},fcAns={},kkoPage=0,fcPage=0;
 const KKO_PER=8,FC_PER=4;
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-function startSurvey(){show('kko-screen');renderKKO();}
+function startSurvey(){
+  const ad=document.getElementById('ad-soyad').value.trim();
+  if(!ad){document.getElementById('ad-warn').style.display='block';return;}
+  document.getElementById('ad-warn').style.display='none';
+  show('kko-screen');renderKKO();
+}
 
 function renderKKO(){
   const start=kkoPage*KKO_PER;
@@ -422,7 +432,9 @@ async function saveData(kko,fc,baskinKKO,baskinDriver){
   const note=document.getElementById("save-note");
   note.textContent="Veriler kaydediliyor...";
   try{
+    const ad=document.getElementById('ad-soyad').value.trim();
     const params=new URLSearchParams({
+      ad_soyad:ad,
       kko_degisim:kko.find(k=>k.f===1).avg.toFixed(2),
       kko_uzmanlik:kko.find(k=>k.f===2).avg.toFixed(2),
       kko_uzman:kko.find(k=>k.f===3).avg.toFixed(2),
