@@ -6,529 +6,153 @@
 <title>FUPi Kariyer Kalıpları Değerlendirmesi</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
-
-  :root {
-    --dark: #0f0f1a;
-    --mid: #16162a;
-    --card: rgba(255,255,255,0.04);
-    --card-hover: rgba(255,255,255,0.07);
-    --border: rgba(255,255,255,0.08);
-    --border-hover: rgba(255,255,255,0.15);
-    --orange: #F5A623;
-    --orange-dim: rgba(245,166,35,0.12);
-    --orange-glow: rgba(245,166,35,0.06);
-    --text: #e8e8f0;
-    --muted: #7a7a9a;
-    --faint: #3a3a5a;
-    --purple: #7F77DD;
-    --teal: #1D9E75;
-    --blue: #378ADD;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--dark);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(245,166,35,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(127,119,221,0.04) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  .screen { display: none; }
-  .screen.active { display: block; animation: fadeIn .3s ease; }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* HEADER */
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
-    border-bottom: 0.5px solid var(--border);
-  }
-
-  .logo-svg { width: 48px; height: 48px; flex-shrink: 0; }
-
-  .logo-text { line-height: 1.15; }
-  .logo-text .name {
-    font-size: 20px;
-    font-weight: 500;
-    color: #fff;
-    letter-spacing: .02em;
-  }
-  .logo-text .sub {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: .14em;
-    text-transform: uppercase;
-  }
-
-  /* PROGRESS */
-  .progress-wrap { margin-bottom: 2.5rem; }
-  .progress-track {
-    height: 2px;
-    background: var(--faint);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: .5rem;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--orange);
-    border-radius: 2px;
-    transition: width .5s cubic-bezier(.4,0,.2,1);
-  }
-  .progress-label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: .06em;
-  }
-
-  /* SECTION META */
-  .sec-badge {
-    display: inline-block;
-    font-size: 10px;
-    color: var(--orange);
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-bottom: .6rem;
-    font-weight: 500;
-  }
-  .sec-title {
-    font-size: 22px;
-    font-weight: 400;
-    color: #fff;
-    margin-bottom: .4rem;
-    line-height: 1.3;
-  }
-  .sec-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: 1.75rem;
-  }
-
-  /* QUESTION CARDS */
-  .q-card {
-    background: var(--card);
-    border: 0.5px solid var(--border);
-    border-radius: 14px;
-    padding: 1.1rem 1.25rem;
-    margin-bottom: .65rem;
-    transition: border-color .2s;
-  }
-  .q-card:hover { border-color: var(--border-hover); }
-  .q-index {
-    font-size: 10px;
-    color: var(--faint);
-    font-family: 'DM Mono', monospace;
-    margin-bottom: .3rem;
-    letter-spacing: .06em;
-  }
-  .q-text {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.65;
-    margin-bottom: 1rem;
-  }
-
-  /* LIKERT */
-  .likert-row {
-    display: flex;
-    gap: 5px;
-    margin-bottom: .4rem;
-  }
-  .lbtn {
-    flex: 1;
-    height: 38px;
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--muted);
-    transition: all .15s;
-  }
-  .lbtn:hover {
-    background: var(--orange-dim);
-    border-color: rgba(245,166,35,0.35);
-    color: var(--orange);
-  }
-  .lbtn.sel {
-    background: var(--orange-dim);
-    border-color: var(--orange);
-    color: var(--orange);
-    font-weight: 500;
-  }
-  .likert-ends {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: var(--faint);
-  }
-
-  /* FORCED CHOICE */
-  .fc-card {
-    background: var(--card);
-    border: 0.5px solid var(--border);
-    border-radius: 14px;
-    padding: 1.1rem 1.25rem;
-    margin-bottom: .65rem;
-    transition: border-color .2s;
-  }
-  .fc-meta {
-    font-size: 10px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    margin-bottom: .3rem;
-    letter-spacing: .04em;
-  }
-  .fc-pair-label { color: var(--orange); }
-  .fc-q {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.6;
-    margin-bottom: .85rem;
-  }
-  .fc-opts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .fc-opt {
-    border: 0.5px solid var(--border);
-    border-radius: 10px;
-    padding: .75rem .9rem;
-    cursor: pointer;
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--muted);
-    background: transparent;
-    line-height: 1.55;
-    text-align: left;
-    transition: all .15s;
-  }
-  .fc-opt:hover {
-    background: var(--orange-dim);
-    border-color: rgba(245,166,35,0.35);
-    color: var(--text);
-  }
-  .fc-opt.sel {
-    background: var(--orange-dim);
-    border-color: var(--orange);
-    color: var(--orange);
-  }
-  .fc-opt-lbl {
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--orange);
-    opacity: .6;
-    margin-bottom: 4px;
-    letter-spacing: .1em;
-  }
-
-  /* NAV */
-  .nav-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.75rem;
-    gap: 12px;
-  }
-  .btn-main {
-    background: var(--orange);
-    color: #0f0f1a;
-    border: none;
-    border-radius: 10px;
-    padding: .65rem 1.5rem;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: opacity .15s, transform .1s;
-    letter-spacing: .01em;
-  }
-  .btn-main:hover { opacity: .88; }
-  .btn-main:active { transform: scale(.97); }
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 0.5px solid var(--border);
-    border-radius: 10px;
-    padding: .65rem 1.25rem;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .btn-ghost:hover { color: var(--text); border-color: var(--border-hover); }
-  .nav-count { font-size: 12px; color: var(--muted); }
-  .warn {
-    font-size: 12px;
-    color: #e07b7b;
-    margin-top: .65rem;
-    display: none;
-  }
-
-  /* INTRO */
-  .intro-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 1.75rem;
-  }
-  .intro-box {
-    background: var(--card);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1.1rem;
-  }
-  .intro-box-num {
-    font-size: 10px;
-    color: var(--orange);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-  .intro-box-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: #fff;
-    margin-bottom: 3px;
-  }
-  .intro-box-sub { font-size: 12px; color: var(--muted); }
-
-  /* RESULTS */
-  .result-block {
-    background: var(--card);
-    border: 0.5px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .result-block h3 {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    margin-bottom: 1.1rem;
-  }
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: .65rem;
-  }
-  .bar-lbl {
-    font-size: 12px;
-    color: var(--muted);
-    width: 145px;
-    flex-shrink: 0;
-  }
-  .bar-track {
-    flex: 1;
-    height: 5px;
-    background: var(--faint);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width .7s cubic-bezier(.4,0,.2,1);
-  }
-  .bar-num {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    width: 40px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  /* AI OUTPUT */
-  .ai-block {
-    background: var(--orange-glow);
-    border: 0.5px solid rgba(245,166,35,0.18);
-    border-radius: 14px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .ai-label {
-    font-size: 10px;
-    color: var(--orange);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin-bottom: .85rem;
-    font-weight: 500;
-  }
-  .ai-text {
-    font-size: 14px;
-    line-height: 1.9;
-    color: var(--text);
-    white-space: pre-wrap;
-    min-height: 60px;
-  }
-
-  .dots span {
-    animation: blink 1.4s infinite;
-    opacity: 0;
-    font-size: 20px;
-    color: var(--orange);
-  }
-  .dots span:nth-child(2) { animation-delay: .25s; }
-  .dots span:nth-child(3) { animation-delay: .5s; }
-  @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
-
-  .save-note {
-    text-align: center;
-    font-size: 11px;
-    color: var(--faint);
-    min-height: 18px;
-    margin-top: .5rem;
-  }
-
-  @media (max-width: 500px) {
-    .fc-opts { grid-template-columns: 1fr; }
-    .intro-grid { grid-template-columns: 1fr; }
-    .wrap { padding: 1.25rem 1rem 3rem; }
-  }
+  :root{--dark:#0f0f1a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--border-h:rgba(255,255,255,0.15);--orange:#F5A623;--orange-dim:rgba(245,166,35,0.12);--orange-glow:rgba(245,166,35,0.06);--text:#e8e8f0;--muted:#7a7a9a;--faint:#3a3a5a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(245,166,35,0.04) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 10% 80%,rgba(127,119,221,0.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+  .wrap{max-width:680px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+  .screen{display:none}.screen.active{display:block;animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .header{display:flex;align-items:center;gap:14px;padding-bottom:1.5rem;margin-bottom:2rem;border-bottom:.5px solid var(--border)}
+  .logo-svg{width:48px;height:48px;flex-shrink:0}
+  .logo-text .name{font-size:20px;font-weight:500;color:#fff;letter-spacing:.02em;line-height:1.15}
+  .logo-text .sub{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+  .progress-wrap{margin-bottom:2.5rem}
+  .progress-track{height:2px;background:var(--faint);border-radius:2px;overflow:hidden;margin-bottom:.5rem}
+  .progress-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .progress-label{font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .sec-badge{display:inline-block;font-size:10px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;font-weight:500}
+  .sec-title{font-size:22px;font-weight:400;color:#fff;margin-bottom:.4rem;line-height:1.3}
+  .sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
+  .q-card{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:.65rem;transition:border-color .2s}
+  .q-card:hover{border-color:var(--border-h)}
+  .q-index{font-size:10px;color:var(--faint);font-family:'DM Mono',monospace;margin-bottom:.3rem;letter-spacing:.06em}
+  .q-text{font-size:14px;color:var(--text);line-height:1.65;margin-bottom:1rem}
+  .likert-row{display:flex;gap:5px;margin-bottom:.4rem}
+  .lbtn{flex:1;height:38px;border:.5px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .15s}
+  .lbtn:hover{background:var(--orange-dim);border-color:rgba(245,166,35,.35);color:var(--orange)}
+  .lbtn.sel{background:var(--orange-dim);border-color:var(--orange);color:var(--orange);font-weight:500}
+  .likert-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--faint)}
+  .fc-card{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:.65rem;transition:border-color .2s}
+  .fc-card:hover{border-color:var(--border-h)}
+  .fc-q-num{font-size:10px;color:var(--faint);font-family:'DM Mono',monospace;margin-bottom:.3rem;letter-spacing:.06em}
+  .fc-q{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:.85rem}
+  .fc-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .fc-opt{border:.5px solid var(--border);border-radius:10px;padding:.75rem .9rem;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--muted);background:transparent;line-height:1.55;text-align:left;transition:all .15s}
+  .fc-opt:hover{background:var(--orange-dim);border-color:rgba(245,166,35,.35);color:var(--text)}
+  .fc-opt.sel{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
+  .fc-opt-lbl{font-size:9px;font-weight:500;color:var(--orange);opacity:.6;margin-bottom:4px;letter-spacing:.1em}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;gap:12px}
+  .btn-main{background:var(--orange);color:#0f0f1a;border:none;border-radius:10px;padding:.65rem 1.5rem;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s,transform .1s}
+  .btn-main:hover{opacity:.88}.btn-main:active{transform:scale(.97)}
+  .btn-ghost{background:transparent;color:var(--muted);border:.5px solid var(--border);border-radius:10px;padding:.65rem 1.25rem;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+  .btn-ghost:hover{color:var(--text);border-color:var(--border-h)}
+  .nav-count{font-size:12px;color:var(--muted)}
+  .warn{font-size:12px;color:#e07b7b;margin-top:.65rem;display:none}
+  .intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.75rem}
+  .intro-box{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1.1rem}
+  .intro-box-num{font-size:10px;color:var(--orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+  .intro-box-title{font-size:14px;font-weight:500;color:#fff;margin-bottom:3px}
+  .intro-box-sub{font-size:12px;color:var(--muted)}
+  .result-block{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+  .result-block h3{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.1rem}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:.65rem}
+  .bar-lbl{font-size:12px;color:var(--muted);width:145px;flex-shrink:0}
+  .bar-track{flex:1;height:5px;background:var(--faint);border-radius:3px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+  .bar-num{font-size:12px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace;width:40px;text-align:right;flex-shrink:0}
+  .ai-block{background:var(--orange-glow);border:.5px solid rgba(245,166,35,.18);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+  .ai-label{font-size:10px;color:var(--orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.85rem;font-weight:500}
+  .profile-chip{display:inline-block;background:var(--orange-dim);border:.5px solid var(--orange);color:var(--orange);font-size:12px;padding:3px 12px;border-radius:20px;margin-bottom:1rem;font-weight:500}
+  .ai-text{font-size:14px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+  .save-note{text-align:center;font-size:11px;color:var(--faint);min-height:18px;margin-top:.5rem}
+  @media(max-width:500px){.fc-opts{grid-template-columns:1fr}.intro-grid{grid-template-columns:1fr}.wrap{padding:1.25rem 1rem 3rem}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- HEADER (her ekranda) -->
-  <div class="header">
-    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(50,45)">
-        <polygon points="0,-26 5.5,-6 26,-6 9,7 15,27 0,16 -15,27 -9,7 -26,-6 -5.5,-6" fill="#F5A623"/>
-        <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#4A90D9" transform="translate(-16,-18) scale(.7)"/>
-        <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#5BAD4E" transform="translate(-28,-6) scale(.55)"/>
-        <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#C0392B" transform="translate(18,-20) scale(.5)"/>
-        <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#8E44AD" transform="translate(24,-6) scale(.42)"/>
-      </g>
-    </svg>
-    <div class="logo-text">
-      <div class="name">FUPi</div>
-      <div class="sub">Kariyer Tasarımı</div>
-    </div>
+<div class="header">
+  <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(50,45)">
+      <polygon points="0,-26 5.5,-6 26,-6 9,7 15,27 0,16 -15,27 -9,7 -26,-6 -5.5,-6" fill="#F5A623"/>
+      <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#4A90D9" transform="translate(-16,-18) scale(.7)"/>
+      <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#5BAD4E" transform="translate(-28,-6) scale(.55)"/>
+      <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#C0392B" transform="translate(18,-20) scale(.5)"/>
+      <polygon points="0,-14 3,-5 14,-5 5,3.5 8,13 0,8 -8,13 -5,3.5 -14,-5 -3,-5" fill="#8E44AD" transform="translate(24,-6) scale(.42)"/>
+    </g>
+  </svg>
+  <div class="logo-text">
+    <div class="name">FUPi</div>
+    <div class="sub">Kariyer Tasarımı</div>
   </div>
-
-  <!-- INTRO -->
-  <div id="intro" class="screen active">
-    <div class="sec-badge">Kariyer Kalıpları Değerlendirmesi</div>
-    <h1 class="sec-title">Kariyer profilini keşfet</h1>
-    <p class="sec-desc">Bu değerlendirme iki bölümden oluşuyor. Yaklaşık 10–15 dakika sürer. Tamamladığında kariyer kalıpların hakkında kişisel bir analiz alacaksın.</p>
-    <div class="intro-grid">
-      <div class="intro-box">
-        <div class="intro-box-num">Bölüm 1</div>
-        <div class="intro-box-title">Kariyer Kalıpları Ölçeği</div>
-        <div class="intro-box-sub">32 madde · 5'li derecelendirme</div>
-      </div>
-      <div class="intro-box">
-        <div class="intro-box-num">Bölüm 2</div>
-        <div class="intro-box-title">Zorunlu Seçim Ölçeği</div>
-        <div class="intro-box-sub">24 madde · ikili tercih</div>
-      </div>
-    </div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:1.5rem">Doğru ya da yanlış cevap yoktur. İçgüdüsel ilk tepkini seç.</p>
-    <button class="btn-main" onclick="startSurvey()">Değerlendirmeye başla →</button>
-  </div>
-
-  <!-- KKÖ -->
-  <div id="kko-screen" class="screen">
-    <div class="progress-wrap">
-      <div class="progress-track"><div class="progress-fill" id="kko-prog" style="width:0%"></div></div>
-      <div class="progress-label" id="kko-prog-lbl"></div>
-    </div>
-    <div class="sec-badge">Bölüm 1 · Kariyer Kalıpları Ölçeği</div>
-    <h2 class="sec-title" id="kko-title"></h2>
-    <p class="sec-desc" id="kko-desc"></p>
-    <div id="kko-qs"></div>
-    <p class="warn" id="kko-warn">Lütfen bu bölümdeki tüm maddeleri yanıtla.</p>
-    <div class="nav-row">
-      <button class="btn-ghost" id="kko-back" onclick="kkoNav(-1)">← Geri</button>
-      <span class="nav-count" id="kko-count"></span>
-      <button class="btn-main" id="kko-next" onclick="kkoNav(1)">İleri →</button>
-    </div>
-  </div>
-
-  <!-- Zorunlu seçim -->
-  <div id="fc-screen" class="screen">
-    <div class="progress-wrap">
-      <div class="progress-track"><div class="progress-fill" id="fc-prog" style="width:0%"></div></div>
-      <div class="progress-label" id="fc-prog-lbl"></div>
-    </div>
-    <div class="sec-badge">Bölüm 2 · Zorunlu Seçim Ölçeği</div>
-    <h2 class="sec-title">Seni daha iyi tanımlayan seçeneği işaretle</h2>
-    <p class="sec-desc">Her soruda yalnızca bir seçenek seçebilirsin. İkisi de uyuyor gibi görünse bile içgüdüsel tercihinle devam et.</p>
-    <div id="fc-qs"></div>
-    <p class="warn" id="fc-warn">Lütfen bu bölümdeki tüm maddeleri yanıtla.</p>
-    <div class="nav-row">
-      <button class="btn-ghost" id="fc-back" onclick="fcNav(-1)">← Geri</button>
-      <span class="nav-count" id="fc-count"></span>
-      <button class="btn-main" id="fc-next" onclick="fcNav(1)">İleri →</button>
-    </div>
-  </div>
-
-  <!-- SONUÇ -->
-  <div id="result-screen" class="screen">
-    <div class="sec-badge">Değerlendirme tamamlandı</div>
-    <h1 class="sec-title" style="margin-bottom:1.5rem">Kariyer profilin</h1>
-
-    <div class="result-block">
-      <h3>KKÖ — kariyer kalıpları ölçeği</h3>
-      <div id="kko-bars"></div>
-    </div>
-
-    <div class="result-block">
-      <h3>Zorunlu seçim — Driver kariyer tipleri</h3>
-      <div id="fc-bars"></div>
-    </div>
-
-    <div class="ai-block">
-      <div class="ai-label">✦ Kişisel kariyer analizi</div>
-      <div class="ai-text" id="ai-out"><span class="dots"><span>•</span><span>•</span><span>•</span></span></div>
-    </div>
-
-    <div class="save-note" id="save-note"></div>
-    <button class="btn-ghost" onclick="resetAll()" style="width:100%;margin-top:.75rem">Yeniden başla</button>
-  </div>
-
 </div>
 
-<script>
-const WEBHOOK = "https://script.google.com/macros/s/AKfycbzAlSvreppeCCjnor6cEbceVXt_XKl9CMTB0WN2uGkuOJijFfnPfpAvwWfzP4PxlASx_A/exec";
+<div id="intro" class="screen active">
+  <div class="sec-badge">Kariyer Kalıpları Değerlendirmesi</div>
+  <h1 class="sec-title">Kariyer profilini keşfet</h1>
+  <p class="sec-desc">Bu değerlendirme iki bölümden oluşuyor. Yaklaşık 10–15 dakika sürer. Tamamladığında kariyer kalıpların hakkında kişisel bir analiz alacaksın.</p>
+  <div class="intro-grid">
+    <div class="intro-box"><div class="intro-box-num">Bölüm 1</div><div class="intro-box-title">Kariyer Kalıpları Ölçeği</div><div class="intro-box-sub">32 madde · 5'li derecelendirme</div></div>
+    <div class="intro-box"><div class="intro-box-num">Bölüm 2</div><div class="intro-box-title">Kariyer Tercihleri</div><div class="intro-box-sub">24 madde · ikili tercih</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:1.5rem">Doğru ya da yanlış cevap yoktur. İçgüdüsel ilk tepkini seç.</p>
+  <button class="btn-main" onclick="startSurvey()">Değerlendirmeye başla →</button>
+</div>
 
-const KKO_ITEMS = [
+<div id="kko-screen" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="kko-prog" style="width:0%"></div></div>
+    <div class="progress-label" id="kko-prog-lbl"></div>
+  </div>
+  <div class="sec-badge">Bölüm 1 · 32 madde</div>
+  <h2 class="sec-title">Aşağıdaki ifadelere ne ölçüde katılıyorsun?</h2>
+  <p class="sec-desc">1 = Hiç katılmıyorum &nbsp;·&nbsp; 5 = Kesinlikle katılıyorum</p>
+  <div id="kko-qs"></div>
+  <p class="warn" id="kko-warn">Lütfen bu sayfadaki tüm maddeleri yanıtla.</p>
+  <div class="nav-row">
+    <button class="btn-ghost" id="kko-back" onclick="kkoNav(-1)">← Geri</button>
+    <span class="nav-count" id="kko-count"></span>
+    <button class="btn-main" id="kko-next" onclick="kkoNav(1)">İleri →</button>
+  </div>
+</div>
+
+<div id="fc-screen" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="fc-prog" style="width:0%"></div></div>
+    <div class="progress-label" id="fc-prog-lbl"></div>
+  </div>
+  <div class="sec-badge">Bölüm 2 · 24 madde</div>
+  <h2 class="sec-title">Seni daha iyi tanımlayan seçeneği işaretle</h2>
+  <p class="sec-desc">Her soruda yalnızca bir seçenek seçebilirsin. İkisi de uyuyor gibi görünse bile içgüdüsel tercihinle devam et.</p>
+  <div id="fc-qs"></div>
+  <p class="warn" id="fc-warn">Lütfen bu sayfadaki tüm maddeleri yanıtla.</p>
+  <div class="nav-row">
+    <button class="btn-ghost" id="fc-back" onclick="fcNav(-1)">← Geri</button>
+    <span class="nav-count" id="fc-count"></span>
+    <button class="btn-main" id="fc-next" onclick="fcNav(1)">İleri →</button>
+  </div>
+</div>
+
+<div id="result-screen" class="screen">
+  <div class="sec-badge">Değerlendirme tamamlandı</div>
+  <h1 class="sec-title" style="margin-bottom:1.5rem">Kariyer profilin</h1>
+  <div class="result-block"><h3>Kariyer kalıpları ölçeği</h3><div id="kko-bars"></div></div>
+  <div class="result-block"><h3>Kariyer tipi tercihleri</h3><div id="fc-bars"></div></div>
+  <div class="ai-block">
+    <div class="ai-label">✦ Kişisel kariyer analizi</div>
+    <div id="profile-chip-wrap"></div>
+    <div class="ai-text" id="ai-out"></div>
+  </div>
+  <div class="save-note" id="save-note"></div>
+  <button class="btn-ghost" onclick="resetAll()" style="width:100%;margin-top:.75rem">Yeniden başla</button>
+</div>
+
+</div>
+<script>
+const WEBHOOK="https://script.google.com/macros/s/AKfycbzAlSvreppeCCjnor6cEbceVXt_XKl9CMTB0WN2uGkuOJijFfnPfpAvwWfzP4PxlASx_A/exec";
+
+const KKO_ALL=[
   {f:1,code:"KKO52",text:"Kariyerimde bir sonraki adımın ne olacağını bilmemek, benim için heyecan vericidir."},
   {f:1,code:"KKO48",text:"Kariyerimde belirli aralıklarla yön değiştirmenin bana iyi geleceğini düşünüyorum."},
   {f:1,code:"KKO64",text:"Uzun vadede tek bir kariyer yolunda kalırsam kendimi kısıtlanmış hissederim."},
@@ -540,7 +164,7 @@ const KKO_ITEMS = [
   {f:2,code:"KKO75",text:"Alanımda ustalık düzeyinde tanınmak ve değer görmek beni motive eder."},
   {f:2,code:"KKO66",text:"Alanımda güçlü ve yetkili bir isim olmak istiyorum."},
   {f:2,code:"KKO67",text:"Belirli bir işi ya da mesleği mükemmel düzeyde icra etmek, kariyer hedefimin merkezindedir."},
-  {f:2,code:"KKO36",text:"Elde edeceğim farklı deneyimlerin gelecekteki kariyer perspektifini zenginleştireceğini düşünüyorum."},
+  {f:2,code:"KKO36",text:"Elde edeceğim farklı deneyimlerin gelecekteki kariyer perspektifimi zenginleştireceğini düşünüyorum."},
   {f:2,code:"KKO35",text:"Seçtiğim alanda derinleşmek için gerekli çabayı göstermeye hazırım."},
   {f:2,code:"KKO68",text:"Biriktirdiğim farklı deneyimlerin ileride öngöremediğim fırsatlar yaratabileceğine inanıyorum."},
   {f:2,code:"KKO47",text:"Aynı işi daha iyi yapabilmek beni motive eder."},
@@ -563,60 +187,58 @@ const KKO_ITEMS = [
   {f:4,code:"KKO26",text:"Terfi fırsatları olmayan bir iş beni tatmin etmez."}
 ];
 
-const SECS = [
-  {id:1,name:"Değişim ve esneklik",desc:"Kariyerinde değişim, çeşitlilik ve esnekliğe ilişkin tutumunu değerlendir."},
-  {id:2,name:"Ustalık ve uzmanlık",desc:"Mesleki gelişim, yaratıcılık ve uzmanlık odaklı kariyer anlayışını değerlendir."},
-  {id:3,name:"Uzman kalıbı",desc:"Tek bir alanda derinleşme, istikrar ve uzun vadeli uzmanlığa ilişkin tutumunu değerlendir."},
-  {id:4,name:"Doğrusal kariyer",desc:"Hiyerarşik yükselme, statü kazanımı ve güç odaklı kariyer anlayışını değerlendir."}
+const FC_ALL=[
+  {no:1,q:"Mezun olduktan sonra kariyer yolunu düşündüğünde hangisi seni daha iyi tanımlıyor?",a:{t:"Seçtiğim alanda uzmanlaşarak hiyerarşik olarak yükselmek istiyorum.",s:{D:1}},b:{t:"Farklı alanlarda deneyim kazanarak kendimi periyodik olarak yenilemek istiyorum.",s:{S:1}}},
+  {no:2,q:"Bir iş teklifini değerlendirirken aklındaki ilk soru hangisi olur?",a:{t:"Bu pozisyon beni kariyer basamaklarımda ne kadar ilerletir?",s:{D:1}},b:{t:"Bu pozisyon bana ne kadar farklı ve yeni bir deneyim kazandırır?",s:{S:1}}},
+  {no:3,q:"10 yıl sonra mesleki açıdan nasıl biri olmak istiyorsun?",a:{t:"Üst yönetimi hedefleyen, güçlü ve yetki sahibi biri",s:{D:1}},b:{t:"Birden fazla alanda deneyim sahibi, çok yönlü bir profesyonel",s:{S:1}}},
+  {no:4,q:"İşyerinde hangisi seni tatmin eder?",a:{t:"Başkalarına ne yapmaları gerektiğini söyleyip yönlendirmek",s:{D:1}},b:{t:"Heyecan verici, yeni sorumluluklar üstlenmek",s:{S:1}}},
+  {no:5,q:"Kariyer başarısını nasıl tanımlıyorsun?",a:{t:"Sürekli yükselerek daha fazla sorumluluk ve statü elde etmek",s:{D:1}},b:{t:"Seçtiğim işi en iyi şekilde, uzun yıllar boyunca sürdürmek",s:{U:1}}},
+  {no:6,q:"Bir kurumda çalışmaya devam edip etmeme kararı verirken ne belirleyici olur?",a:{t:"Burada daha üst pozisyonlara yükselme fırsatımın olup olmadığı",s:{D:1}},b:{t:"Bu işin bana uzun vadede güvence ve istikrar sağlayıp sağlamadığı",s:{U:1}}},
+  {no:7,q:"İdeal kariyer senaryonu hangisi?",a:{t:"Her yıl biraz daha fazla sorumluluk alarak tepe noktaya ulaşmak.",s:{D:1}},b:{t:"Sevdiğim işi mükemmel biçimde yaparak uzun yıllar aynı alanda kalmak.",s:{U:1}}},
+  {no:8,q:"Hangisi senin için daha cazip? (yetki ve teknik uzmanlık)",a:{t:"Olabildiğince geniş yetki ve her konuda söz sahibi olmak",s:{D:1}},b:{t:"Sınırlı insan yönetip teknik konularda söz sahibi olmak",s:{U:1}}},
+  {no:9,q:"Kariyer planlamasına yaklaşımın hangisine daha yakın?",a:{t:"Net hedeflerim var ve tüm kararlarımı bu hedeflere göre veriyorum.",s:{D:1}},b:{t:"Planlarım sık değişir; fırsatlar ve anlık ilgilerim yönlendiriyor beni.",s:{G:1}}},
+  {no:10,q:"Meslektaşlarının seni nasıl tanımlamasını isterdin?",a:{t:"Hedefine odaklanmış, kararlı ve sistematik biri",s:{D:1}},b:{t:"Esnek, spontane ve her ortama uyum sağlayan biri",s:{G:1}}},
+  {no:11,q:"Kariyer geçmişine baktığında hangisi daha çok seni tanımlasın istersin?",a:{t:"Hep yükseldim ve ilerledim.",s:{D:1}},b:{t:"Çok farklı şeyler denedim; bir çizgiden çok bir mozaik gibi.",s:{G:1}}},
+  {no:12,q:"Kariyerin için hangisi daha anlamlı?",a:{t:"Güç ve statü",s:{D:1}},b:{t:"Bağımsızlık ve özgürlük",s:{G:1}}},
+  {no:13,q:"Mesleki gelişim için hangisi daha önemli?",a:{t:"Farklı alanlara açılarak geniş bir perspektif kazanmak",s:{S:1}},b:{t:"Tek bir alanda derinleşerek gerçek bir uzman olmak",s:{U:1}}},
+  {no:14,q:"Gelecekte nerede olmak istiyorsun?",a:{t:"Şu an çalıştığım alandan farklı, yeni bir alanda kendimi geliştirirken.",s:{S:1}},b:{t:"Şu an çalıştığım alanda çok daha derinleşmiş ve uzmanlaşmış olarak",s:{U:1}}},
+  {no:15,q:"Hangisi senin için daha motive edici? (çalışma fırsatları)",a:{t:"Farklı alanlarda çalışma fırsatları",s:{S:1}},b:{t:"Organizasyonda bir konudaki en bilgili kişi olmak",s:{U:1}}},
+  {no:16,q:"Kariyer tatmini için neye ihtiyaç duyduğunu düşünüyorsun?",a:{t:"Sürekli yeni şeyler öğrendiğim, değişen ve gelişen bir kariyer yolculuğu",s:{S:1}},b:{t:"Ustalaştığım işi hakkıyla yapabildiğim, istikrarlı bir çalışma ortamı",s:{U:1}}},
+  {no:17,q:"Alan değiştirirken seni yönlendiren şey hangisi olabilir?",a:{t:"Biriktirdiğim deneyimi yeni bir alana taşıyarak büyümek isterim.",s:{S:1}},b:{t:"Mevcut işten sıkıldım ya da yeni bir fırsat çıktı, geçmek isterim.",s:{G:1}}},
+  {no:18,q:"Kariyer değişikliklerine nasıl bakıyorsun?",a:{t:"Birikimli bir büyüme sürecinin parçası — her geçiş bir öncekinin üstüne inşa edilir.",s:{S:1}},b:{t:"Hayat böyle akıyor; her dönem kendi içinde anlamlı, bağlantı aramıyorum.",s:{G:1}}},
+  {no:19,q:"Farklı deneyimler edinmek senin için ne anlama geliyor?",a:{t:"Gelecekte bir araya getireceğim parçaları topluyorum.",s:{S:1}},b:{t:"Şu an ilgimi çeken şeyi yapıyorum, ilerisi kendiliğinden şekillenir.",s:{G:1}}},
+  {no:20,q:"Hangisi senin için daha cazip? (öğrenme ve esneklik)",a:{t:"Yeni şeyler öğrenmek ve farklı işler yapmak",s:{S:1}},b:{t:"Çalışma hayatımda esneklik ve kendi zamanımı kontrol edebilmek",s:{G:1}}},
+  {no:21,q:"Uzun vadeli kariyer tercihin hangisine daha yakın?",a:{t:"Aynı alanda ya da kurumda uzun yıllar geçirerek gerçek bir uzman olmak",s:{U:1}},b:{t:"Farklı işler, farklı ortamlar — çeşitlilik ve özgürlük önceliğim",s:{G:1}}},
+  {no:22,q:"Kariyer güvencesi konusunda ne düşünüyorsun?",a:{t:"Güvenceli ve öngörülebilir bir kariyer yolu, değişimden her zaman önce gelir.",s:{U:1}},b:{t:"Güvence beni kısıtlar; özgürce hareket edebilmek daha önemli.",s:{G:1}}},
+  {no:23,q:"Gelecekte kariyerini nasıl tanımlamak istersin?",a:{t:"Hep aynı çizgide kaldım, tutarlı ve istikrarlı bir yol izledim.",s:{U:1}},b:{t:"Çok farklı şeyler denedim; bir çizgiden çok bir mozaik gibi.",s:{G:1}}},
+  {no:24,q:"Kariyerinde hangisi seni daha motive eder?",a:{t:"Eğitimini aldığım mesleki alanda derinleşip uzmanlaşmak",s:{U:1}},b:{t:"Yapmak istediklerim için gereken parayı kazanıp çalışmaya ara vermek",s:{G:1}}}
 ];
 
-const FC_ITEMS = [
-  {no:1,pair:"Doğrusal–Sarmal",q:"Mezun olduktan sonra kariyer yolunu düşündüğünde hangisi seni daha iyi tanımlıyor?",a:{t:"Seçtiğim alanda uzmanlaşarak hiyerarşik olarak yükselmek istiyorum.",s:{D:1}},b:{t:"Farklı alanlarda deneyim kazanarak kendimi periyodik olarak yenilemek istiyorum.",s:{S:1}}},
-  {no:2,pair:"Doğrusal–Sarmal",q:"Bir iş teklifini değerlendirirken aklındaki ilk soru hangisi olur?",a:{t:"Bu pozisyon beni kariyer basamaklarımda ne kadar ilerletir?",s:{D:1}},b:{t:"Bu pozisyon bana ne kadar farklı ve yeni bir deneyim kazandırır?",s:{S:1}}},
-  {no:3,pair:"Doğrusal–Sarmal",q:"10 yıl sonra mesleki açıdan nasıl biri olmak istiyorsun?",a:{t:"Üst yönetimi hedefleyen, güçlü ve yetki sahibi biri",s:{D:1}},b:{t:"Birden fazla alanda deneyim sahibi, çok yönlü bir profesyonel",s:{S:1}}},
-  {no:4,pair:"Doğrusal–Sarmal",q:"İşyerinde hangisi seni tatmin eder?",a:{t:"Başkalarına ne yapmaları gerektiğini söyleyip yönlendirmek",s:{D:1}},b:{t:"Heyecan verici, yeni sorumluluklar üstlenmek",s:{S:1}}},
-  {no:5,pair:"Doğrusal–Uzman",q:"Kariyer başarısını nasıl tanımlıyorsun?",a:{t:"Sürekli yükselerek daha fazla sorumluluk ve statü elde etmek",s:{D:1}},b:{t:"Seçtiğim işi en iyi şekilde, uzun yıllar boyunca sürdürmek",s:{U:1}}},
-  {no:6,pair:"Doğrusal–Uzman",q:"Bir kurumda çalışmaya devam edip etmeme kararı verirken ne belirleyici olur?",a:{t:"Burada daha üst pozisyonlara yükselme fırsatımın olup olmadığı",s:{D:1}},b:{t:"Bu işin bana uzun vadede güvence ve istikrar sağlayıp sağlamadığı",s:{U:1}}},
-  {no:7,pair:"Doğrusal–Uzman",q:"İdeal kariyer senaryonu hangisi?",a:{t:"Her yıl biraz daha fazla sorumluluk alarak tepe noktaya ulaşmak.",s:{D:1}},b:{t:"Sevdiğim işi mükemmel biçimde yaparak uzun yıllar aynı alanda kalmak.",s:{U:1}}},
-  {no:8,pair:"Doğrusal–Uzman",q:"Hangisi senin için daha cazip?",a:{t:"Olabildiğince geniş yetki ve her konuda söz sahibi olmak",s:{D:1}},b:{t:"Sınırlı insan yönetip teknik konularda söz sahibi olmak",s:{U:1}}},
-  {no:9,pair:"Doğrusal–Geçişken",q:"Kariyer planlamasına yaklaşımın hangisine daha yakın?",a:{t:"Net hedeflerim var ve tüm kararlarımı bu hedeflere göre veriyorum.",s:{D:1}},b:{t:"Planlarım sık değişir; fırsatlar ve anlık ilgilerim yönlendiriyor beni.",s:{G:1}}},
-  {no:10,pair:"Doğrusal–Geçişken",q:"Meslektaşlarının seni nasıl tanımlamasını isterdin?",a:{t:"Hedefine odaklanmış, kararlı ve sistematik biri",s:{D:1}},b:{t:"Esnek, spontane ve her ortama uyum sağlayan biri",s:{G:1}}},
-  {no:11,pair:"Doğrusal–Geçişken",q:"Kariyer geçmişine baktığında hangisi daha çok seni tanımlasın istersin?",a:{t:"Hep yükseldim ve ilerledim.",s:{D:1}},b:{t:"Çok farklı şeyler denedim; bir çizgiden çok bir mozaik gibi.",s:{G:1}}},
-  {no:12,pair:"Doğrusal–Geçişken",q:"Kariyerin için hangisi daha anlamlı?",a:{t:"Güç ve statü",s:{D:1}},b:{t:"Bağımsızlık ve özgürlük",s:{G:1}}},
-  {no:13,pair:"Sarmal–Uzman",q:"Mesleki gelişim için hangisi daha önemli?",a:{t:"Farklı alanlara açılarak geniş bir perspektif kazanmak",s:{S:1}},b:{t:"Tek bir alanda derinleşerek gerçek bir uzman olmak",s:{U:1}}},
-  {no:14,pair:"Sarmal–Uzman",q:"Gelecekte nerede olmak istiyorsun?",a:{t:"Şu an çalıştığım alandan farklı, yeni bir alanda kendimi geliştirirken.",s:{S:1}},b:{t:"Şu an çalıştığım alanda çok daha derinleşmiş ve uzmanlaşmış olarak",s:{U:1}}},
-  {no:15,pair:"Sarmal–Uzman",q:"Hangisi senin için daha motive edici?",a:{t:"Farklı alanlarda çalışma fırsatları",s:{S:1}},b:{t:"Organizasyonda bir konudaki en bilgili kişi olmak",s:{U:1}}},
-  {no:16,pair:"Sarmal–Uzman",q:"Kariyer tatmini için neye ihtiyaç duyduğunu düşünüyorsun?",a:{t:"Sürekli yeni şeyler öğrendiğim, değişen ve gelişen bir kariyer yolculuğu",s:{S:1}},b:{t:"Ustalaştığım işi hakkıyla yapabildiğim, istikrarlı bir çalışma ortamı",s:{U:1}}},
-  {no:17,pair:"Sarmal–Geçişken",q:"Alan değiştirirken seni yönlendiren şey hangisi olabilir?",a:{t:"Biriktirdiğim deneyimi yeni bir alana taşıyarak büyümek isterim.",s:{S:1}},b:{t:"Mevcut işten sıkıldım ya da yeni bir fırsat çıktı, geçmek isterim.",s:{G:1}}},
-  {no:18,pair:"Sarmal–Geçişken",q:"Kariyer değişikliklerine nasıl bakıyorsun?",a:{t:"Birikimli bir büyüme sürecinin parçası — her geçiş bir öncekinin üstüne inşa edilir.",s:{S:1}},b:{t:"Hayat böyle akıyor; her dönem kendi içinde anlamlı, bağlantı aramıyorum.",s:{G:1}}},
-  {no:19,pair:"Sarmal–Geçişken",q:"Farklı deneyimler edinmek senin için ne anlama geliyor?",a:{t:"Gelecekte bir araya getireceğim parçaları topluyorum.",s:{S:1}},b:{t:"Şu an ilgimi çeken şeyi yapıyorum, ilerisi kendiliğinden şekillenir.",s:{G:1}}},
-  {no:20,pair:"Sarmal–Geçişken",q:"Hangisi senin için daha cazip?",a:{t:"Yeni şeyler öğrenmek ve farklı işler yapmak",s:{S:1}},b:{t:"Çalışma hayatımda esneklik ve kendi zamanımı kontrol edebilmek",s:{G:1}}},
-  {no:21,pair:"Uzman–Geçişken",q:"Uzun vadeli kariyer tercihin hangisine daha yakın?",a:{t:"Aynı alanda ya da kurumda uzun yıllar geçirerek gerçek bir uzman olmak",s:{U:1}},b:{t:"Farklı işler, farklı ortamlar — çeşitlilik ve özgürlük önceliğim",s:{G:1}}},
-  {no:22,pair:"Uzman–Geçişken",q:"Kariyer güvencesi konusunda ne düşünüyorsun?",a:{t:"Güvenceli ve öngörülebilir bir kariyer yolu, değişimden her zaman önce gelir.",s:{U:1}},b:{t:"Güvence beni kısıtlar; özgürce hareket edebilmek daha önemli.",s:{G:1}}},
-  {no:23,pair:"Uzman–Geçişken",q:"Gelecekte kariyerini nasıl tanımlamak istersin?",a:{t:"Hep aynı çizgide kaldım, tutarlı ve istikrarlı bir yol izledim.",s:{U:1}},b:{t:"Çok farklı şeyler denedim; bir çizgiden çok bir mozaik gibi.",s:{G:1}}},
-  {no:24,pair:"Uzman–Geçişken",q:"Kariyerinde hangisi seni daha motive eder?",a:{t:"Eğitimini aldığım mesleki alanda derinleşip uzmanlaşmak",s:{U:1}},b:{t:"Yapmak istediklerim için gereken parayı kazanıp çalışmaya ara vermek",s:{G:1}}}
+const KKO_NAMES=[
+  {f:1,name:"Değişim ve esneklik",color:"#EF9F27"},
+  {f:2,name:"Ustalık ve uzmanlık",color:"#7F77DD"},
+  {f:3,name:"Uzman kalıbı",color:"#1D9E75"},
+  {f:4,name:"Doğrusal kariyer",color:"#378ADD"}
 ];
 
-let kkoAns={}, fcAns={}, kkoSec=0, fcPage=0;
-const FC_PER=4;
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+const KKO_ITEMS=shuffle(KKO_ALL);
+const FC_ITEMS=shuffle(FC_ALL);
 
-function startSurvey(){ show('kko-screen'); renderKKO(); }
+let kkoAns={},fcAns={},kkoPage=0,fcPage=0;
+const KKO_PER=8,FC_PER=4;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+function startSurvey(){show('kko-screen');renderKKO();}
 
 function renderKKO(){
-  const sec=SECS[kkoSec];
-  document.getElementById('kko-title').textContent=sec.name;
-  document.getElementById('kko-desc').textContent=sec.desc;
-  const items=KKO_ITEMS.filter(i=>i.f===sec.id);
+  const start=kkoPage*KKO_PER;
+  const items=KKO_ITEMS.slice(start,start+KKO_PER);
   const el=document.getElementById('kko-qs');
   el.innerHTML='';
   items.forEach((item,idx)=>{
-    const n=kkoSec*8+idx+1;
+    const n=start+idx+1;
     const div=document.createElement('div');
     div.className='q-card';
     div.innerHTML=`<div class="q-index">MADDE ${n} / 32</div>
@@ -625,11 +247,13 @@ function renderKKO(){
     <div class="likert-ends"><span>Hiç katılmıyorum</span><span>Kesinlikle katılıyorum</span></div>`;
     el.appendChild(div);
   });
-  document.getElementById('kko-prog').style.width=((kkoSec/4)*50)+'%';
-  document.getElementById('kko-prog-lbl').textContent=`Bölüm ${kkoSec+1} / 4 · ${items.filter(i=>kkoAns[i.code]).length} / ${items.length} yanıtlandı`;
-  document.getElementById('kko-count').textContent=`${kkoSec+1} / 4`;
-  document.getElementById('kko-back').style.visibility=kkoSec===0?'hidden':'visible';
-  document.getElementById('kko-next').textContent=kkoSec===3?"Bölüm 2'ye geç →":"İleri →";
+  const totalPages=Math.ceil(KKO_ITEMS.length/KKO_PER);
+  const answered=items.filter(i=>kkoAns[i.code]!==undefined).length;
+  document.getElementById('kko-prog').style.width=((kkoPage/totalPages)*50)+'%';
+  document.getElementById('kko-prog-lbl').textContent=`Sayfa ${kkoPage+1} / ${totalPages} · ${answered} / ${items.length} yanıtlandı`;
+  document.getElementById('kko-count').textContent=`${kkoPage+1} / ${totalPages}`;
+  document.getElementById('kko-back').style.visibility=kkoPage===0?'hidden':'visible';
+  document.getElementById('kko-next').textContent=start+KKO_PER>=KKO_ITEMS.length?"Bölüm 2'ye geç →":"İleri →";
   document.getElementById('kko-warn').style.display='none';
 }
 
@@ -637,20 +261,20 @@ function setKKO(code,val,btn){
   kkoAns[code]=val;
   btn.closest('.likert-row').querySelectorAll('.lbtn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
-  const items=KKO_ITEMS.filter(i=>i.f===SECS[kkoSec].id);
-  document.getElementById('kko-prog-lbl').textContent=`Bölüm ${kkoSec+1} / 4 · ${items.filter(i=>kkoAns[i.code]).length} / ${items.length} yanıtlandı`;
+  const start=kkoPage*KKO_PER;
+  const items=KKO_ITEMS.slice(start,start+KKO_PER);
+  const answered=items.filter(i=>kkoAns[i.code]!==undefined).length;
+  document.getElementById('kko-prog-lbl').textContent=`Sayfa ${kkoPage+1} / ${Math.ceil(KKO_ITEMS.length/KKO_PER)} · ${answered} / ${items.length} yanıtlandı`;
 }
 
 function kkoNav(dir){
   if(dir===1){
-    const items=KKO_ITEMS.filter(i=>i.f===SECS[kkoSec].id);
-    if(items.some(i=>!kkoAns[i.code])){document.getElementById('kko-warn').style.display='block';return;}
-    if(kkoSec===3){show('fc-screen');renderFC();return;}
-    kkoSec++;
-  } else {
-    if(kkoSec===0)return;
-    kkoSec--;
-  }
+    const start=kkoPage*KKO_PER;
+    const items=KKO_ITEMS.slice(start,start+KKO_PER);
+    if(items.some(i=>kkoAns[i.code]===undefined)){document.getElementById('kko-warn').style.display='block';return;}
+    if(start+KKO_PER>=KKO_ITEMS.length){show('fc-screen');renderFC();return;}
+    kkoPage++;
+  } else {if(kkoPage===0)return;kkoPage--;}
   renderKKO();
 }
 
@@ -659,11 +283,12 @@ function renderFC(){
   const items=FC_ITEMS.slice(start,start+FC_PER);
   const el=document.getElementById('fc-qs');
   el.innerHTML='';
-  items.forEach(item=>{
+  items.forEach((item,i)=>{
+    const n=start+i+1;
     const div=document.createElement('div');
     div.className='fc-card';
-    const sA=fcAns[item.no]==='A', sB=fcAns[item.no]==='B';
-    div.innerHTML=`<div class="fc-meta">SORU ${item.no} / 24 · <span class="fc-pair-label">${item.pair}</span></div>
+    const sA=fcAns[item.no]==='A',sB=fcAns[item.no]==='B';
+    div.innerHTML=`<div class="fc-q-num">SORU ${n} / 24</div>
     <div class="fc-q">${item.q}</div>
     <div class="fc-opts">
       <button class="fc-opt${sA?' sel':''}" onclick="setFC(${item.no},'A',this)"><div class="fc-opt-lbl">A</div>${item.a.t}</button>
@@ -671,14 +296,13 @@ function renderFC(){
     </div>`;
     el.appendChild(div);
   });
-  const total=Math.ceil(FC_ITEMS.length/FC_PER);
-  const answered=FC_ITEMS.slice(start,start+FC_PER).filter(i=>fcAns[i.no]).length;
-  document.getElementById('fc-prog').style.width=(50+(fcPage/total)*50)+'%';
-  document.getElementById('fc-prog-lbl').textContent=`Sayfa ${fcPage+1} / ${total} · ${answered} / ${FC_PER} yanıtlandı`;
-  document.getElementById('fc-count').textContent=`${fcPage+1} / ${total}`;
+  const totalPages=Math.ceil(FC_ITEMS.length/FC_PER);
+  const answered=items.filter(i=>fcAns[i.no]!==undefined).length;
+  document.getElementById('fc-prog').style.width=(50+(fcPage/totalPages)*50)+'%';
+  document.getElementById('fc-prog-lbl').textContent=`Sayfa ${fcPage+1} / ${totalPages} · ${answered} / ${items.length} yanıtlandı`;
+  document.getElementById('fc-count').textContent=`${fcPage+1} / ${totalPages}`;
   document.getElementById('fc-back').style.visibility=fcPage===0?'hidden':'visible';
-  const isLast=start+FC_PER>=FC_ITEMS.length;
-  document.getElementById('fc-next').textContent=isLast?'Sonuçları gör →':'İleri →';
+  document.getElementById('fc-next').textContent=start+FC_PER>=FC_ITEMS.length?'Sonuçları gör →':'İleri →';
   document.getElementById('fc-warn').style.display='none';
 }
 
@@ -688,38 +312,36 @@ function setFC(no,choice,btn){
   btn.classList.add('sel');
   const start=fcPage*FC_PER;
   const items=FC_ITEMS.slice(start,start+FC_PER);
-  const total=Math.ceil(FC_ITEMS.length/FC_PER);
-  const answered=items.filter(i=>fcAns[i.no]).length;
-  document.getElementById('fc-prog-lbl').textContent=`Sayfa ${fcPage+1} / ${total} · ${answered} / ${FC_PER} yanıtlandı`;
+  const answered=items.filter(i=>fcAns[i.no]!==undefined).length;
+  document.getElementById('fc-prog-lbl').textContent=`Sayfa ${fcPage+1} / ${Math.ceil(FC_ITEMS.length/FC_PER)} · ${answered} / ${items.length} yanıtlandı`;
 }
 
 function fcNav(dir){
   if(dir===1){
     const start=fcPage*FC_PER;
     const items=FC_ITEMS.slice(start,start+FC_PER);
-    if(items.some(i=>!fcAns[i.no])){document.getElementById('fc-warn').style.display='block';return;}
+    if(items.some(i=>fcAns[i.no]===undefined)){document.getElementById('fc-warn').style.display='block';return;}
     if(start+FC_PER>=FC_ITEMS.length){showResults();return;}
     fcPage++;
   } else {
-    if(fcPage===0){show('kko-screen');kkoSec=3;renderKKO();return;}
+    if(fcPage===0){show('kko-screen');kkoPage=Math.ceil(KKO_ITEMS.length/KKO_PER)-1;renderKKO();return;}
     fcPage--;
   }
   renderFC();
 }
 
 function calcKKO(){
-  return SECS.map(sec=>{
-    const items=KKO_ITEMS.filter(i=>i.f===sec.id);
+  return KKO_NAMES.map(n=>{
+    const items=KKO_ALL.filter(i=>i.f===n.f);
     const avg=items.reduce((a,i)=>a+(kkoAns[i.code]||3),0)/items.length;
-    return {name:sec.name,avg};
+    return {...n,avg};
   });
 }
 
 function calcFC(){
   const c={D:0,S:0,U:0,G:0};
-  FC_ITEMS.forEach(item=>{
-    const ch=fcAns[item.no];
-    if(!ch)return;
+  FC_ALL.forEach(item=>{
+    const ch=fcAns[item.no];if(!ch)return;
     Object.entries(ch==='A'?item.a.s:item.b.s).forEach(([k,v])=>c[k]+=v);
   });
   return c;
@@ -730,104 +352,99 @@ function showResults(){
   const kko=calcKKO();
   const fc=calcFC();
   const fcTotal=Object.values(fc).reduce((a,b)=>a+b,0);
-
-  const kkoColors=['#EF9F27','#7F77DD','#1D9E75','#378ADD'];
-  document.getElementById('kko-bars').innerHTML=kko.map((s,i)=>`
-    <div class="bar-row">
-      <div class="bar-lbl">${s.name}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${((s.avg/5)*100).toFixed(0)}%;background:${kkoColors[i]}"></div></div>
-      <div class="bar-num">${s.avg.toFixed(1)}</div>
-    </div>`).join('');
-
   const fcDefs=[{k:'D',l:'Doğrusal',c:'#378ADD'},{k:'S',l:'Sarmal',c:'#7F77DD'},{k:'U',l:'Uzman',c:'#1D9E75'},{k:'G',l:'Geçişken',c:'#EF9F27'}];
-  document.getElementById('fc-bars').innerHTML=fcDefs.map(d=>`
-    <div class="bar-row">
-      <div class="bar-lbl">${d.l}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${fcTotal>0?((fc[d.k]/fcTotal)*100).toFixed(0):0}%;background:${d.c}"></div></div>
-      <div class="bar-num">${fc[d.k]} / ${fcTotal}</div>
-    </div>`).join('');
 
-  const baskinKKO=kko.reduce((a,b)=>a.avg>b.avg?a:b).name;
-  const baskinDriver=fcDefs.reduce((a,b)=>(fc[a.k]||0)>=(fc[b.k]||0)?a:b).l;
+  document.getElementById('kko-bars').innerHTML=kko.map(s=>`<div class="bar-row"><div class="bar-lbl">${s.name}</div><div class="bar-track"><div class="bar-fill" style="width:${((s.avg/5)*100).toFixed(0)}%;background:${s.color}"></div></div><div class="bar-num">${s.avg.toFixed(1)}</div></div>`).join('');
+  document.getElementById('fc-bars').innerHTML=fcDefs.map(d=>`<div class="bar-row"><div class="bar-lbl">${d.l}</div><div class="bar-track"><div class="bar-fill" style="width:${fcTotal>0?((fc[d.k]/fcTotal)*100).toFixed(0):0}%;background:${d.c}"></div></div><div class="bar-num">${fc[d.k]} / ${fcTotal}</div></div>`).join('');
 
-  saveData(kko,fc,fcTotal,baskinKKO,baskinDriver);
-  fetchAI(kko,fc,fcTotal);
+  const baskinKKO=kko.reduce((a,b)=>a.avg>b.avg?a:b);
+  const baskinDriver=fcDefs.reduce((a,b)=>(fc[a.k]||0)>=(fc[b.k]||0)?a:b);
+
+  document.getElementById('profile-chip-wrap').innerHTML=`<div class="profile-chip">${baskinKKO.name} · ${baskinDriver.l}</div>`;
+  document.getElementById('ai-out').textContent=generateInterpretation(kko,fc,baskinKKO,baskinDriver);
+
+  saveData(kko,fc,baskinKKO.name,baskinDriver.l);
 }
 
-async function saveData(kko,fc,fcTotal,baskinKKO,baskinDriver){
+function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
+  const degisim=kko.find(k=>k.f===1).avg;
+  const uzmanlik=kko.find(k=>k.f===2).avg;
+  const uzman=kko.find(k=>k.f===3).avg;
+  const dogrusal=kko.find(k=>k.f===4).avg;
+
+  const kkoDesc={
+    1:degisim>=4
+      ?"Kariyer anlayışın güçlü bir değişim ve esneklik eğilimi taşıyor. Tek bir yolda kalmak yerine farklı deneyimler arayışında olman, seni hem geçişken hem de sarmal kariyer kalıplarına yaklaştırıyor. Bu bir güçsüzlük değil — aksine değişen iş dünyasında büyük bir avantaj."
+      :"Değişim ve esnekliğe orta düzeyde açıksın. Tamamen sabit bir çizgide kalmayı tercih etmesen de ani sıçramalardan ziyade kontrollü bir esnekliği benimsiyorsun.",
+    2:uzmanlik>=4
+      ?"Ustalık ve derinleşme güdüsün belirgin biçimde öne çıkıyor. İşini iyi yapmak, alanında tanınmak ve biriktirdiğin deneyimleri anlam taşıyan bir bütüne dönüştürmek senin için kariyer tatmininin merkezinde yer alıyor."
+      :"Mesleki derinleşmeyi önemsiyorsun ancak bu tek motivasyon kaynağın değil. Farklı ilgi alanları ve çeşitlilik de seni tatmin ediyor.",
+    3:uzman>=4
+      ?"Kariyer anlayışında istikrar ve uzmanlaşma ön planda. Aynı alanda uzun yıllar geçirerek gerçek bir otorite olmak sana hem güven hem de tatmin veriyor. Öngörülebilir bir yol, senin için kaos değil — sağlam bir zemin."
+      :"Belirli bir alanda derinleşmek istesen de tam anlamıyla 'tek yollu' bir kariyer anlayışına sahip değilsin. İstikrar önemli, ama tek ölçütün bu değil.",
+    4:dogrusal>=4
+      ?"Hiyerarşik yükselme ve statü kazanımı seni güçlü biçimde motive ediyor. Sorumluluk almak, unvan ve yetki elde etmek — bunlar sana kariyer başarısının somut göstergeleri olarak görünüyor."
+      :"Kariyer başarısını salt unvan veya statüyle ölçmüyorsun. Yükselmek güzel, ama tek hedefin bu değil."
+  }[baskinKKO.f];
+
+  const uyumMap={
+    "1-S":"İki ölçek de birbiriyle tutarlı bir tablo çiziyor: hem KKÖ hem kariyer tercihi sorularında sarmal bir eğilim belirgin. Periyodik büyüme, yeni alanlara açılma ve birikimli gelişim senin için kariyer yolculuğunun özü.",
+    "1-G":"Değişim ve esneklik eğilimin güçlü, tercih sorularında ise geçişken kalıp öne çıkıyor. İkisi benzer bir özgürlük arayışını yansıtsa da aralarında ince bir fark var: biri birikimli büyümeyi, diğeri anlık fırsatları ve bağımsızlığı ön plana koyuyor. Bu çift yönlü baskı, kariyer kararlarında bazen kararsızlık yaratabilir — farkında olmak önemli.",
+    "1-D":"Esneklik ve değişim arzun güçlü olsa da tercih sorularında yükselme odaklı bir eğilim görünüyor. Bu çelişkili gibi görünse de çok yönlü büyürken aynı zamanda yukarı tırmanmak isteğinin yansıması olabilir.",
+    "1-U":"Değişim arayışın belirgin, ancak tercih sorularında uzman kalıbı öne çıkıyor. Belki derin bir uzmanlık edinmek istiyorsun — ama bunu tek bir alanda değil, farklı alanlarda ayrı ayrı deneyimleyerek.",
+    "2-S":"Ustalık ve uzmanlık eğilimin sarmal kariyer tercihleriyle güzel bir uyum içinde. Hem derinleşmek hem de periyodik olarak yenilenip farklı alanlara açılmak istiyorsun. Bu iki şey birbiriyle çelişmez — birinde biriktirdiğini ötekine taşıyabilen bir kariyer anlayışı bu.",
+    "2-U":"Mesleki ustalık eğilimin ve uzman kalıp tercihin birbirini destekliyor. Aynı alanda derinleşerek tanınan, değer gören ve işini gerçekten iyi yapan biri olmak istiyorsun. İki ölçek de tutarlı bir tablo çiziyor.",
+    "2-D":"Ustalık güdün güçlü, ama tercih sorularında yükselme eğilimi de belirgin. 'Alanında en iyi' olmak ile 'hiyerarşide en üst' olmak arasında zaman zaman tercih yapmak durumunda kalabilirsin.",
+    "2-G":"Mesleki derinleşme isteğin ve geçişken kariyer tercihlerin ilginç bir gerilim yaratıyor. Hem uzmanlaşmak hem de özgür hareket etmek istiyorsun — bu enerjiyi doğru kanalize edersen çok güçlü bir kariyer profili ortaya çıkabilir.",
+    "3-U":"Hem KKÖ hem tercih soruları uzman kalıbında örtüşüyor. Tek bir alanda derinleşmek, istikrar ve öngörülebilirlik senin için kariyer güvencesinin temeli. Bu tutarlılık, kariyer kararlarında daha az çelişki yaşadığına işaret ediyor.",
+    "3-D":"KKÖ'de uzman kalıbı ön planda olsa da tercih sorularında yükselme eğilimi güçlü. Bu ilginç bir kombinasyon: belirli bir alanda derinleşmek istiyorsun, ama aynı zamanda o alanın en tepesine ulaşmak da önemli senin için.",
+    "3-S":"İstikrar ve derinleşme eğilimin güçlü olsa da tercih sorularında sarmal büyüme isteği görünüyor. Belki de uzman kalmak istiyorsun ama yeni deneyimlere de zaman zaman kapı aralamak istiyor içindeki bir ses.",
+    "3-G":"KKÖ'de istikrar ve uzmanlaşma ön planda, ancak tercih sorularında geçişken eğilim öne çıkıyor. Bu çelişkili görünse de ikisi arasındaki gerilim, kariyer kararlarında karmaşıklık yaratabiliyor.",
+    "4-D":"Hem KKÖ hem tercih sorularında doğrusal kariyer kalıbı çok net. Yükselme, sorumluluk ve statü senin için kariyer başarısının merkezinde. İki ölçek de birbiriyle tutarlı bir portre çiziyor.",
+    "4-S":"KKÖ'de doğrusal yükselme eğilimin güçlü, tercih sorularında ise sarmal kalıp öne çıkıyor. Hangisi önce gelir sorusunu zaman zaman kendine sormaya değer: yükselme mi, yoksa çok yönlü büyüme mi?",
+    "4-U":"Yükselme odaklı bir eğilimin yanı sıra uzman kalıbı da güçlü. Belki de 'alanının en üstüne çıkmak' senin için ikisini aynı anda gerçekleştirmenin yolu.",
+    "4-G":"Yükselme isteği ve geçişken özgürlük arayışı bir arada. Bu iki güdü zaman zaman birbirini dengeleyebilir — ya da çatışabilir. Kariyer kararlarında hangisinin daha belirleyici olduğunu fark etmek önemli."
+  };
+
+  const uyumKey=baskinKKO.f+"-"+baskinDriver.k;
+  const uyum=uyumMap[uyumKey]||"İki ölçek sonuçların birbirini tamamlayan farklı boyutlara dikkat çekiyor. Kariyer anlayışının birden fazla boyutu aynı anda barındırdığı görülüyor.";
+
+  const gucluMap={
+    1:"Güçlü yönün: belirsizlikle barışık olmak ve değişime hızlı uyum sağlamak. Dikkat noktası: aşırı esneklik bazen derinleşmeyi zorlaştırabilir. Hangi alanlarda köklenmek istediğini zaman zaman sorgulamak sana yol gösterebilir.",
+    2:"Güçlü yönün: deneyimlerini anlamlı bir bütüne dönüştürme kapasiten ve işine katma değer katma isteğin. Dikkat noktası: ustalık arayışı bazen 'hiçbir şey yeterince iyi değil' tuzağına düşürebilir. Yeterince iyi olanı da kutlamayı unutma.",
+    3:"Güçlü yönün: sabır, tutarlılık ve uzun vadeli düşünme kapasiten. Dikkat noktası: değişen iş dünyasında tamamen sabit kalmak zaman zaman fırsatları kaçırmana yol açabilir. Köklerin sağlam olsun ama dalların biraz hareket etsin.",
+    4:"Güçlü yönün: hedef odaklılık ve liderlik isteğin. Dikkat noktası: yükselme odaklı bir kariyer anlayışı bazen işin içsel anlamını ikinci plana itebilir. Motivasyonunun yalnızca dışsal kaynaklara bağlı olmadığından emin ol."
+  }[baskinKKO.f];
+
+  const oneriMap={
+    1:"Öneri: Esnekliğin bir güç — ama hangi değerlere geri döneceğini bilmek seni kaybolmaktan korur. Kariyer yolculuğunda pusula olacak 2-3 değerini netleştirmeye çalış.",
+    2:"Öneri: Birikimini fark et. Zaten sahip olduğun uzmanlığı görmezden gelerek hep bir sonrakini aramak, şu anki potansiyelini kullanmamak anlamına gelebilir.",
+    3:"Öneri: Uzmanlığını daha geniş bir kitleyle buluştur. Derinliğin var — şimdi bunu görünür kılmanın yollarını araştır.",
+    4:"Öneri: 'Neden yükselmek istiyorum?' sorusunun yanıtını zaman zaman gözden geçir. Motivasyonun netleştikçe doğru fırsatlara odaklanmak kolaylaşır."
+  }[baskinKKO.f];
+
+  return `${kkoDesc}\n\n${uyum}\n\n${gucluMap}\n\n${oneriMap}`;
+}
+
+async function saveData(kko,fc,baskinKKO,baskinDriver){
   const note=document.getElementById('save-note');
   note.textContent='Veriler kaydediliyor...';
   try{
-    await fetch(WEBHOOK,{
-      method:'POST',
-      body:JSON.stringify({
-        kko_degisim:kko[0].avg.toFixed(2),
-        kko_uzmanlik:kko[1].avg.toFixed(2),
-        kko_uzman:kko[2].avg.toFixed(2),
-        kko_dogrusal:kko[3].avg.toFixed(2),
-        zs_dogrusal:fc.D, zs_sarmal:fc.S, zs_uzman:fc.U, zs_gecisken:fc.G,
-        baskin_kko:baskinKKO, baskin_driver:baskinDriver
-      }),
-      headers:{'Content-Type':'application/json'}
-    });
+    await fetch(WEBHOOK,{method:'POST',body:JSON.stringify({
+      action:'save',
+      kko_degisim:kko.find(k=>k.f===1).avg.toFixed(2),
+      kko_uzmanlik:kko.find(k=>k.f===2).avg.toFixed(2),
+      kko_uzman:kko.find(k=>k.f===3).avg.toFixed(2),
+      kko_dogrusal:kko.find(k=>k.f===4).avg.toFixed(2),
+      zs_dogrusal:fc.D,zs_sarmal:fc.S,zs_uzman:fc.U,zs_gecisken:fc.G,
+      baskin_kko:baskinKKO,baskin_driver:baskinDriver
+    }),headers:{'Content-Type':'application/json'}});
     note.textContent='✓ Yanıtların kaydedildi.';
     setTimeout(()=>note.textContent='',4000);
-  } catch(e){
-    note.textContent='Kayıt sırasında bir sorun oluştu.';
-  }
+  } catch(e){note.textContent='';}
 }
 
-async function fetchAI(kko,fc,fcTotal){
-  const out=document.getElementById('ai-out');
-  const kkoSum=kko.map(s=>`${s.name}: ${s.avg.toFixed(2)}/5`).join(', ');
-  const fcLabels={D:'Doğrusal',S:'Sarmal',U:'Uzman',G:'Geçişken'};
-  const fcSum=Object.entries(fc).map(([k,v])=>`${fcLabels[k]}: ${v}/${fcTotal}`).join(', ');
-
-  const prompt=`Sen bir kariyer psikolojisi uzmanısın. Aşağıdaki iki ölçekten elde edilen sonuçlara göre katılımcıya kişisel, içgörülü ve destekleyici bir kariyer profili yorumu yaz. Türkçe yaz, "sen" diye hitap et.
-
-KKÖ Sonuçları (5'li Likert ortalamaları):
-${kkoSum}
-
-Faktör açıklamaları:
-- Değişim ve esneklik: değişim, çeşitlilik, esneklik arayışı (sarmal+geçişken örüntüler)
-- Ustalık ve uzmanlık: mesleki derinleşme, yaratıcılık, deneyim birikimi (sarmal ağırlıklı)
-- Uzman kalıbı: tek alanda istikrar, öngörülebilirlik, derinleşme (steady-state)
-- Doğrusal kariyer: hiyerarşik yükselme, statü, güç odaklılık (linear)
-
-Zorunlu Seçim Ölçeği (Driver'ın 4 kariyer tipi):
-${fcSum}
-
-Driver tipi açıklamaları:
-- Doğrusal: yükselme odaklı, hiyerarşi, güç
-- Sarmal: periyodik alan değişimi, büyüme, çok yönlülük
-- Uzman: tek alanda derinleşme, istikrar, ustalık
-- Geçişken: özgürlük, çeşitlilik, anlık fırsat odaklılık
-
-Lütfen şunları içer:
-1. Baskın kariyer kalıbı ve bu kalıbın ne anlama geldiği (2-3 cümle)
-2. KKÖ ve zorunlu seçim arasındaki uyum ya da gerilimler (2-3 cümle)
-3. Bu profilin güçlü yönleri ve dikkat edilmesi gereken noktalar (2-3 cümle)
-4. Kısa bir öneri cümlesi
-
-Uzunluk: yaklaşık 200-250 kelime. Akademik değil, samimi ve kişisel ton.`;
-
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
-    });
-    const data=await res.json();
-    out.textContent=data.content?.find(c=>c.type==='text')?.text||'Yorum alınamadı.';
-  } catch(e){
-    out.textContent='Yorum yüklenirken bir hata oluştu. Lütfen tekrar deneyin.';
-  }
-}
-
-function resetAll(){
-  kkoAns={};fcAns={};kkoSec=0;fcPage=0;
-  show('intro');
-}
+function resetAll(){kkoAns={};fcAns={};kkoPage=0;fcPage=0;show('intro');}
 </script>
 </body>
 </html>
