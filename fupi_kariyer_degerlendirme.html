@@ -431,21 +431,21 @@ function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
 }
 
 async function saveData(kko,fc,baskinKKO,baskinDriver){
-  const note=document.getElementById('save-note');
-  note.textContent='Veriler kaydediliyor...';
+  const note=document.getElementById("save-note");
+  note.textContent="Veriler kaydediliyor...";
   try{
-    await fetch(WEBHOOK,{method:'POST',body:JSON.stringify({
-      action:'save',
+    const params=new URLSearchParams({
       kko_degisim:kko.find(k=>k.f===1).avg.toFixed(2),
       kko_uzmanlik:kko.find(k=>k.f===2).avg.toFixed(2),
       kko_uzman:kko.find(k=>k.f===3).avg.toFixed(2),
       kko_dogrusal:kko.find(k=>k.f===4).avg.toFixed(2),
       zs_dogrusal:fc.D,zs_sarmal:fc.S,zs_uzman:fc.U,zs_gecisken:fc.G,
       baskin_kko:baskinKKO,baskin_driver:baskinDriver
-    }),headers:{'Content-Type':'application/json'}});
-    note.textContent='✓ Yanıtların kaydedildi.';
-    setTimeout(()=>note.textContent='',4000);
-  } catch(e){note.textContent='';}
+    });
+    await fetch(WEBHOOK+"?"+params.toString(),{method:"GET",mode:"no-cors"});
+    note.textContent="✓ Yanıtların kaydedildi.";
+    setTimeout(()=>note.textContent="",4000);
+  } catch(e){note.textContent="";}
 }
 
 function resetAll(){kkoAns={};fcAns={};kkoPage=0;fcPage=0;show('intro');}
