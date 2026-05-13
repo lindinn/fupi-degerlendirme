@@ -370,63 +370,137 @@ function showResults(){
 }
 
 function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
-  const degisim=kko.find(k=>k.f===1).avg;
-  const uzmanlik=kko.find(k=>k.f===2).avg;
-  const uzman=kko.find(k=>k.f===3).avg;
-  const dogrusal=kko.find(k=>k.f===4).avg;
+  const G=kko.find(k=>k.f===1).avg; // Geçişken
+  const S=kko.find(k=>k.f===2).avg; // Sarmal
+  const U=kko.find(k=>k.f===3).avg; // Uzman
+  const D=kko.find(k=>k.f===4).avg; // Doğrusal
 
-  const kkoDesc={
-    1:degisim>=4
-      ?"Geçişken kariyer eğilimin güçlü biçimde öne çıkıyor. Tek bir yolda kalmak yerine farklı deneyimler arayışında olman seni esnek ve çok yönlü bir kariyer profiline yaklaştırıyor. Bu bir güçsüzlük değil — aksine değişen iş dünyasında büyük bir avantaj."
-      :"Geçişken eğilime orta düzeyde sahipsin. Tamamen sabit bir çizgide kalmayı tercih etmesen de ani sıçramalardan ziyade kontrollü bir esnekliği benimsiyorsun.",
-    2:uzmanlik>=4
-      ?"Sarmal kariyer güdüsün belirgin biçimde öne çıkıyor. İşini iyi yapmak, alanında tanınmak ve biriktirdiğin deneyimleri anlam taşıyan bir bütüne dönüştürmek senin için kariyer tatmininin merkezinde yer alıyor."
-      :"Sarmal eğilime orta düzeyde sahipsin. Mesleki derinleşmeyi önemsiyorsun ancak bu tek motivasyon kaynağın değil.",
-    3:uzman>=4
-      ?"Uzman kariyer kalıbı sende belirgin biçimde öne çıkıyor. Aynı alanda uzun yıllar geçirerek gerçek bir otorite olmak sana hem güven hem de tatmin veriyor. Öngörülebilir bir yol, senin için kaos değil — sağlam bir zemin."
-      :"Uzman eğilime orta düzeyde sahipsin. Belirli bir alanda derinleşmek istesen de tam anlamıyla 'tek yollu' bir kariyer anlayışına sahip değilsin.",
-    4:dogrusal>=4
-      ?"Doğrusal kariyer eğilimin güçlü. Hiyerarşik yükselme ve statü kazanımı seni motive ediyor. Sorumluluk almak, unvan ve yetki elde etmek — bunlar sana kariyer başarısının somut göstergeleri olarak görünüyor."
-      :"Doğrusal eğilime orta düzeyde sahipsin. Kariyer başarısını salt unvan veya statüyle ölçmüyorsun — yükselmek güzel, ama tek hedefin bu değil."
-  }[baskinKKO.f];
+  const fcG=fc.G||0, fcS=fc.S||0, fcU=fc.U||0, fcD=fc.D||0;
+  const fcTotal=(fcG+fcS+fcU+fcD)||24;
 
-  const uyumMap={
-    "1-S":"İki ölçek birbiriyle tam uyumlu değil: KKÖ'de geçişken eğilim baskın, ancak tercih sorularında sarmal kalıp öne çıkıyor. Belki özgürce hareket etmek isterken aynı zamanda bu deneyimlerin birikimli bir anlam taşımasını da istiyorsun.",
-    "1-G":"İki ölçek de tutarlı biçimde geçişken eğilimi işaret ediyor. Özgürlük, çeşitlilik ve anlık fırsatlara açıklık senin için kariyer yolculuğunun merkezinde. Bu tutarlılık, kariyer kararlarında içgüdülerini güvenle takip edebileceğini gösteriyor.",
-    "1-D":"Geçişken eğilimin güçlü olsa da tercih sorularında yükselme odaklı bir eğilim görünüyor. Farklı deneyimler ararken aynı zamanda yukarı tırmanmak da istiyorsun — bu enerjiyi dengede tutmak kariyer yolculuğunda belirleyici olabilir.",
-    "1-U":"Geçişken eğilimin belirgin, ancak tercih sorularında uzman kalıbı öne çıkıyor. Belki derin bir uzmanlık edinmek istiyorsun — ama bunu tek bir alanda değil, farklı alanlarda ayrı ayrı deneyimleyerek.",
-    "2-S":"İki ölçek tutarlı biçimde sarmal eğilimi işaret ediyor. Hem derinleşmek hem de periyodik olarak yenilenip farklı alanlara açılmak istiyorsun. Birinde biriktirdiğini ötekine taşıyabilen bir kariyer anlayışı bu — iki ölçek de bunu doğruluyor.",
-    "2-U":"Sarmal eğilimin güçlü olsa da tercih sorularında uzman kalıbı öne çıkıyor. Mesleki derinleşme ve birikimli büyüme arzun, belirli bir alanda uzun vadeli ustalaşma isteğiyle buluşuyor.",
-    "2-D":"Sarmal güdün güçlü, ama tercih sorularında yükselme eğilimi de belirgin. 'Alanında en iyi' olmak ile 'hiyerarşide en üst' olmak arasında zaman zaman tercih yapmak durumunda kalabilirsin.",
-    "2-G":"Sarmal eğilimin ve geçişken kariyer tercihlerin ilginç bir gerilim yaratıyor. Hem derinleşmek hem de özgür hareket etmek istiyorsun — bu enerjiyi doğru kanalize edersen çok güçlü bir kariyer profili ortaya çıkabilir.",
-    "3-U":"İki ölçek de tutarlı biçimde uzman kalıbını işaret ediyor. Tek bir alanda derinleşmek, istikrar ve öngörülebilirlik senin için kariyer güvencesinin temeli. Bu tutarlılık, kariyer kararlarında daha az çelişki yaşadığına işaret ediyor.",
-    "3-D":"KKÖ'de uzman eğilimi baskın olsa da tercih sorularında yükselme eğilimi güçlü. Belirli bir alanda derinleşmek istiyorsun, ama aynı zamanda o alanın en tepesine ulaşmak da önemli senin için.",
-    "3-S":"Uzman eğilimin güçlü olsa da tercih sorularında sarmal büyüme isteği görünüyor. Uzman kalmak istiyorsun — ama yeni deneyimlere zaman zaman kapı aralamak da istiyor içindeki bir ses.",
-    "3-G":"KKÖ'de uzman eğilimi baskın, ancak tercih sorularında geçişken kalıp öne çıkıyor. İstikrar arzun ve özgürlük isteğin arasındaki bu gerilim, kariyer kararlarında zaman zaman karmaşıklık yaratabilir.",
-    "4-D":"İki ölçek de tutarlı biçimde doğrusal kariyer kalıbını işaret ediyor. Yükselme, sorumluluk ve statü senin için kariyer başarısının merkezinde. Bu tutarlılık, kariyer hedeflerinde net bir yönün olduğunu gösteriyor.",
-    "4-S":"KKÖ'de doğrusal eğilim baskın, tercih sorularında ise sarmal kalıp öne çıkıyor. Yükselme mi, yoksa çok yönlü büyüme mi? Bu soruyu zaman zaman kendine sormaya değer.",
-    "4-U":"Yükselme odaklı eğilinin yanı sıra uzman kalıbı da güçlü. 'Alanının en üstüne çıkmak' senin için belki de ikisini aynı anda gerçekleştirmenin yolu.",
-    "4-G":"Yükselme isteği ve geçişken özgürlük arayışı bir arada. Bu iki güdü zaman zaman birbirini dengeleyebilir — ya da çatışabilir. Kariyer kararlarında hangisinin daha belirleyici olduğunu fark etmek önemli."
+  // İkinci baskın KKÖ boyutu
+  const kkoSorted=[
+    {f:1,k:'G',name:'Geçişken',avg:G},
+    {f:2,k:'S',name:'Sarmal',avg:S},
+    {f:3,k:'U',name:'Uzman',avg:U},
+    {f:4,k:'D',name:'Doğrusal',avg:D}
+  ].sort((a,b)=>b.avg-a.avg);
+  const ikinciBoyut=kkoSorted[1];
+  const ucuncuBoyut=kkoSorted[2];
+
+  // İkinci baskın Driver tipi
+  const fcSorted=[
+    {k:'G',l:'Geçişken',v:fcG},
+    {k:'S',l:'Sarmal',v:fcS},
+    {k:'U',l:'Uzman',v:fcU},
+    {k:'D',l:'Doğrusal',v:fcD}
+  ].sort((a,b)=>b.v-a.v);
+  const ikinciDriver=fcSorted[1];
+
+  // ZS'den durumsal ipuçları — hangi sorularda ne seçildi
+  const secilenler={};
+  FC_ALL.forEach(item=>{secilenler[item.no]=fcAns[item.no];});
+
+  // Durumsal sorulardan kişiye özel cümleler
+  const durumsal=[];
+
+  // Soru 1: Mezuniyet sonrası
+  if(secilenler[1]==='A') durumsal.push("Kariyer planlamasında hiyerarşik ilerlemeyi öncelikli gördüğün, mezuniyet sonrası için bile net bir yükselme çizgisi hayal ettiğin anlaşılıyor.");
+  else if(secilenler[1]==='B') durumsal.push("Kariyerinin başından itibaren farklı alanlara açılmayı ve kendini yenilemeyi hayal ediyorsun — bu, sarmal bir büyüme anlayışının erken işareti.");
+
+  // Soru 5: Kariyer başarısı tanımı
+  if(secilenler[5]==='A') durumsal.push("Başarıyı sorumluluk ve statü artışıyla tanımlıyorsun — bu, kariyer motivasyonunun önemli bir parçasının dışsal tanınmadan beslendiğini gösteriyor.");
+  else if(secilenler[5]==='B') durumsal.push("Başarıyı uzun vadede işini en iyi şekilde yapmakla tanımlıyorsun — bu, kariyer tatmininin içsel kaynaklardan beslendiğine işaret ediyor.");
+
+  // Soru 9: Planlama yaklaşımı
+  if(secilenler[9]==='A') durumsal.push("Kariyer planlamasında net hedeflerle hareket ediyorsun; kararlarını bu hedeflere göre vermen seni sistematik bir profil olarak konumlandırıyor.");
+  else if(secilenler[9]==='B') durumsal.push("Kariyer planlamasında fırsatları ve anlık ilgileri belirleyici buluyorsun — bu esneklik, öngörülemeyen kapıları görmeni kolaylaştırıyor.");
+
+  // Soru 12: Güç/statü vs. özgürlük
+  if(secilenler[12]==='A') durumsal.push("Güç ve statü senin için anlamlı kariyer hedefleri — bu tercih, karar alma süreçlerinde etkili olmak istediğini yansıtıyor.");
+  else if(secilenler[12]==='B') durumsal.push("Bağımsızlık ve özgürlük senin için güç ve statüden daha anlamlı — bu, kendi ritmine göre çalışabileceğin ortamların seni tatmin ettiğine işaret ediyor.");
+
+  // Soru 17: Alan değişim motivasyonu
+  if(secilenler[17]==='A') durumsal.push("Alan değiştirirken birikimini taşımak istiyorsun — geçişlerin rastgele değil, bir büyüme mantığına oturduğunu gösteriyor bu.");
+  else if(secilenler[17]==='B') durumsal.push("Alan değiştirirken seni yönlendiren şey sıkılmak ya da yeni bir fırsat çıkması — bu kendiliğinden akan bir kariyer anlayışının yansıması.");
+
+  // Soru 22: Güvence vs. özgürlük
+  if(secilenler[22]==='A') durumsal.push("Kariyer güvencesi ve öngörülebilirlik senin için değişimden önce geliyor — bu, istikrarın kariyer kararlarında belirleyici bir ağırlık taşıdığını gösteriyor.");
+  else if(secilenler[22]==='B') durumsal.push("Güvence seni kısıtlıyor gibi hissettiriyor — özgürce hareket edebilmek, istikrardan daha değerli senin için.");
+
+  // Rastgele iki durumsal cümle seç (aynı kişilere farklı çıksın diye karıştır)
+  const shuffledDurumsal=durumsal.sort(()=>Math.random()-0.5).slice(0,2);
+
+  // --- PARAGRAF 1: Baskın KKÖ + ikinci boyut ---
+  const p1Map={
+    'G-S':"Kariyer anlayışında geçişkenlik baskın — farklı deneyimler, değişen çevreler ve yeni başlangıçlar seni motive ediyor. Buna ek olarak sarmal büyüme güdün de güçlü; bu demek ki deneyimlerin rastgele birikmesinden değil, birbirinin üstüne inşa edilen anlamlı bir bütünden zevk alıyorsun. İkisi birlikte çok sağlıklı bir esneklik profili oluşturuyor.",
+    'G-U':"Geçişken kariyer eğilimin belirgin — farklı alanlara açılmak, değişmek ve yenilenmek seni besliyor. Ama uzman boyutun da göz ardı edilemeyecek kadar güçlü; bu ilginç bir gerilim yaratıyor. Büyük ihtimalle her alanda derin bir iz bırakmak istiyorsun, ama tek bir yerde kalmak da istemiyorsun.",
+    'G-D':"Geçişken bir kariyer anlayışın var — çeşitlilik, özgürlük ve anlık fırsatlar seni harekete geçiriyor. Doğrusal boyutun da orta-üstü düzeyde; bu, esnekliğini korurken aynı zamanda belirli alanlarda yukarı tırmanmak istediğini gösteriyor. İkisi arasındaki denge kariyer kararlarında belirleyici olacak.",
+    'S-G':"Sarmal kariyer güdün öne çıkıyor — mesleki derinleşme, büyüme ve deneyimlerini anlamlı bir bütüne dönüştürme senin için merkezi önem taşıyor. Geçişken boyutun da güçlü; bu sarmal büyümeye esnek bir ritim katıyor. Büyük ihtimalle farklı alanlara açılıyorsun ama her geçişte bir şeyler biriktiriyorsun.",
+    'S-U':"Sarmal kariyer anlayışın baskın — derinleşmek, gelişmek ve birikimini taşımak seni tanımlıyor. Uzman boyutun da güçlü; bu, belirli alanlarda gerçekten ustalaşmak istediğini gösteriyor. İki boyut birbirini destekliyor: hem derinleşmek hem de bu derinliği zaman içinde farklı alanlara taşımak.",
+    'S-D':"Sarmal büyüme güdün belirgin — mesleki gelişim, deneyim birikimi ve her geçişte bir adım daha ileriye gitmek seni motive ediyor. Doğrusal boyutun da orta-güçlü; büyürken aynı zamanda hiyerarşik olarak da ilerlemeyi önemsiyorsun. Bu ikisi birlikte oldukça güçlü bir kariyer profili oluşturuyor.",
+    'U-S':"Uzman kariyer kalıbı sende belirgin — aynı alanda derinleşmek, güvenilir ve değer verilen biri olmak seni tatmin ediyor. Sarmal boyutun da göz ardı edilemez; zaman zaman yeni alanlara açılmak, farklı deneyimler edinmek de istiyor içindeki bir ses. Bu ikisi arasındaki denge kariyer yolculuğunu zenginleştirebilir.",
+    'U-G':"Uzman kariyer anlayışın öne çıkıyor — istikrar, derinleşme ve belirli bir alanda otorite olmak senin için anlamlı. Geçişken boyutun da orta düzeyde güçlü; bu, tamamen sabit kalmak istemediğini, zaman zaman özgürlük ve çeşitlilik arayışına girdiğini gösteriyor.",
+    'U-D':"Uzman kariyer kalıbın baskın — aynı alanda yıllar geçirmek, gerçek bir otorite olmak seni tatmin ediyor. Doğrusal boyutun da güçlü; sadece uzmanlaşmak değil, o uzmanlıkla birlikte hiyerarşik olarak da yükselmek istiyorsun. Bu iki boyut birlikte güçlü bir kariyer motivasyonu oluşturuyor.",
+    'D-S':"Doğrusal kariyer eğilimin belirgin — yükselme, sorumluluk ve statü kazanımı seni güçlü biçimde motive ediyor. Sarmal boyutun da kayda değer; sadece yukarı değil, aynı zamanda genişleyerek büyümek de istiyorsun. Bu ikisi birlikte liderlik potansiyeli yüksek bir profil çiziyor.",
+    'D-G':"Doğrusal kariyer anlayışın öne çıkıyor — hiyerarşide yükselmek, etki alanını genişletmek ve liderlik rolleri seni motive ediyor. Geçişken boyutun da orta düzeyde güçlü; yükselirken aynı zamanda çeşitli deneyimler edinmek, tek bir çizgide kalmamak da istiyorsun.",
+    'D-U':"Doğrusal kariyer güdün baskın — yetki, sorumluluk ve statü artışı kariyer başarısının temel göstergeleri senin için. Uzman boyutun da güçlü; bu, 'alanının en iyisi olarak yükselmek' gibi güçlü bir motivasyona işaret ediyor. İki boyut birbirini çok iyi tamamlıyor."
   };
+  const p1Key=baskinKKO.k+'-'+ikinciBoyut.k;
+  const p1=p1Map[p1Key]||`${baskinKKO.name} kariyer eğilimin öne çıkıyor. Buna ek olarak ${ikinciBoyut.name} boyutun da kayda değer bir güç taşıyor — bu iki boyutun birlikte şekillendirdiği kariyer profili, hem esneklik hem de derinlik barındırıyor.`;
 
-  const uyumKey=baskinKKO.f+"-"+baskinDriver.k;
-  const uyum=uyumMap[uyumKey]||"İki ölçek sonuçların birbirini tamamlayan farklı boyutlara dikkat çekiyor. Kariyer anlayışının birden fazla boyutu aynı anda barındırdığı görülüyor.";
+  // --- PARAGRAF 2: ZS profili + ikinci Driver ---
+  const p2Map={
+    'G-S':`Tercih sorularında da geçişken eğilim baskın (${fcG}/${fcTotal}), sarmal ikinci sırada (${fcS}/${fcTotal}). Bu, hem özgürlük hem de birikimli büyüme arayışının bir arada bulunduğunu gösteriyor. Anlık fırsatlara açık olurken deneyimlerini de bir yere taşımak istiyorsun.`,
+    'G-U':`Tercih sorularında geçişken eğilim baskın (${fcG}/${fcTotal}), uzman kalıbı ikinci sırada (${fcU}/${fcTotal}). Özgürlük ve çeşitlilik isterken aynı zamanda belirli konularda gerçekten derin olmak da istiyorsun. Bu gerilim, dikkatli yönetildiğinde güçlü bir kariyer profili oluşturabilir.`,
+    'G-D':`Tercih sorularında geçişken eğilim öne çıkıyor (${fcG}/${fcTotal}), doğrusal kalıp ise ikinci sırada (${fcD}/${fcTotal}). Bağımsızlık ve özgürlük önceliğin olsa da yükselme isteği de göz ardı edilemeyecek kadar güçlü.`,
+    'S-G':`Tercih sorularında sarmal eğilim baskın (${fcS}/${fcTotal}), geçişken ikinci sırada (${fcG}/${fcTotal}). Birikimli büyüme ve periyodik yenilenme senin kariyer anlayışının merkezinde — geçişken boyut buna bir özgürlük dozu katıyor.`,
+    'S-U':`Tercih sorularında sarmal eğilim öne çıkıyor (${fcS}/${fcTotal}), uzman kalıbı ise güçlü ikinci (${fcU}/${fcTotal}). Hem farklı alanlara açılmak hem de belirli konularda gerçek bir derinlik kazanmak istiyorsun. Bu iki motivasyon aynı anda karşılanabilir — doğru kariyer planlamasıyla.`,
+    'S-D':`Tercih sorularında sarmal eğilim baskın (${fcS}/${fcTotal}), doğrusal ikinci sırada (${fcD}/${fcTotal}). Büyürken aynı zamanda hiyerarşik olarak da ilerlemeyi önemsiyorsun — bu ikisi birlikte kariyer tatminini artıracak bir kombinasyon.`,
+    'U-S':`Tercih sorularında uzman kalıbı öne çıkıyor (${fcU}/${fcTotal}), sarmal ise güçlü ikinci (${fcS}/${fcTotal}). Derinleşmek istiyorsun ama tamamen sabit kalmak da istemiyorsun — zaman içinde farklı alanlarda farklı uzmanlıklar geliştirmek bu ikisini bir araya getirebilir.`,
+    'U-G':`Tercih sorularında uzman eğilim baskın (${fcU}/${fcTotal}), geçişken ikinci sırada (${fcG}/${fcTotal}). İstikrar ve derinleşmeyi öncelik olarak görüyorsun ama özgürlük isteği de göz ardı edilemeyecek kadar güçlü.`,
+    'U-D':`Tercih sorularında uzman kalıbı baskın (${fcU}/${fcTotal}), doğrusal güçlü ikinci (${fcD}/${fcTotal}). Derinleşmek ve aynı zamanda hiyerarşik olarak yükselmek — bu ikisini bir araya getiren kariyer yolları genellikle teknik liderlik pozisyonlarında kesişiyor.`,
+    'D-S':`Tercih sorularında doğrusal eğilim baskın (${fcD}/${fcTotal}), sarmal ise güçlü ikinci (${fcS}/${fcTotal}). Yükselme odaklı bir kariyer anlayışın var ama aynı zamanda büyürken çok yönlü deneyimler edinmek de istiyorsun.`,
+    'D-G':`Tercih sorularında doğrusal eğilim öne çıkıyor (${fcD}/${fcTotal}), geçişken ikinci sırada (${fcG}/${fcTotal}). Yükselme ve etki alanını genişletme önceliğin, ama bağımsızlık ve esneklik de kayda değer bir motivasyon kaynağın.`,
+    'D-U':`Tercih sorularında doğrusal eğilim baskın (${fcD}/${fcTotal}), uzman kalıbı güçlü ikinci (${fcU}/${fcTotal}). 'Alanının en iyisi olarak hiyerarşinin tepesine ulaşmak' — bu iki motivasyonun kesişim noktası kariyer tatmininin kalbi olabilir.`
+  };
+  const p2Key=baskinDriver.k+'-'+ikinciDriver.k;
+  const p2=p2Map[p2Key]||`Tercih sorularında ${baskinDriver.l} eğilimi baskın (${fcSorted[0].v}/${fcTotal}), ${ikinciDriver.l} ise ikinci sırada (${ikinciDriver.v}/${fcTotal}). Bu iki eğilim kariyer tercihlerini birlikte şekillendiriyor.`;
 
+  // --- PARAGRAF 3: Durumsal ipuçları ---
+  const p3=shuffledDurumsal.join(' ');
+
+  // --- PARAGRAF 4: Güçlü yön + dikkat ---
   const gucluMap={
-    1:"Güçlü yönün: belirsizlikle barışık olmak ve değişime hızlı uyum sağlamak. Dikkat noktası: aşırı esneklik bazen derinleşmeyi zorlaştırabilir. Hangi alanlarda köklenmek istediğini zaman zaman sorgulamak sana yol gösterebilir.",
-    2:"Güçlü yönün: deneyimlerini anlamlı bir bütüne dönüştürme kapasiten ve işine katma değer katma isteğin. Dikkat noktası: ustalık arayışı bazen 'hiçbir şey yeterince iyi değil' tuzağına düşürebilir. Yeterince iyi olanı da kutlamayı unutma.",
-    3:"Güçlü yönün: sabır, tutarlılık ve uzun vadeli düşünme kapasiten. Dikkat noktası: değişen iş dünyasında tamamen sabit kalmak zaman zaman fırsatları kaçırmana yol açabilir. Köklerin sağlam olsun ama dalların biraz hareket etsin.",
-    4:"Güçlü yönün: hedef odaklılık ve liderlik isteğin. Dikkat noktası: yükselme odaklı bir kariyer anlayışı bazen işin içsel anlamını ikinci plana itebilir. Motivasyonunun yalnızca dışsal kaynaklara bağlı olmadığından emin ol."
-  }[baskinKKO.f];
+    'G':"Güçlü yönün: belirsizlikle barışık olmak, değişime hızlı uyum sağlamak ve farklı ortamlarda kendini ifade edebilmek. Dikkat noktası: çok fazla seçenek arasında kalmak bazen seni köksüzleştirebilir. Neyin peşinde olduğunu bilmek, esnekliğini daha etkili kullanmana yardımcı olur.",
+    'S':"Güçlü yönün: öğrenmeyi sevmek, deneyimlerini anlam taşıyan bir bütüne dönüştürme kapasiten ve sürekli gelişme isteğin. Dikkat noktası: 'bir sonraki aşamaya geçmeden önce yeterince derinleşeyim' baskısı bazen seni yerinde saydırabilir. Zaten sahip olduğun birikimi de görünür kılmayı unutma.",
+    'U':"Güçlü yönün: sabır, tutarlılık ve uzun vadeli bakış açısı. Bir konuya hakkıyla hakim olmak için gereken çabayı göstermeye isteklisin. Dikkat noktası: değişen iş dünyasında uzmanlığını güncel tutmak ve zaman zaman çevrendeki yeniliklere açık olmak da önemli.",
+    'D':"Güçlü yönün: hedef odaklılık, kararlılık ve liderlik potansiyeli. Rekabetçi ortamlarda performansını koruyabiliyorsun. Dikkat noktası: yükselme odaklı bir kariyer anlayışı bazen işin içsel anlamını ikinci plana itebilir. 'Neden yükselmek istiyorum?' sorusuna dönem dönem dönmek seni daha tutarlı kılar."
+  }[baskinKKO.k];
 
+  // --- PARAGRAF 5: Kişiye özel öneri ---
   const oneriMap={
-    1:"Öneri: Esnekliğin bir güç — ama hangi değerlere geri döneceğini bilmek seni kaybolmaktan korur. Kariyer yolculuğunda pusula olacak 2-3 değerini netleştirmeye çalış.",
-    2:"Öneri: Birikimini fark et. Zaten sahip olduğun uzmanlığı görmezden gelerek hep bir sonrakini aramak, şu anki potansiyelini kullanmamak anlamına gelebilir.",
-    3:"Öneri: Uzmanlığını daha geniş bir kitleyle buluştur. Derinliğin var — şimdi bunu görünür kılmanın yollarını araştır.",
-    4:"Öneri: 'Neden yükselmek istiyorum?' sorusunun yanıtını zaman zaman gözden geçir. Motivasyonun netleştikçe doğru fırsatlara odaklanmak kolaylaşır."
-  }[baskinKKO.f];
+    'G-G':"Öneri: Özgürlüğün var — ama özgürlük en çok bir pusulayla birlikte işe yarar. Kariyer yolculuğunda referans alacağın 2-3 temel değerini netleştir; bu seni kaybolmaktan korur ve fırsatları daha isabetli değerlendirmeni sağlar.",
+    'G-S':"Öneri: Farklı alanlarda deneyim edinmek istiyorsun ama bu deneyimlerin bir anlam taşımasını da istiyorsun. Her yeni adımda 'bu deneyim beni nereye götürüyor?' sorusunu sor — bu sana hem esneklik hem yön sağlar.",
+    'G-U':"Öneri: Farklı alanlarda derin izler bırakmak güçlü bir motivasyon. Bunun için her alanda ne kadar zaman geçireceğini planlamak ve geçişlerini bilinçli yapmak kariyer tatminini artıracak.",
+    'G-D':"Öneri: Özgürlük ve yükselme arzunu birleştiren kariyer yolları arayabilirsin — girişimcilik, bağımsız danışmanlık veya esnek liderlik rolleri bu ikisini bir araya getirebilir.",
+    'S-G':"Öneri: Birikimini fark et. Her yeni deneyimde bir öncekinden ne taşıdığını düşün — bu bilinçli birikim sarmal büyümeni hızlandırır ve seni daha güçlü bir profesyonele dönüştürür.",
+    'S-S':"Öneri: Büyüme yolculuğun net. Şimdi odaklanman gereken şey bu büyümeyi başkalarına da görünür kılmak — yazdığın, konuştuğun veya paylaştığın her şey birikimini daha geniş bir kitleyle buluşturur.",
+    'S-U':"Öneri: Derinleşmek istediğin alanlarda gerçekten ustalaşmak için zaman ve sabır gerekiyor. Şu an nerede olduğunu ve nereye varmak istediğini somutlaştırmak bu yolculuğu daha anlamlı kılar.",
+    'S-D':"Öneri: Hem büyümek hem yükselmek istiyorsun — bu ikisini birleştiren 'büyüyen liderlik' rollerini araştır. Akademi, araştırma liderliği veya uzmanlık gerektiren üst pozisyonlar bu profil için biçilmiş kaftan.",
+    'U-G':"Öneri: Uzmanlığın değerli — ama bunu görünür kılmak da senin işin. Alanında yazmak, konuşmak veya mentorluk yapmak uzmanlığını hem derinleştirir hem yayar.",
+    'U-S':"Öneri: Zaman zaman yeni alanlara açılma isteğini küçümseme. Uzmanlığını farklı bağlamlarda uygulamak hem seni besler hem de alanına dışarıdan bakış açısı kazandırır.",
+    'U-U':"Öneri: Derinleşme yolun net. Şimdi odaklanabileceğin şey: alanındaki en güncel gelişmeleri takip etmek ve uzmanlığını farklı formatlarda paylaşmak — bu seni sadece iyi değil, referans alınan biri yapar.",
+    'U-D':"Öneri: Teknik liderlik rolleri tam sana göre — hem uzmanlığını kullanırsın hem de hiyerarşik olarak ilerlersin. Bu pozisyonları hedefleyerek kariyer planlamanı somutlaştırabilirsin.",
+    'D-G':"Öneri: Yükselme hedefin net — ama bu yolda esnekliğini de koru. Farklı alanlarda edindiğin deneyimler liderlik kapasiteni genişletir ve seni daha donanımlı bir yönetici yapar.",
+    'D-S':"Öneri: Hem yüksel hem büyü. Liderlik yolculuğunda farklı alanlarda deneyim edinmek seni daha çok yönlü bir lider yapar. Sadece dikey değil, aynı zamanda yatay büyümeye de yatırım yap.",
+    'D-U':"Öneri: 'Neden yükselmek istiyorum?' sorusunun yanıtına sahipsin — uzmanlığınla yükselme isteğin bu yanıtı güçlendiriyor. Şimdi odağın: doğru alanda, doğru pozisyonları hedeflemek.",
+    'D-D':"Öneri: Hedeflerin net ve motivasyonun güçlü. Şimdi odaklanabileceğin şey: bu yolculukta seni destekleyecek doğru mentorları ve çevreyi bulmak — yalnız yükselmek yerine birlikte büyümek daha sürdürülebilir."
+  };
+  const oneriKey=baskinKKO.k+'-'+baskinDriver.k;
+  const oneri=oneriMap[oneriKey]||oneriMap[baskinKKO.k+'-'+baskinKKO.k]||"Öneri: Kariyer anlayışını düzenli aralıklarla gözden geçirmek, değişen önceliklerini fark etmeni kolaylaştırır. Bugün doğru olan yarın farklılaşabilir — bu esneklik güç.";
 
-  return `${kkoDesc}\n\n${uyum}\n\n${gucluMap}\n\n${oneriMap}`;
+  return `${p1}\n\n${p2}\n\n${p3 ? p3+'\n\n' : ''}${gucluMap}\n\n${oneri}`;
 }
 
 async function saveData(kko,fc,baskinKKO,baskinDriver,yorum){
