@@ -201,8 +201,14 @@ function renderTable(){
 }
 
 function tr(s){
-  if(!s)return'';
+  if(!s) return '';
   return String(s)
+    .replace(/\u011f/g,'g').replace(/\u011e/g,'G')  // ğ Ğ
+    .replace(/\u00fc/g,'u').replace(/\u00dc/g,'U')  // ü Ü
+    .replace(/\u015f/g,'s').replace(/\u015e/g,'S')  // ş Ş
+    .replace(/\u0131/g,'i').replace(/\u0130/g,'I')  // ı İ
+    .replace(/\u00f6/g,'o').replace(/\u00d6/g,'O')  // ö Ö
+    .replace(/\u00e7/g,'c').replace(/\u00c7/g,'C')  // ç Ç
     .replace(/ğ/g,'g').replace(/Ğ/g,'G')
     .replace(/ü/g,'u').replace(/Ü/g,'U')
     .replace(/ş/g,'s').replace(/Ş/g,'S')
@@ -357,24 +363,67 @@ function downloadPDF(r){
 
   // Yorum
   if(r.yorum && r.yorum.trim()){
+    // Yeni sayfaya geç eğer yeterli alan yoksa
+    if(y > 200){ doc.addPage(); y = M; }
+
     doc.setTextColor(120,120,140);
     doc.setFontSize(8);
     doc.setFont('helvetica','bold');
-    doc.text(tr('KİŞİSEL KARİYER ANALİZİ'), M, y);
+    doc.text(tr('KISISEL KARIYER ANALIZI'), M, y);
     y+=5;
-    const yorumLines = doc.splitTextToSize(tr(r.yorum), CW-10);
-    const yorumH = yorumLines.length*4.8+10;
-    doc.setFillColor(252,247,238);
-    doc.setDrawColor(245,166,35,80);
-    doc.setLineWidth(0.2);
-    doc.roundedRect(M, y, CW, yorumH, 3, 3, 'FD');
-    doc.setFillColor(245,166,35);
-    doc.rect(M, y, 3, yorumH, 'F');
-    doc.setTextColor(60,50,20);
+
     doc.setFont('helvetica','normal');
     doc.setFontSize(8.5);
-    doc.text(yorumLines, M+7, y+7);
-    y += yorumH+6;
+    doc.setTextColor(60,50,20);
+
+    const maxW = CW - 14;
+    const yorumLines = doc.splitTextToSize(tr(r.yorum), maxW);
+    const lineH = 4.8;
+    const pageH = 274; // footer üstü
+
+    // Satır satır yaz, sayfa dolunca yeni sayfa aç
+    let boxStartY = y;
+    let boxLines = [];
+
+    yorumLines.forEach(line => {
+      if(y + lineH > pageH - 10){
+        // Mevcut kutuyu çiz
+        const boxH = boxLines.length * lineH + 10;
+        doc.setFillColor(252,247,238);
+        doc.setDrawColor(245,166,35,80);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(M, boxStartY, CW, boxH, 3, 3, 'FD');
+        doc.setFillColor(245,166,35);
+        doc.rect(M, boxStartY, 3, boxH, 'F');
+        doc.setTextColor(60,50,20);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(8.5);
+        doc.text(boxLines, M+7, boxStartY+7);
+
+        doc.addPage();
+        y = M;
+        boxStartY = y;
+        boxLines = [];
+      }
+      boxLines.push(line);
+      y += lineH;
+    });
+
+    // Kalan satırları yaz
+    if(boxLines.length > 0){
+      const boxH = boxLines.length * lineH + 10;
+      doc.setFillColor(252,247,238);
+      doc.setDrawColor(245,166,35,80);
+      doc.setLineWidth(0.2);
+      doc.roundedRect(M, boxStartY, CW, boxH, 3, 3, 'FD');
+      doc.setFillColor(245,166,35);
+      doc.rect(M, boxStartY, 3, boxH, 'F');
+      doc.setTextColor(60,50,20);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8.5);
+      doc.text(boxLines, M+7, boxStartY+7);
+      y = boxStartY + boxH + 6;
+    }
   }
 
   // Footer
