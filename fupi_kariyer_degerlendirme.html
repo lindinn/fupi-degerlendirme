@@ -215,10 +215,10 @@ const FC_ALL=[
 ];
 
 const KKO_NAMES=[
-  {f:1,name:"Değişim ve esneklik",color:"#EF9F27"},
-  {f:2,name:"Ustalık ve uzmanlık",color:"#7F77DD"},
-  {f:3,name:"Uzman kalıbı",color:"#1D9E75"},
-  {f:4,name:"Doğrusal kariyer",color:"#378ADD"}
+  {f:1,name:"Geçişken",color:"#EF9F27"},
+  {f:2,name:"Sarmal",color:"#7F77DD"},
+  {f:3,name:"Uzman",color:"#1D9E75"},
+  {f:4,name:"Doğrusal",color:"#378ADD"}
 ];
 
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -352,9 +352,13 @@ function showResults(){
   const kko=calcKKO();
   const fc=calcFC();
   const fcTotal=Object.values(fc).reduce((a,b)=>a+b,0);
-  const fcDefs=[{k:'D',l:'Doğrusal',c:'#378ADD'},{k:'S',l:'Sarmal',c:'#7F77DD'},{k:'U',l:'Uzman',c:'#1D9E75'},{k:'G',l:'Geçişken',c:'#EF9F27'}];
+  const fcDefs=[{k:'G',l:'Geçişken',c:'#EF9F27'},{k:'S',l:'Sarmal',c:'#7F77DD'},{k:'U',l:'Uzman',c:'#1D9E75'},{k:'D',l:'Doğrusal',c:'#378ADD'}];
 
-  document.getElementById('kko-bars').innerHTML=kko.map(s=>`<div class="bar-row"><div class="bar-lbl">${s.name}</div><div class="bar-track"><div class="bar-fill" style="width:${((s.avg/5)*100).toFixed(0)}%;background:${s.color}"></div></div><div class="bar-num">${s.avg.toFixed(1)}</div></div>`).join('');
+  document.getElementById('kko-bars').innerHTML=kko.map(s=>{
+    const pct=((s.avg/5)*100).toFixed(0);
+    const lvl=s.avg<2.5?{lbl:'Düşük',tc:'#e07b7b'}:s.avg<3.5?{lbl:'Orta',tc:'#aaa'}:{lbl:'Yüksek',tc:s.color};
+    return `<div class="bar-row"><div class="bar-lbl">${s.name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${s.color}"></div></div><div class="bar-num" style="color:${lvl.tc}">${s.avg.toFixed(1)}</div><div style="font-size:10px;color:${lvl.tc};width:42px;flex-shrink:0">${lvl.lbl}</div></div>`;
+  }).join('');
   document.getElementById('fc-bars').innerHTML=fcDefs.map(d=>`<div class="bar-row"><div class="bar-lbl">${d.l}</div><div class="bar-track"><div class="bar-fill" style="width:${fcTotal>0?((fc[d.k]/fcTotal)*100).toFixed(0):0}%;background:${d.c}"></div></div><div class="bar-num">${fc[d.k]} / ${fcTotal}</div></div>`).join('');
 
   const baskinKKO=kko.reduce((a,b)=>a.avg>b.avg?a:b);
@@ -374,35 +378,35 @@ function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
 
   const kkoDesc={
     1:degisim>=4
-      ?"Kariyer anlayışın güçlü bir değişim ve esneklik eğilimi taşıyor. Tek bir yolda kalmak yerine farklı deneyimler arayışında olman, seni hem geçişken hem de sarmal kariyer kalıplarına yaklaştırıyor. Bu bir güçsüzlük değil — aksine değişen iş dünyasında büyük bir avantaj."
-      :"Değişim ve esnekliğe orta düzeyde açıksın. Tamamen sabit bir çizgide kalmayı tercih etmesen de ani sıçramalardan ziyade kontrollü bir esnekliği benimsiyorsun.",
+      ?"Geçişken kariyer eğilimin güçlü biçimde öne çıkıyor. Tek bir yolda kalmak yerine farklı deneyimler arayışında olman seni esnek ve çok yönlü bir kariyer profiline yaklaştırıyor. Bu bir güçsüzlük değil — aksine değişen iş dünyasında büyük bir avantaj."
+      :"Geçişken eğilime orta düzeyde sahipsin. Tamamen sabit bir çizgide kalmayı tercih etmesen de ani sıçramalardan ziyade kontrollü bir esnekliği benimsiyorsun.",
     2:uzmanlik>=4
-      ?"Ustalık ve derinleşme güdüsün belirgin biçimde öne çıkıyor. İşini iyi yapmak, alanında tanınmak ve biriktirdiğin deneyimleri anlam taşıyan bir bütüne dönüştürmek senin için kariyer tatmininin merkezinde yer alıyor."
-      :"Mesleki derinleşmeyi önemsiyorsun ancak bu tek motivasyon kaynağın değil. Farklı ilgi alanları ve çeşitlilik de seni tatmin ediyor.",
+      ?"Sarmal kariyer güdüsün belirgin biçimde öne çıkıyor. İşini iyi yapmak, alanında tanınmak ve biriktirdiğin deneyimleri anlam taşıyan bir bütüne dönüştürmek senin için kariyer tatmininin merkezinde yer alıyor."
+      :"Sarmal eğilime orta düzeyde sahipsin. Mesleki derinleşmeyi önemsiyorsun ancak bu tek motivasyon kaynağın değil.",
     3:uzman>=4
-      ?"Kariyer anlayışında istikrar ve uzmanlaşma ön planda. Aynı alanda uzun yıllar geçirerek gerçek bir otorite olmak sana hem güven hem de tatmin veriyor. Öngörülebilir bir yol, senin için kaos değil — sağlam bir zemin."
-      :"Belirli bir alanda derinleşmek istesen de tam anlamıyla 'tek yollu' bir kariyer anlayışına sahip değilsin. İstikrar önemli, ama tek ölçütün bu değil.",
+      ?"Uzman kariyer kalıbı sende belirgin biçimde öne çıkıyor. Aynı alanda uzun yıllar geçirerek gerçek bir otorite olmak sana hem güven hem de tatmin veriyor. Öngörülebilir bir yol, senin için kaos değil — sağlam bir zemin."
+      :"Uzman eğilime orta düzeyde sahipsin. Belirli bir alanda derinleşmek istesen de tam anlamıyla 'tek yollu' bir kariyer anlayışına sahip değilsin.",
     4:dogrusal>=4
-      ?"Hiyerarşik yükselme ve statü kazanımı seni güçlü biçimde motive ediyor. Sorumluluk almak, unvan ve yetki elde etmek — bunlar sana kariyer başarısının somut göstergeleri olarak görünüyor."
-      :"Kariyer başarısını salt unvan veya statüyle ölçmüyorsun. Yükselmek güzel, ama tek hedefin bu değil."
+      ?"Doğrusal kariyer eğilimin güçlü. Hiyerarşik yükselme ve statü kazanımı seni motive ediyor. Sorumluluk almak, unvan ve yetki elde etmek — bunlar sana kariyer başarısının somut göstergeleri olarak görünüyor."
+      :"Doğrusal eğilime orta düzeyde sahipsin. Kariyer başarısını salt unvan veya statüyle ölçmüyorsun — yükselmek güzel, ama tek hedefin bu değil."
   }[baskinKKO.f];
 
   const uyumMap={
-    "1-S":"İki ölçek de birbiriyle tutarlı bir tablo çiziyor: hem KKÖ hem kariyer tercihi sorularında sarmal bir eğilim belirgin. Periyodik büyüme, yeni alanlara açılma ve birikimli gelişim senin için kariyer yolculuğunun özü.",
-    "1-G":"Değişim ve esneklik eğilimin güçlü, tercih sorularında ise geçişken kalıp öne çıkıyor. İkisi benzer bir özgürlük arayışını yansıtsa da aralarında ince bir fark var: biri birikimli büyümeyi, diğeri anlık fırsatları ve bağımsızlığı ön plana koyuyor. Bu çift yönlü baskı, kariyer kararlarında bazen kararsızlık yaratabilir — farkında olmak önemli.",
-    "1-D":"Esneklik ve değişim arzun güçlü olsa da tercih sorularında yükselme odaklı bir eğilim görünüyor. Bu çelişkili gibi görünse de çok yönlü büyürken aynı zamanda yukarı tırmanmak isteğinin yansıması olabilir.",
-    "1-U":"Değişim arayışın belirgin, ancak tercih sorularında uzman kalıbı öne çıkıyor. Belki derin bir uzmanlık edinmek istiyorsun — ama bunu tek bir alanda değil, farklı alanlarda ayrı ayrı deneyimleyerek.",
-    "2-S":"Ustalık ve uzmanlık eğilimin sarmal kariyer tercihleriyle güzel bir uyum içinde. Hem derinleşmek hem de periyodik olarak yenilenip farklı alanlara açılmak istiyorsun. Bu iki şey birbiriyle çelişmez — birinde biriktirdiğini ötekine taşıyabilen bir kariyer anlayışı bu.",
-    "2-U":"Mesleki ustalık eğilimin ve uzman kalıp tercihin birbirini destekliyor. Aynı alanda derinleşerek tanınan, değer gören ve işini gerçekten iyi yapan biri olmak istiyorsun. İki ölçek de tutarlı bir tablo çiziyor.",
-    "2-D":"Ustalık güdün güçlü, ama tercih sorularında yükselme eğilimi de belirgin. 'Alanında en iyi' olmak ile 'hiyerarşide en üst' olmak arasında zaman zaman tercih yapmak durumunda kalabilirsin.",
-    "2-G":"Mesleki derinleşme isteğin ve geçişken kariyer tercihlerin ilginç bir gerilim yaratıyor. Hem uzmanlaşmak hem de özgür hareket etmek istiyorsun — bu enerjiyi doğru kanalize edersen çok güçlü bir kariyer profili ortaya çıkabilir.",
-    "3-U":"Hem KKÖ hem tercih soruları uzman kalıbında örtüşüyor. Tek bir alanda derinleşmek, istikrar ve öngörülebilirlik senin için kariyer güvencesinin temeli. Bu tutarlılık, kariyer kararlarında daha az çelişki yaşadığına işaret ediyor.",
-    "3-D":"KKÖ'de uzman kalıbı ön planda olsa da tercih sorularında yükselme eğilimi güçlü. Bu ilginç bir kombinasyon: belirli bir alanda derinleşmek istiyorsun, ama aynı zamanda o alanın en tepesine ulaşmak da önemli senin için.",
-    "3-S":"İstikrar ve derinleşme eğilimin güçlü olsa da tercih sorularında sarmal büyüme isteği görünüyor. Belki de uzman kalmak istiyorsun ama yeni deneyimlere de zaman zaman kapı aralamak istiyor içindeki bir ses.",
-    "3-G":"KKÖ'de istikrar ve uzmanlaşma ön planda, ancak tercih sorularında geçişken eğilim öne çıkıyor. Bu çelişkili görünse de ikisi arasındaki gerilim, kariyer kararlarında karmaşıklık yaratabiliyor.",
-    "4-D":"Hem KKÖ hem tercih sorularında doğrusal kariyer kalıbı çok net. Yükselme, sorumluluk ve statü senin için kariyer başarısının merkezinde. İki ölçek de birbiriyle tutarlı bir portre çiziyor.",
-    "4-S":"KKÖ'de doğrusal yükselme eğilimin güçlü, tercih sorularında ise sarmal kalıp öne çıkıyor. Hangisi önce gelir sorusunu zaman zaman kendine sormaya değer: yükselme mi, yoksa çok yönlü büyüme mi?",
-    "4-U":"Yükselme odaklı bir eğilimin yanı sıra uzman kalıbı da güçlü. Belki de 'alanının en üstüne çıkmak' senin için ikisini aynı anda gerçekleştirmenin yolu.",
+    "1-S":"İki ölçek birbiriyle tam uyumlu değil: KKÖ'de geçişken eğilim baskın, ancak tercih sorularında sarmal kalıp öne çıkıyor. Belki özgürce hareket etmek isterken aynı zamanda bu deneyimlerin birikimli bir anlam taşımasını da istiyorsun.",
+    "1-G":"İki ölçek de tutarlı biçimde geçişken eğilimi işaret ediyor. Özgürlük, çeşitlilik ve anlık fırsatlara açıklık senin için kariyer yolculuğunun merkezinde. Bu tutarlılık, kariyer kararlarında içgüdülerini güvenle takip edebileceğini gösteriyor.",
+    "1-D":"Geçişken eğilimin güçlü olsa da tercih sorularında yükselme odaklı bir eğilim görünüyor. Farklı deneyimler ararken aynı zamanda yukarı tırmanmak da istiyorsun — bu enerjiyi dengede tutmak kariyer yolculuğunda belirleyici olabilir.",
+    "1-U":"Geçişken eğilimin belirgin, ancak tercih sorularında uzman kalıbı öne çıkıyor. Belki derin bir uzmanlık edinmek istiyorsun — ama bunu tek bir alanda değil, farklı alanlarda ayrı ayrı deneyimleyerek.",
+    "2-S":"İki ölçek tutarlı biçimde sarmal eğilimi işaret ediyor. Hem derinleşmek hem de periyodik olarak yenilenip farklı alanlara açılmak istiyorsun. Birinde biriktirdiğini ötekine taşıyabilen bir kariyer anlayışı bu — iki ölçek de bunu doğruluyor.",
+    "2-U":"Sarmal eğilimin güçlü olsa da tercih sorularında uzman kalıbı öne çıkıyor. Mesleki derinleşme ve birikimli büyüme arzun, belirli bir alanda uzun vadeli ustalaşma isteğiyle buluşuyor.",
+    "2-D":"Sarmal güdün güçlü, ama tercih sorularında yükselme eğilimi de belirgin. 'Alanında en iyi' olmak ile 'hiyerarşide en üst' olmak arasında zaman zaman tercih yapmak durumunda kalabilirsin.",
+    "2-G":"Sarmal eğilimin ve geçişken kariyer tercihlerin ilginç bir gerilim yaratıyor. Hem derinleşmek hem de özgür hareket etmek istiyorsun — bu enerjiyi doğru kanalize edersen çok güçlü bir kariyer profili ortaya çıkabilir.",
+    "3-U":"İki ölçek de tutarlı biçimde uzman kalıbını işaret ediyor. Tek bir alanda derinleşmek, istikrar ve öngörülebilirlik senin için kariyer güvencesinin temeli. Bu tutarlılık, kariyer kararlarında daha az çelişki yaşadığına işaret ediyor.",
+    "3-D":"KKÖ'de uzman eğilimi baskın olsa da tercih sorularında yükselme eğilimi güçlü. Belirli bir alanda derinleşmek istiyorsun, ama aynı zamanda o alanın en tepesine ulaşmak da önemli senin için.",
+    "3-S":"Uzman eğilimin güçlü olsa da tercih sorularında sarmal büyüme isteği görünüyor. Uzman kalmak istiyorsun — ama yeni deneyimlere zaman zaman kapı aralamak da istiyor içindeki bir ses.",
+    "3-G":"KKÖ'de uzman eğilimi baskın, ancak tercih sorularında geçişken kalıp öne çıkıyor. İstikrar arzun ve özgürlük isteğin arasındaki bu gerilim, kariyer kararlarında zaman zaman karmaşıklık yaratabilir.",
+    "4-D":"İki ölçek de tutarlı biçimde doğrusal kariyer kalıbını işaret ediyor. Yükselme, sorumluluk ve statü senin için kariyer başarısının merkezinde. Bu tutarlılık, kariyer hedeflerinde net bir yönün olduğunu gösteriyor.",
+    "4-S":"KKÖ'de doğrusal eğilim baskın, tercih sorularında ise sarmal kalıp öne çıkıyor. Yükselme mi, yoksa çok yönlü büyüme mi? Bu soruyu zaman zaman kendine sormaya değer.",
+    "4-U":"Yükselme odaklı eğilinin yanı sıra uzman kalıbı da güçlü. 'Alanının en üstüne çıkmak' senin için belki de ikisini aynı anda gerçekleştirmenin yolu.",
     "4-G":"Yükselme isteği ve geçişken özgürlük arayışı bir arada. Bu iki güdü zaman zaman birbirini dengeleyebilir — ya da çatışabilir. Kariyer kararlarında hangisinin daha belirleyici olduğunu fark etmek önemli."
   };
 
