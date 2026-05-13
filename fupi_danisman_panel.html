@@ -231,27 +231,27 @@ function downloadPDF(r){
   doc.setTextColor(245,166,35);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text(tr('FUPi KARİYER TASARIMI — fupi.com.tr'), M, 16);
+  doc.text('FUPi KARIYER TASARIMI — fupi.com.tr', M, 16);
   doc.setTextColor(255,255,255);
   doc.setFontSize(18);
-  doc.text(tr('Kariyer Profil Raporu'), M, 29);
+  doc.text('Kariyer Profil Raporu', M, 29);
   doc.setTextColor(150,150,170);
   doc.setFontSize(9);
   doc.setFont('helvetica','normal');
-  doc.text(tr('Kariyer Kalıpları Değerlendirme Sistemi'), M, 38);
+  doc.text('Kariyer Kaliplari Degerlendirme Sistemi', M, 38);
   doc.text(tr(r.tarih)||'', W-M, 38, {align:'right'});
   y = 60;
 
-  // Öğrenci kutusu
-  doc.setFillColor(245,166,35,25);
+  // İsim kutusu
+  doc.setFillColor(40,35,15);
   doc.setDrawColor(245,166,35,180);
   doc.setLineWidth(0.4);
   doc.roundedRect(M, y, CW, 16, 3, 3, 'FD');
-  doc.setTextColor(120,90,0);
+  doc.setTextColor(180,130,30);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text(tr('ÖĞRENCİ'), M+5, y+6);
-  doc.setTextColor(30,20,0);
+  doc.text('ISIM', M+5, y+6);
+  doc.setTextColor(255,255,255);
   doc.setFontSize(13);
   doc.text(tr(r.ad_soyad)||'—', M+5, y+13);
   y += 24;
@@ -260,7 +260,7 @@ function downloadPDF(r){
   doc.setTextColor(120,120,140);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text(tr('BASKИН KARİYER PROFİLİ'), M, y);
+  doc.text('BASKIN KARIYER PROFILI', M, y);
   y += 5;
 
   const chipColors = {
@@ -276,7 +276,7 @@ function downloadPDF(r){
   doc.roundedRect(M, y, CW/2-5, 12, 2, 2, 'FD');
   doc.setTextColor(kkoColor[0]*.6, kkoColor[1]*.6, kkoColor[2]*.6);
   doc.setFontSize(8);
-  doc.text(tr('KKÖ'), M+4, y+5);
+  doc.text('KKO', M+4, y+5);
   doc.setFontSize(11);
   doc.setFont('helvetica','bold');
   doc.text(tr(r.baskin_kko)||'—', M+4, y+10.5);
@@ -287,7 +287,7 @@ function downloadPDF(r){
   doc.setTextColor(drColor[0]*.6, drColor[1]*.6, drColor[2]*.6);
   doc.setFontSize(8);
   doc.setFont('helvetica','normal');
-  doc.text(tr('Driver'), M+CW/2+9, y+5);
+  doc.text('Driver', M+CW/2+9, y+5);
   doc.setFontSize(11);
   doc.setFont('helvetica','bold');
   doc.text(tr(r.baskin_driver)||'—', M+CW/2+9, y+10.5);
@@ -297,7 +297,7 @@ function downloadPDF(r){
   doc.setTextColor(120,120,140);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text(tr('KARİYER KALIPLARI ÖLÇEĞİ (KKÖ) — 1-5 Likert ortalaması'), M, y);
+  doc.text('KARIYER KALIPLARI OLCEGI (KKO) — 1-5 Likert ortalamasi', M, y);
   y += 5;
 
   const kkoItems=[
@@ -331,7 +331,7 @@ function downloadPDF(r){
   doc.setTextColor(120,120,140);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text(tr('ZORUNLU SEÇİM — DRIVER KARİYER TİPLERİ'), M, y);
+  doc.text('ZORUNLU SECIM — DRIVER KARIYER TIPLERI', M, y);
   y+=5;
 
   const zsToplam = (parseInt(r.zs_gecisken||0)+parseInt(r.zs_sarmal||0)+parseInt(r.zs_uzman||0)+parseInt(r.zs_dogrusal||0)) || 24;
@@ -369,7 +369,7 @@ function downloadPDF(r){
     doc.setTextColor(120,120,140);
     doc.setFontSize(8);
     doc.setFont('helvetica','bold');
-    doc.text(tr('KISISEL KARIYER ANALIZI'), M, y);
+    doc.text('KISISEL KARIYER ANALIZI', M, y);
     y+=5;
 
     doc.setFont('helvetica','normal');
@@ -434,10 +434,10 @@ function downloadPDF(r){
   doc.setTextColor(100,100,120);
   doc.setFontSize(8);
   doc.setFont('helvetica','normal');
-  doc.text(tr('FUPi Kariyer Tasarımı — fupi.com.tr'), M, 283);
-  doc.text(tr('Bu rapor FUPi Kariyer Kalıpları Değerlendirme Sistemi tarafından otomatik oluşturulmuştur.'), M, 289);
+  doc.text('FUPi Kariyer Tasarimi — fupi.com.tr', M, 283);
+  doc.text('Bu rapor FUPi Kariyer Kaliplari Degerlendirme Sistemi tarafindan olusturulmustur.', M, 289);
   const bugun = new Date().toLocaleDateString('tr-TR');
-  doc.text(tr('Rapor tarihi: ')+bugun, W-M, 289, {align:'right'});
+  doc.text('Rapor tarihi: '+bugun, W-M, 289, {align:'right'});
 
   const ad = (r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_ğüşıöçĞÜŞİÖÇ]/g,'');
   doc.save('FUPi_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf');
