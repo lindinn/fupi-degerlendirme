@@ -200,6 +200,17 @@ function renderTable(){
   </table>`;
 }
 
+function tr(s){
+  if(!s)return'';
+  return String(s)
+    .replace(/ğ/g,'g').replace(/Ğ/g,'G')
+    .replace(/ü/g,'u').replace(/Ü/g,'U')
+    .replace(/ş/g,'s').replace(/Ş/g,'S')
+    .replace(/ı/g,'i').replace(/İ/g,'I')
+    .replace(/ö/g,'o').replace(/Ö/g,'O')
+    .replace(/ç/g,'c').replace(/Ç/g,'C');
+}
+
 function downloadPDF(r){
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
@@ -214,15 +225,15 @@ function downloadPDF(r){
   doc.setTextColor(245,166,35);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text('FUPi KARİYER TASARIMI — fupi.com.tr', M, 16);
+  doc.text(tr('FUPi KARİYER TASARIMI — fupi.com.tr'), M, 16);
   doc.setTextColor(255,255,255);
   doc.setFontSize(18);
-  doc.text('Kariyer Profil Raporu', M, 29);
+  doc.text(tr('Kariyer Profil Raporu'), M, 29);
   doc.setTextColor(150,150,170);
   doc.setFontSize(9);
   doc.setFont('helvetica','normal');
-  doc.text('Kariyer Kalıpları Değerlendirme Sistemi', M, 38);
-  doc.text(r.tarih||'', W-M, 38, {align:'right'});
+  doc.text(tr('Kariyer Kalıpları Değerlendirme Sistemi'), M, 38);
+  doc.text(tr(r.tarih)||'', W-M, 38, {align:'right'});
   y = 60;
 
   // Öğrenci kutusu
@@ -233,17 +244,17 @@ function downloadPDF(r){
   doc.setTextColor(120,90,0);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text('ÖĞRENCİ', M+5, y+6);
+  doc.text(tr('ÖĞRENCİ'), M+5, y+6);
   doc.setTextColor(30,20,0);
   doc.setFontSize(13);
-  doc.text(r.ad_soyad||'—', M+5, y+13);
+  doc.text(tr(r.ad_soyad)||'—', M+5, y+13);
   y += 24;
 
   // Profil özeti
   doc.setTextColor(120,120,140);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text('BASKИН KARİYER PROFİLİ', M, y);
+  doc.text(tr('BASKИН KARİYER PROFİLİ'), M, y);
   y += 5;
 
   const chipColors = {
@@ -259,10 +270,10 @@ function downloadPDF(r){
   doc.roundedRect(M, y, CW/2-5, 12, 2, 2, 'FD');
   doc.setTextColor(kkoColor[0]*.6, kkoColor[1]*.6, kkoColor[2]*.6);
   doc.setFontSize(8);
-  doc.text('KKÖ', M+4, y+5);
+  doc.text(tr('KKÖ'), M+4, y+5);
   doc.setFontSize(11);
   doc.setFont('helvetica','bold');
-  doc.text(r.baskin_kko||'—', M+4, y+10.5);
+  doc.text(tr(r.baskin_kko)||'—', M+4, y+10.5);
 
   doc.setFillColor(drColor[0], drColor[1], drColor[2], 20);
   doc.setDrawColor(drColor[0], drColor[1], drColor[2], 120);
@@ -270,17 +281,17 @@ function downloadPDF(r){
   doc.setTextColor(drColor[0]*.6, drColor[1]*.6, drColor[2]*.6);
   doc.setFontSize(8);
   doc.setFont('helvetica','normal');
-  doc.text('Driver', M+CW/2+9, y+5);
+  doc.text(tr('Driver'), M+CW/2+9, y+5);
   doc.setFontSize(11);
   doc.setFont('helvetica','bold');
-  doc.text(r.baskin_driver||'—', M+CW/2+9, y+10.5);
+  doc.text(tr(r.baskin_driver)||'—', M+CW/2+9, y+10.5);
   y += 20;
 
   // KKÖ Puanları
   doc.setTextColor(120,120,140);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text('KARİYER KALIPLARI ÖLÇEĞİ (KKÖ) — 1-5 Likert ortalaması', M, y);
+  doc.text(tr('KARİYER KALIPLARI ÖLÇEĞİ (KKÖ) — 1-5 Likert ortalaması'), M, y);
   y += 5;
 
   const kkoItems=[
@@ -294,7 +305,7 @@ function downloadPDF(r){
     doc.setTextColor(60,60,80);
     doc.setFontSize(9);
     doc.setFont('helvetica','normal');
-    doc.text(item.lbl, M, y+4.5);
+    doc.text(tr(item.lbl), M, y+4.5);
     doc.setFillColor(235,235,242);
     doc.roundedRect(M+32, y, CW-55, 5, 1, 1, 'F');
     const pct = Math.min(Math.max(item.val/5,0),1);
@@ -302,7 +313,7 @@ function downloadPDF(r){
       doc.setFillColor(...item.color);
       doc.roundedRect(M+32, y, (CW-55)*pct, 5, 1, 1, 'F');
     }
-    const lvl = item.val<2.5?'Düşük':item.val<3.5?'Orta':'Yüksek';
+    const lvl = item.val<2.5?'Dusuk':item.val<3.5?'Orta':'Yuksek';
     doc.setTextColor(...item.color);
     doc.setFont('helvetica','bold');
     doc.text(item.val.toFixed(1)+'/5  '+lvl, M+32+(CW-55)+3, y+4.5);
@@ -314,7 +325,7 @@ function downloadPDF(r){
   doc.setTextColor(120,120,140);
   doc.setFontSize(8);
   doc.setFont('helvetica','bold');
-  doc.text('ZORUNLU SEÇİM — DRIVER KARİYER TİPLERİ', M, y);
+  doc.text(tr('ZORUNLU SEÇİM — DRIVER KARİYER TİPLERİ'), M, y);
   y+=5;
 
   const zsToplam = (parseInt(r.zs_gecisken||0)+parseInt(r.zs_sarmal||0)+parseInt(r.zs_uzman||0)+parseInt(r.zs_dogrusal||0)) || 24;
@@ -329,7 +340,7 @@ function downloadPDF(r){
     doc.setTextColor(60,60,80);
     doc.setFontSize(9);
     doc.setFont('helvetica','normal');
-    doc.text(item.lbl, M, y+4.5);
+    doc.text(tr(item.lbl), M, y+4.5);
     doc.setFillColor(235,235,242);
     doc.roundedRect(M+32, y, CW-55, 5, 1, 1, 'F');
     const pct = item.val/zsToplam;
@@ -349,9 +360,9 @@ function downloadPDF(r){
     doc.setTextColor(120,120,140);
     doc.setFontSize(8);
     doc.setFont('helvetica','bold');
-    doc.text('KİŞİSEL KARİYER ANALİZİ', M, y);
+    doc.text(tr('KİŞİSEL KARİYER ANALİZİ'), M, y);
     y+=5;
-    const yorumLines = doc.splitTextToSize(r.yorum, CW-10);
+    const yorumLines = doc.splitTextToSize(tr(r.yorum), CW-10);
     const yorumH = yorumLines.length*4.8+10;
     doc.setFillColor(252,247,238);
     doc.setDrawColor(245,166,35,80);
@@ -374,10 +385,10 @@ function downloadPDF(r){
   doc.setTextColor(100,100,120);
   doc.setFontSize(8);
   doc.setFont('helvetica','normal');
-  doc.text('FUPi Kariyer Tasarımı — fupi.com.tr', M, 283);
-  doc.text('Bu rapor FUPi Kariyer Kalıpları Değerlendirme Sistemi tarafından otomatik oluşturulmuştur.', M, 289);
+  doc.text(tr('FUPi Kariyer Tasarımı — fupi.com.tr'), M, 283);
+  doc.text(tr('Bu rapor FUPi Kariyer Kalıpları Değerlendirme Sistemi tarafından otomatik oluşturulmuştur.'), M, 289);
   const bugun = new Date().toLocaleDateString('tr-TR');
-  doc.text('Rapor tarihi: '+bugun, W-M, 289, {align:'right'});
+  doc.text(tr('Rapor tarihi: ')+bugun, W-M, 289, {align:'right'});
 
   const ad = (r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_ğüşıöçĞÜŞİÖÇ]/g,'');
   doc.save('FUPi_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf');

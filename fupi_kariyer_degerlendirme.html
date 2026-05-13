@@ -434,6 +434,8 @@ async function saveData(kko,fc,baskinKKO,baskinDriver,yorum){
   note.textContent="Veriler kaydediliyor...";
   try{
     const ad=document.getElementById('ad-soyad').value.trim();
+
+    // 1. Adım: Puanları kaydet, satır numarasını al
     const params=new URLSearchParams({
       ad_soyad:ad,
       kko_degisim:kko.find(k=>k.f===1).avg.toFixed(2),
@@ -441,10 +443,21 @@ async function saveData(kko,fc,baskinKKO,baskinDriver,yorum){
       kko_uzman:kko.find(k=>k.f===3).avg.toFixed(2),
       kko_dogrusal:kko.find(k=>k.f===4).avg.toFixed(2),
       zs_dogrusal:fc.D,zs_sarmal:fc.S,zs_uzman:fc.U,zs_gecisken:fc.G,
-      baskin_kko:baskinKKO,baskin_driver:baskinDriver,
-      yorum:yorum
+      baskin_kko:baskinKKO,baskin_driver:baskinDriver
     });
-    await fetch(WEBHOOK+"?"+params.toString(),{method:"GET",mode:"no-cors"});
+    const res=await fetch(WEBHOOK+"?"+params.toString(),{method:"GET"});
+    const rowNum=await res.text();
+
+    // 2. Adım: Yorumu ayrı istek ile kaydet
+    if(rowNum && !isNaN(parseInt(rowNum))){
+      const yorumParams=new URLSearchParams({
+        action:"yorum",
+        row:rowNum.trim(),
+        yorum:yorum
+      });
+      await fetch(WEBHOOK+"?"+yorumParams.toString(),{method:"GET",mode:"no-cors"});
+    }
+
     note.textContent="✓ Yanıtların kaydedildi.";
     setTimeout(()=>note.textContent="",4000);
   } catch(e){note.textContent="";}
