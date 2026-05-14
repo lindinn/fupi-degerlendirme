@@ -324,11 +324,8 @@ async function downloadPDF(r) {
   }
 
   function stenEtiketPDF(sten) {
-    if(sten <= 2) return 'Cok dusuk';
-    if(sten <= 4) return 'Dusuk';
-    if(sten <= 6) return 'Ortalama';
-    if(sten <= 8) return 'Yuksek';
-    return 'Cok yuksek';
+    const e={1:'Hic Uygun Degil',2:'Uygun Degil',3:'Uygun Degil',4:'Biraz Uygun',5:'Uygun',6:'Uygun',7:'Oldukca Uygun',8:'Cok Uygun',9:'Cok Uygun',10:'Tamamen Uygun'};
+    return e[sten]||'';
   }
 
   const kkoItems = [

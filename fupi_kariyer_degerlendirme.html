@@ -392,11 +392,8 @@ function hamToSten(ham,boyut){
 }
 
 function stenEtiket(sten){
-  if(sten<=2) return {lbl:'Çok düşük',color:'#e07b7b'};
-  if(sten<=4) return {lbl:'Düşük',color:'#EF9F27'};
-  if(sten<=6) return {lbl:'Ortalama',color:'#888'};
-  if(sten<=8) return {lbl:'Yüksek',color:'#1D9E75'};
-  return {lbl:'Çok yüksek',color:'#7F77DD'};
+  const e={1:{lbl:'Hiç Uygun Değil',color:'#e07b7b'},2:{lbl:'Uygun Değil',color:'#e07b7b'},3:{lbl:'Uygun Değil',color:'#EF9F27'},4:{lbl:'Biraz Uygun',color:'#EF9F27'},5:{lbl:'Uygun',color:'#888'},6:{lbl:'Uygun',color:'#888'},7:{lbl:'Oldukça Uygun',color:'#1D9E75'},8:{lbl:'Çok Uygun',color:'#1D9E75'},9:{lbl:'Çok Uygun',color:'#7F77DD'},10:{lbl:'Tamamen Uygun',color:'#7F77DD'}};
+  return e[sten]||{lbl:'',color:'#888'};
 }
 
 const BASKIN_RENK={
