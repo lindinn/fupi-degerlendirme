@@ -157,6 +157,7 @@
   <div class="result-block">
     <h3>Kariyer tipi tercihleri</h3>
     <p style="font-size:11px;color:var(--fupi-muted);margin-bottom:1rem">Her tip için 12 ikili tercihten kaç kez seçildiğini gösteriyor.</p>
+    <div id="baskin-driver-kart" style="margin-bottom:1rem"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
       <div style="position:relative;height:200px"><canvas id="fc-pasta" role="img" aria-label="Kariyer tipi tercih dağılımı">Kariyer tipi tercih pasta grafiği</canvas></div>
       <div id="fc-legend" style="display:flex;flex-direction:column;gap:8px;padding-top:.5rem"></div>
@@ -221,7 +222,7 @@ const FC_ALL=[
   {no:8,q:"Çalışma ortamında hangisi senin için daha çekici?",a:{t:"Olabildiğince geniş yetki ve her konuda söz sahibi olmak",s:{D:1}},b:{t:"Sınırlı insan yönetip teknik konularda söz sahibi olmak",s:{U:1}}},
   {no:9,q:"Kariyer planlamasına yaklaşımın hangisine daha yakın?",a:{t:"Net hedeflerim var ve tüm kararlarımı bu hedeflere göre veriyorum.",s:{D:1}},b:{t:"Planlarım sık değişir; fırsatlar ve anlık ilgilerim yönlendiriyor beni.",s:{G:1}}},
   {no:10,q:"Meslektaşlarının seni nasıl tanımlamasını isterdin?",a:{t:"Hedefine odaklanmış, kararlı ve sistematik biri",s:{D:1}},b:{t:"Esnek, spontane ve her ortama uyum sağlayan biri",s:{G:1}}},
-  {no:11,q:"Kariyer geçmişine baktığında hangisi daha çok seni tanımlasın istersin?",a:{t:"Hep yükseldim ve ilerledim.",s:{D:1}},b:{t:"Çok farklı şeyler denedim; bir çizgiden çok bir mozaik gibi.",s:{G:1}}},
+  {no:11,q:"Kariyer geçmişine baktığında hangisi daha çok seni tanımlasın istersin?",a:{t:"Hep yükseldim ve ilerledim.",s:{D:1}},b:{t:"Farklı alanlarda deneyim kazandım, her biri bana yeni bir şey kattı.",s:{G:1}}},
   {no:12,q:"Kariyerin için hangisi daha anlamlı?",a:{t:"Güç ve statü",s:{D:1}},b:{t:"Bağımsızlık ve özgürlük",s:{G:1}}},
   {no:13,q:"Mesleki gelişim için hangisi daha önemli?",a:{t:"Farklı alanlara açılarak geniş bir perspektif kazanmak",s:{S:1}},b:{t:"Tek bir alanda derinleşerek gerçek bir uzman olmak",s:{U:1}}},
   {no:14,q:"Gelecekte nerede olmak istiyorsun?",a:{t:"Şu an çalıştığım alandan farklı, yeni bir alanda kendimi geliştirirken.",s:{S:1}},b:{t:"Şu an çalıştığım alanda çok daha derinleşmiş ve uzmanlaşmış olarak",s:{U:1}}},
@@ -399,10 +400,10 @@ function stenEtiket(sten){
 }
 
 const BASKIN_RENK={
-  'Geçişken':{bg:'rgba(239,159,39,0.15)',border:'rgba(239,159,39,0.5)',title:'#633806',desc:'#854F0B',ikon:'#EF9F27',ikonBg:'rgba(239,159,39,0.2)',ikonRenk:'#EF9F27'},
-  'Sarmal':  {bg:'rgba(127,119,221,0.15)',border:'rgba(127,119,221,0.5)',title:'#26215C',desc:'#3C3489',ikon:'#7F77DD',ikonBg:'rgba(127,119,221,0.2)',ikonRenk:'#7F77DD'},
-  'Uzman':   {bg:'rgba(29,158,117,0.15)',border:'rgba(29,158,117,0.5)',title:'#04342C',desc:'#085041',ikon:'#1D9E75',ikonBg:'rgba(29,158,117,0.2)',ikonRenk:'#1D9E75'},
-  'Doğrusal':{bg:'rgba(55,138,221,0.15)',border:'rgba(55,138,221,0.5)',title:'#042C53',desc:'#0C447C',ikon:'#378ADD',ikonBg:'rgba(55,138,221,0.2)',ikonRenk:'#378ADD'}
+  'Geçişken':{bg:'rgba(239,159,39,0.12)',border:'rgba(239,159,39,0.4)',title:'#FAC775',desc:'#EF9F27',ikon:'#EF9F27',ikonBg:'rgba(239,159,39,0.2)',ikonRenk:'#EF9F27'},
+  'Sarmal':  {bg:'rgba(127,119,221,0.12)',border:'rgba(127,119,221,0.4)',title:'#AFA9EC',desc:'#7F77DD',ikon:'#7F77DD',ikonBg:'rgba(127,119,221,0.2)',ikonRenk:'#7F77DD'},
+  'Uzman':   {bg:'rgba(29,158,117,0.12)',border:'rgba(29,158,117,0.4)',title:'#5DCAA5',desc:'#1D9E75',ikon:'#1D9E75',ikonBg:'rgba(29,158,117,0.2)',ikonRenk:'#1D9E75'},
+  'Doğrusal':{bg:'rgba(55,138,221,0.12)',border:'rgba(55,138,221,0.4)',title:'#85B7EB',desc:'#378ADD',ikon:'#378ADD',ikonBg:'rgba(55,138,221,0.2)',ikonRenk:'#378ADD'}
 };
 
 const BASKIN_IKON={'Geçişken':'ti-arrows-shuffle','Sarmal':'ti-refresh','Uzman':'ti-award','Doğrusal':'ti-trending-up'};
@@ -456,6 +457,27 @@ function showResults(){
     </div>`;
   }).join('');
 
+  // ZS baskın driver kartı
+  const rd=BASKIN_RENK[baskinDriver.l]||BASKIN_RENK['Sarmal'];
+  const ikonD=BASKIN_IKON[baskinDriver.l]||'ti-star';
+  const DRIVER_ACIKLAMA={
+    'Geçişken':'Özgürlük, çeşitlilik ve anlık fırsatlara açıklık tercihlerinde belirleyici.',
+    'Sarmal':'Periyodik büyüme, farklı alanlara açılma ve birikimli gelişim tercihlerinde öne çıkıyor.',
+    'Uzman':'Tek alanda derinleşme, istikrar ve uzun vadeli ustalaşma tercihlerinde baskın.',
+    'Doğrusal':'Yükselme, hiyerarşi ve statü kazanımı tercihlerinde belirleyici.'
+  };
+  document.getElementById('baskin-driver-kart').innerHTML=`
+    <div class="baskin-kart-wrap" style="background:${rd.bg};border-color:${rd.border}">
+      <div class="baskin-ikon" style="background:${rd.ikonBg}">
+        <i class="ti ${ikonD}" aria-hidden="true" style="color:${rd.ikonRenk};font-size:24px"></i>
+      </div>
+      <div style="flex:1">
+        <div class="baskin-etiket" style="color:${rd.ikonRenk}">Baskın Driver tipin</div>
+        <div class="baskin-isim" style="color:${rd.title}">${baskinDriver.l}</div>
+        <div class="baskin-desc" style="color:${rd.desc}">${DRIVER_ACIKLAMA[baskinDriver.l]||''}</div>
+      </div>
+    </div>`;
+
   // ZS pasta grafiği
   const fcSirali=[...fcDefs].sort((a,b)=>(fc[b.k]||0)-(fc[a.k]||0));
   const pastaData=fcSirali.map(d=>fc[d.k]||0);
@@ -503,7 +525,7 @@ function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
   const D=kko.find(k=>k.f===4).avg; // Doğrusal
 
   const fcG=fc.G||0, fcS=fc.S||0, fcU=fc.U||0, fcD=fc.D||0;
-  const fcTotal=(fcG+fcS+fcU+fcD)||24;
+  const fcTotal=12;
 
   // İkinci baskın KKÖ boyutu
   const kkoSorted=[
