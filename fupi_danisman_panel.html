@@ -297,49 +297,98 @@ async function downloadPDF(r) {
   drawText(p, String(r.baskin_driver||'—'), M+CW/2+25, y-27, 11, drCol, true);
   y -= 50;
 
-  // KKÖ BARLAR
-  drawText(p, 'KARIYER KALIPLARI OLCEGI (KKO) — 1-5 Likert ortalamasi', M, y, 8, muted, true);
+  // KKÖ STEN BARLAR
+  drawText(p, 'KARIYER KALIPLARI OLCEGI (KKO) — Sten Puani (1-10)', M, y, 8, muted, true);
   y -= 14;
+
+  const normParams = {
+    'Gecisken': {mu:3.3923, sd:0.7114},
+    'Sarmal':   {mu:4.1601, sd:0.6842},
+    'Uzman':    {mu:3.5969, sd:0.6778},
+    'Dogrusal': {mu:3.6147, sd:0.7461}
+  };
+
+  function hamToStenPDF(ham, boyut) {
+    const {mu, sd} = normParams[boyut];
+    const z = (ham - mu) / sd;
+    const sten = Math.round(2*z + 5.5);
+    return Math.min(10, Math.max(1, sten));
+  }
+
+  function stenRenk(sten) {
+    if(sten <= 2) return rgb(0.88, 0.48, 0.48);
+    if(sten <= 4) return rgb(245/255, 166/255, 35/255);
+    if(sten <= 6) return rgb(0.5, 0.5, 0.6);
+    if(sten <= 8) return rgb(29/255, 158/255, 117/255);
+    return rgb(127/255, 119/255, 221/255);
+  }
+
+  function stenEtiketPDF(sten) {
+    if(sten <= 2) return 'Cok dusuk';
+    if(sten <= 4) return 'Dusuk';
+    if(sten <= 6) return 'Ortalama';
+    if(sten <= 8) return 'Yuksek';
+    return 'Cok yuksek';
+  }
 
   const kkoItems = [
     { lbl:'Gecisken', val:parseFloat(r.kko_gecisken||0), color:rgb(245/255,166/255,35/255) },
-    { lbl:'Sarmal', val:parseFloat(r.kko_sarmal||0), color:rgb(127/255,119/255,221/255) },
-    { lbl:'Uzman', val:parseFloat(r.kko_uzman||0), color:rgb(29/255,158/255,117/255) },
+    { lbl:'Sarmal',   val:parseFloat(r.kko_sarmal||0),   color:rgb(127/255,119/255,221/255) },
+    { lbl:'Uzman',    val:parseFloat(r.kko_uzman||0),    color:rgb(29/255,158/255,117/255) },
     { lbl:'Dogrusal', val:parseFloat(r.kko_dogrusal||0), color:rgb(55/255,138/255,221/255) }
-  ];
+  ].sort((a,b)=>b.val-a.val);
 
   for(const item of kkoItems) {
+    const sten = hamToStenPDF(item.val, item.lbl);
+    const sRenk = stenRenk(sten);
+    const sEtiket = stenEtiketPDF(sten);
     drawText(p, item.lbl, M, y, 9, rgb(0.37,0.37,0.5), false);
-    const barX = M+90, barW = CW-130, barH = 10;
-    p.drawRectangle({ x:barX, y:y-10, width:barW, height:barH, color:rgb(0.92,0.92,0.95) });
-    const pct = Math.min(Math.max(item.val/5,0),1);
-    if(pct > 0) p.drawRectangle({ x:barX, y:y-10, width:barW*pct, height:barH, color:item.color });
-    const lvl = item.val<2.5?'Dusuk':item.val<3.5?'Orta':'Yuksek';
-    drawText(p, item.val.toFixed(1)+'/5  '+lvl, barX+barW+8, y, 9, item.color, true);
-    y -= 22;
+    const barX = M+90, barW = CW-160, barH = 9;
+    p.drawRectangle({ x:barX, y:y-9, width:barW, height:barH, color:rgb(0.88,0.88,0.92) });
+    const pct = Math.min(Math.max(sten/10, 0), 1);
+    if(pct > 0) p.drawRectangle({ x:barX, y:y-9, width:barW*pct, height:barH, color:item.color });
+    drawText(p, String(sten), barX+barW+5, y, 10, item.color, true);
+    drawText(p, sEtiket, barX+barW+20, y, 8, sRenk, false);
+    y -= 20;
   }
   y -= 8;
 
-  // ZS BARLAR
-  drawText(p, 'ZORUNLU SECIM — DRIVER KARIYER TIPLERI', M, y, 8, muted, true);
+  // ZS BARLAR — yüzde gösterim
+  drawText(p, 'ZORUNLU SECIM — DRIVER KARIYER TIPLERI (maks: 12)', M, y, 8, muted, true);
   y -= 14;
+
+  // Baskın driver kartı
+  const drCol2 = chipColors[r.baskin_driver] || muted;
+  const driverAciklama = {
+    'Geçişken':'Ozgurluk, cesitlilik ve anlik firsatlara aciklik tercihlerinde belirleyici.',
+    'Sarmal':'Periyodik buyume ve birikimli gelisim tercihlerinde one cikiyor.',
+    'Uzman':'Tek alanda derinlesme ve uzun vadeli ustalaşma tercihlerinde baskin.',
+    'Dogrusal':'Yukselme, hiyerarssi ve statu kazanimi tercihlerinde belirleyici.'
+  };
+  p.drawRectangle({ x:M, y:y-36, width:CW, height:36, color:rgb(0.08,0.08,0.14), borderColor:drCol2, borderWidth:0.8 });
+  drawText(p, 'BASKIN DRIVER TIPI', M+11, y-10, 7, drCol2, true);
+  drawText(p, String(r.baskin_driver||'—'), M+11, y-22, 12, drCol2, true);
+  const dAcik = driverAciklama[r.baskin_driver] || '';
+  if(dAcik) drawText(p, dAcik, M+120, y-22, 8, rgb(0.5,0.5,0.6), false);
+  y -= 52;
 
   const zsToplam = 12;
   const zsItems = [
     { lbl:'Gecisken', val:parseInt(r.zs_gecisken||0), color:rgb(245/255,166/255,35/255) },
-    { lbl:'Sarmal', val:parseInt(r.zs_sarmal||0), color:rgb(127/255,119/255,221/255) },
-    { lbl:'Uzman', val:parseInt(r.zs_uzman||0), color:rgb(29/255,158/255,117/255) },
-    { lbl:'Dogrusal', val:parseInt(r.zs_dogrusal||0), color:rgb(55/255,138/255,221/255) }
-  ];
+    { lbl:'Sarmal',   val:parseInt(r.zs_sarmal||0),   color:rgb(127/255,119/255,221/255) },
+    { lbl:'Uzman',    val:parseInt(r.zs_uzman||0),     color:rgb(29/255,158/255,117/255) },
+    { lbl:'Dogrusal', val:parseInt(r.zs_dogrusal||0),  color:rgb(55/255,138/255,221/255) }
+  ].sort((a,b)=>b.val-a.val);
 
   for(const item of zsItems) {
     drawText(p, item.lbl, M, y, 9, rgb(0.37,0.37,0.5), false);
-    const barX = M+90, barW = CW-130, barH = 10;
-    p.drawRectangle({ x:barX, y:y-10, width:barW, height:barH, color:rgb(0.92,0.92,0.95) });
+    const barX = M+90, barW = CW-160, barH = 9;
+    p.drawRectangle({ x:barX, y:y-9, width:barW, height:barH, color:rgb(0.88,0.88,0.92) });
     const pct2 = item.val/zsToplam;
-    if(pct2 > 0) p.drawRectangle({ x:barX, y:y-10, width:barW*pct2, height:barH, color:item.color });
-    drawText(p, item.val+' / '+zsToplam, barX+barW+8, y, 9, item.color, true);
-    y -= 22;
+    if(pct2 > 0) p.drawRectangle({ x:barX, y:y-9, width:barW*pct2, height:barH, color:item.color });
+    const pctStr = Math.round(pct2*100)+'%';
+    drawText(p, item.val+'/12  '+pctStr, barX+barW+5, y, 9, item.color, true);
+    y -= 20;
   }
   y -= 12;
 
