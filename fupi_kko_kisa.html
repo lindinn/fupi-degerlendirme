@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPi Kariyer Kalıpları — Hızlı Değerlendirme</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
+  :root{--dark:#0f0f1a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--border-h:rgba(255,255,255,0.15);--orange:#F5A623;--orange-dim:rgba(245,166,35,0.12);--orange-glow:rgba(245,166,35,0.06);--text:#e8e8f0;--muted:#7a7a9a;--faint:#3a3a5a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(245,166,35,0.04) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 10% 80%,rgba(127,119,221,0.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+  .wrap{max-width:680px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+  .screen{display:none}.screen.active{display:block;animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .header{display:flex;align-items:center;gap:14px;padding-bottom:1.5rem;margin-bottom:2rem;border-bottom:.5px solid var(--border)}
+  .logo-svg{width:48px;height:48px;flex-shrink:0}
+  .logo-text .name{font-size:20px;font-weight:500;color:#fff;letter-spacing:.02em;line-height:1.15}
+  .logo-text .sub{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+  .progress-wrap{margin-bottom:2.5rem}
+  .progress-track{height:2px;background:var(--faint);border-radius:2px;overflow:hidden;margin-bottom:.5rem}
+  .progress-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .progress-label{font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .sec-badge{display:inline-block;font-size:10px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;font-weight:500}
+  .sec-title{font-size:22px;font-weight:400;color:#fff;margin-bottom:.4rem;line-height:1.3}
+  .sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
+  .q-card{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:.65rem;transition:border-color .2s}
+  .q-card:hover{border-color:var(--border-h)}
+  .q-index{font-size:10px;color:var(--faint);font-family:'DM Mono',monospace;margin-bottom:.3rem;letter-spacing:.06em}
+  .q-text{font-size:14px;color:var(--text);line-height:1.65;margin-bottom:1rem}
+  .likert-row{display:flex;gap:5px;margin-bottom:.4rem}
+  .lbtn{flex:1;height:38px;border:.5px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .15s}
+  .lbtn:hover{background:var(--orange-dim);border-color:rgba(245,166,35,.35);color:var(--orange)}
+  .lbtn.sel{background:var(--orange-dim);border-color:var(--orange);color:var(--orange);font-weight:500}
+  .likert-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--faint)}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;gap:12px}
+  .btn-main{background:var(--orange);color:#0f0f1a;border:none;border-radius:10px;padding:.65rem 1.5rem;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s,transform .1s}
+  .btn-main:hover{opacity:.88}.btn-main:active{transform:scale(.97)}
+  .btn-ghost{background:transparent;color:var(--muted);border:.5px solid var(--border);border-radius:10px;padding:.65rem 1.25rem;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+  .btn-ghost:hover{color:var(--text);border-color:var(--border-h)}
+  .nav-count{font-size:12px;color:var(--muted)}
+  .warn{font-size:12px;color:#e07b7b;margin-top:.65rem;display:none}
+  .intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.75rem}
+  .intro-box{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1.1rem}
+  .intro-box-num{font-size:10px;color:var(--orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+  .intro-box-title{font-size:14px;font-weight:500;color:#fff;margin-bottom:3px}
+  .intro-box-sub{font-size:12px;color:var(--muted)}
+  .result-block{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+  .result-block h3{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.1rem}
+  .sten-row{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+  .sten-lbl{font-size:12px;color:var(--muted);width:80px;flex-shrink:0}
+  .sten-track{flex:1;height:8px;background:var(--faint);border-radius:4px;overflow:hidden}
+  .sten-fill{height:100%;border-radius:4px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+  .sten-num{font-size:13px;font-weight:500;width:24px;text-align:right;flex-shrink:0}
+  .sten-badge{font-size:10px;width:60px;flex-shrink:0;text-align:right}
+  .baskin-kart-wrap{border-radius:14px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;border:.5px solid;margin-bottom:1.25rem}
+  .baskin-ikon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .baskin-etiket{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:500;margin-bottom:4px}
+  .baskin-isim{font-size:24px;font-weight:500;line-height:1.2;margin-bottom:4px}
+  .baskin-desc{font-size:13px;line-height:1.6}
+  .ai-block{background:var(--orange-glow);border:.5px solid rgba(245,166,35,.18);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+  .ai-label{font-size:10px;color:var(--orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.85rem;font-weight:500}
+  .ai-text{font-size:14px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+  .save-note{text-align:center;font-size:11px;color:var(--faint);min-height:18px;margin-top:.5rem}
+  .field-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;display:block}
+  .field-input{width:100%;background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s;margin-bottom:.25rem}
+  .field-input:focus{border-color:var(--orange)}
+  @media(max-width:500px){.wrap{padding:1.25rem 1rem 3rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPi" style="height:48px;width:auto">
+</div>
+
+<!-- GİRİŞ -->
+<div id="intro" class="screen active">
+  <div class="sec-badge">Kariyer Kalıpları — Hızlı Değerlendirme</div>
+  <h1 class="sec-title">Kariyer profilini keşfet</h1>
+  <p class="sec-desc">16 kısa ifade. Yaklaşık 5 dakika sürer. Tamamladığında kariyer kalıpların hakkında kişisel bir analiz alacaksın.</p>
+  <div class="intro-grid">
+    <div class="intro-box">
+      <div class="intro-box-num">Süre</div>
+      <div class="intro-box-title">~5 dakika</div>
+      <div class="intro-box-sub">16 madde · 5'li derecelendirme</div>
+    </div>
+    <div class="intro-box">
+      <div class="intro-box-num">Sonuç</div>
+      <div class="intro-box-title">Anında yorum</div>
+      <div class="intro-box-sub">4 boyut · kişisel analiz</div>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Doğru ya da yanlış cevap yoktur. İçgüdüsel ilk tepkini seç.</p>
+  <label class="field-label">Ad Soyad</label>
+  <input class="field-input" type="text" id="ad-soyad" placeholder="Adını ve soyadını yaz...">
+  <p class="warn" id="ad-warn">Lütfen adını ve soyadını yaz.</p>
+  <button class="btn-main" onclick="startSurvey()" style="margin-top:1rem">Başla →</button>
+</div>
+
+<!-- SORULAR -->
+<div id="q-screen" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="q-prog" style="width:0%"></div></div>
+    <div class="progress-label" id="q-prog-lbl"></div>
+  </div>
+  <div class="sec-badge">Kariyer Kalıpları Ölçeği · 16 madde</div>
+  <h2 class="sec-title">Aşağıdaki ifadelere ne ölçüde katılıyorsun?</h2>
+  <p class="sec-desc">1 = Hiç katılmıyorum &nbsp;·&nbsp; 5 = Kesinlikle katılıyorum</p>
+  <div id="q-items"></div>
+  <p class="warn" id="q-warn">Lütfen bu sayfadaki tüm maddeleri yanıtla.</p>
+  <div class="nav-row">
+    <button class="btn-ghost" id="q-back" onclick="qNav(-1)">← Geri</button>
+    <span class="nav-count" id="q-count"></span>
+    <button class="btn-main" id="q-next" onclick="qNav(1)">İleri →</button>
+  </div>
+</div>
+
+<!-- SONUÇ -->
+<div id="result-screen" class="screen">
+  <div class="sec-badge">Değerlendirme tamamlandı</div>
+  <h1 class="sec-title" style="margin-bottom:1.5rem">Kariyer profilin</h1>
+  <div id="baskin-kart" style="margin-bottom:1.25rem"></div>
+  <div class="result-block">
+    <h3>Kariyer kalıpları ölçeği — sten puanı</h3>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:1rem">Sten puanı 1-10 arasında değişir. 5-6 ortalama, 7-8 ortalamanın üstü, 9-10 çok yüksek anlamına gelir.</p>
+    <div id="kko-bars"></div>
+  </div>
+  <div class="ai-block">
+    <div class="ai-label">✦ Kişisel kariyer analizi</div>
+    <div class="ai-text" id="ai-out"></div>
+  </div>
+  <div class="save-note" id="save-note"></div>
+  <button class="btn-ghost" onclick="resetAll()" style="width:100%;margin-top:.75rem">Yeniden başla</button>
+</div>
+
+</div>
+
+<script>
+const WEBHOOK = "https://script.google.com/macros/s/AKfycbyEwnDPnkmhfaxrkTB6tZINR85hc58HNFajmdl4M6cPy6yyWK02xa5RrPeENT5PYe2Y/exec";
+
+const ITEMS = [
+  // Faktör 1: Geçişken (F1)
+  {f:1,code:"KKO52",text:"Kariyerimde bir sonraki adımın ne olacağını bilmemek, benim için heyecan vericidir."},
+  {f:1,code:"KKO48",text:"Kariyerimde belirli aralıklarla yön değiştirmenin bana iyi geleceğini düşünüyorum."},
+  {f:1,code:"KKO64",text:"Uzun vadede tek bir kariyer yolunda kalırsam kendimi kısıtlanmış hissederim."},
+  {f:1,code:"KKO53",text:"Sabit bir kariyer çizgisine bağlı kalmak yerine esnek bir yol izlemeyi tercih ederim."},
+  // Faktör 2: Sarmal (F2)
+  {f:2,code:"KKO66",text:"Alanımda güçlü ve yetkili bir isim olmak istiyorum."},
+  {f:2,code:"KKO75",text:"Alanımda ustalık düzeyinde tanınmak ve değer görmek beni motive eder."},
+  {f:2,code:"KKO67",text:"Belirli bir işi ya da mesleği mükemmel düzeyde icra etmek, kariyer hedefimin merkezindedir."},
+  {f:2,code:"KKO36",text:"Elde edeceğim farklı deneyimlerin gelecekteki kariyer perspektifimi zenginleştireceğini düşünüyorum."},
+  // Faktör 3: Uzman (F3)
+  {f:3,code:"KKO54",text:"Uzun vadede ne yapacağımı şimdiden bilmek bana güven verir."},
+  {f:3,code:"KKO79",text:"Uzmanlaştığım alanda derinleşen biri olmak, farklı alanlara açılmaktan önce geliyor."},
+  {f:3,code:"KKO15",text:"Belirli bir alanda derinleşmek benim için kariyer başarısının göstergesidir."},
+  {f:3,code:"KKO23",text:"Aynı işi ya da alanı uzun süre sürdürmek, benim için olumlu bir şeydir."},
+  // Faktör 4: Doğrusal (F4)
+  {f:4,code:"KKO74",text:"Kariyerimde sürekli olarak bir üst pozisyona yükselmeyi hedefliyorum."},
+  {f:4,code:"KKO78",text:"Belirli bir alanda en üst düzeye ulaşmak benim için temel kariyer hedefidir."},
+  {f:4,code:"KKO22",text:"Yönetici pozisyonlarına yükselmek kariyerimin doğal bir hedefidir."},
+  {f:4,code:"KKO50",text:"Unvan ve statü artışı benim için en önemli motivasyon kaynağıdır."}
+];
+
+const KKO_NAMES=[
+  {f:1,k:"G",name:"Geçişken",color:"#EF9F27"},
+  {f:2,k:"S",name:"Sarmal",color:"#7F77DD"},
+  {f:3,k:"U",name:"Uzman",color:"#1D9E75"},
+  {f:4,k:"D",name:"Doğrusal",color:"#378ADD"}
+];
+
+const NORM_PARAMS={
+  'Geçişken':{mu:3.3923,sd:0.7114},
+  'Sarmal':  {mu:4.1601,sd:0.6842},
+  'Uzman':   {mu:3.5969,sd:0.6778},
+  'Doğrusal':{mu:3.6147,sd:0.7461}
+};
+
+const BASKIN_RENK={
+  'Geçişken':{bg:'rgba(239,159,39,0.12)',border:'rgba(239,159,39,0.4)',title:'#FAC775',desc:'#EF9F27',ikonBg:'rgba(239,159,39,0.2)',ikonRenk:'#EF9F27'},
+  'Sarmal':  {bg:'rgba(127,119,221,0.12)',border:'rgba(127,119,221,0.4)',title:'#AFA9EC',desc:'#7F77DD',ikonBg:'rgba(127,119,221,0.2)',ikonRenk:'#7F77DD'},
+  'Uzman':   {bg:'rgba(29,158,117,0.12)',border:'rgba(29,158,117,0.4)',title:'#5DCAA5',desc:'#1D9E75',ikonBg:'rgba(29,158,117,0.2)',ikonRenk:'#1D9E75'},
+  'Doğrusal':{bg:'rgba(55,138,221,0.12)',border:'rgba(55,138,221,0.4)',title:'#85B7EB',desc:'#378ADD',ikonBg:'rgba(55,138,221,0.2)',ikonRenk:'#378ADD'}
+};
+const BASKIN_IKON={'Geçişken':'ti-arrows-shuffle','Sarmal':'ti-refresh','Uzman':'ti-award','Doğrusal':'ti-trending-up'};
+const BASKIN_ACIKLAMA={
+  'Geçişken':'Farklı deneyimler, yeni başlangıçlar ve esneklik senin kariyer anlayışının merkezinde.',
+  'Sarmal':'Büyümek, derinleşmek ve deneyimlerini anlamlı bir bütüne dönüştürmek seni motive ediyor.',
+  'Uzman':'Tek bir alanda ustalaşmak, istikrar ve uzun vadeli derinleşme senin için değerli.',
+  'Doğrusal':'Yükselme, sorumluluk ve statü kazanımı kariyer motivasyonunun merkezinde.'
+};
+
+// Shuffle
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const SHUFFLED = shuffle(ITEMS);
+
+let answers={}, page=0;
+const PER_PAGE=4;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+
+function startSurvey(){
+  const ad=document.getElementById('ad-soyad').value.trim();
+  if(!ad){document.getElementById('ad-warn').style.display='block';return;}
+  document.getElementById('ad-warn').style.display='none';
+  show('q-screen');renderPage();
+}
+
+function renderPage(){
+  const start=page*PER_PAGE;
+  const items=SHUFFLED.slice(start,start+PER_PAGE);
+  const el=document.getElementById('q-items');
+  el.innerHTML='';
+  items.forEach((item,idx)=>{
+    const n=start+idx+1;
+    const div=document.createElement('div');
+    div.className='q-card';
+    div.innerHTML=`<div class="q-index">MADDE ${n} / 16</div>
+    <div class="q-text">${item.text}</div>
+    <div class="likert-row">${[1,2,3,4,5].map(v=>`<button class="lbtn${answers[item.code]===v?' sel':''}" onclick="setAns('${item.code}',${v},this)">${v}</button>`).join('')}</div>
+    <div class="likert-ends"><span>Hiç katılmıyorum</span><span>Kesinlikle katılıyorum</span></div>`;
+    el.appendChild(div);
+  });
+  const totalPages=Math.ceil(SHUFFLED.length/PER_PAGE);
+  const answered=items.filter(i=>answers[i.code]!==undefined).length;
+  document.getElementById('q-prog').style.width=((page/totalPages)*100)+'%';
+  document.getElementById('q-prog-lbl').textContent=`Sayfa ${page+1} / ${totalPages} · ${answered} / ${items.length} yanıtlandı`;
+  document.getElementById('q-count').textContent=`${page+1} / ${totalPages}`;
+  document.getElementById('q-back').style.visibility=page===0?'hidden':'visible';
+  document.getElementById('q-next').textContent=start+PER_PAGE>=SHUFFLED.length?'Sonuçları gör →':'İleri →';
+  document.getElementById('q-warn').style.display='none';
+}
+
+function setAns(code,val,btn){
+  answers[code]=val;
+  btn.closest('.likert-row').querySelectorAll('.lbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const start=page*PER_PAGE;
+  const items=SHUFFLED.slice(start,start+PER_PAGE);
+  const answered=items.filter(i=>answers[i.code]!==undefined).length;
+  document.getElementById('q-prog-lbl').textContent=`Sayfa ${page+1} / ${Math.ceil(SHUFFLED.length/PER_PAGE)} · ${answered} / ${items.length} yanıtlandı`;
+}
+
+function qNav(dir){
+  if(dir===1){
+    const start=page*PER_PAGE;
+    const items=SHUFFLED.slice(start,start+PER_PAGE);
+    if(items.some(i=>answers[i.code]===undefined)){document.getElementById('q-warn').style.display='block';return;}
+    if(start+PER_PAGE>=SHUFFLED.length){showResults();return;}
+    page++;
+  } else {if(page===0)return;page--;}
+  renderPage();
+}
+
+function calcKKO(){
+  return KKO_NAMES.map(n=>{
+    const items=ITEMS.filter(i=>i.f===n.f);
+    const avg=items.reduce((a,i)=>a+(answers[i.code]||3),0)/items.length;
+    return {...n,avg};
+  });
+}
+
+function hamToSten(ham,boyut){
+  const {mu,sd}=NORM_PARAMS[boyut];
+  const z=(ham-mu)/sd;
+  return Math.min(10,Math.max(1,Math.round(2*z+5.5)));
+}
+
+function stenEtiket(sten){
+  if(sten<=2)return{lbl:'Çok düşük',color:'#e07b7b'};
+  if(sten<=4)return{lbl:'Düşük',color:'#EF9F27'};
+  if(sten<=6)return{lbl:'Ortalama',color:'#888'};
+  if(sten<=8)return{lbl:'Yüksek',color:'#1D9E75'};
+  return{lbl:'Çok yüksek',color:'#7F77DD'};
+}
+
+function showResults(){
+  show('result-screen');
+  const kko=calcKKO();
+  const baskin=kko.reduce((a,b)=>a.avg>b.avg?a:b);
+
+  // Baskın kart
+  const r=BASKIN_RENK[baskin.name]||BASKIN_RENK['Sarmal'];
+  const ikon=BASKIN_IKON[baskin.name]||'ti-star';
+  document.getElementById('baskin-kart').innerHTML=`
+    <div class="baskin-kart-wrap" style="background:${r.bg};border-color:${r.border}">
+      <div class="baskin-ikon" style="background:${r.ikonBg}">
+        <i class="ti ${ikon}" aria-hidden="true" style="color:${r.ikonRenk}"></i>
+      </div>
+      <div style="flex:1">
+        <div class="baskin-etiket" style="color:${r.ikonRenk}">Baskın kariyer kalıbın</div>
+        <div class="baskin-isim" style="color:${r.title}">${baskin.name}</div>
+        <div class="baskin-desc" style="color:${r.desc}">${BASKIN_ACIKLAMA[baskin.name]||''}</div>
+      </div>
+    </div>`;
+
+  // Sten barları
+  const kkoSirali=[...kko].sort((a,b)=>b.avg-a.avg);
+  document.getElementById('kko-bars').innerHTML=kkoSirali.map((s,i)=>{
+    const sten=hamToSten(s.avg,s.name);
+    const {lbl,color}=stenEtiket(sten);
+    return `<div class="sten-row">
+      <div class="sten-lbl" style="${i===0?'font-weight:500;color:var(--text)':''}">
+        <span style="font-size:9px;${i===0?'background:rgba(245,166,35,0.2);color:#EF9F27':'color:var(--faint)'};padding:1px 5px;border-radius:3px;margin-right:4px">${i+1}.</span>${s.name}
+      </div>
+      <div class="sten-track"><div class="sten-fill" style="width:${(sten/10)*100}%;background:${s.color}"></div></div>
+      <div class="sten-num" style="color:${s.color}">${sten}</div>
+      <div class="sten-badge" style="color:${color}">${lbl}</div>
+    </div>`;
+  }).join('');
+
+  const yorum=generateYorum(kko,baskin);
+  document.getElementById('ai-out').textContent=yorum;
+  saveData(kko,baskin.name,yorum);
+}
+
+function generateYorum(kko,baskin){
+  const G=kko.find(k=>k.f===1).avg;
+  const S=kko.find(k=>k.f===2).avg;
+  const U=kko.find(k=>k.f===3).avg;
+  const D=kko.find(k=>k.f===4).avg;
+
+  const kkoSirali=[...kko].sort((a,b)=>b.avg-a.avg);
+  const ikinci=kkoSirali[1];
+  const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
+
+  const p1Map={
+    'G-S':rand(["Kariyer anlayışında geçişkenlik baskın — farklı deneyimler, değişen çevreler ve yeni başlangıçlar seni motive ediyor. Sarmal büyüme güdün de güçlü; bu demek ki deneyimlerinin rastgele birikmesinden değil, birbirinin üstüne inşa edilen anlamlı bir bütünden zevk alıyorsun.","Özgürlük ve çeşitlilik kariyer anlayışının merkezinde, ama deneyimlerini bir anlam bütününe dönüştürme isteğin de güçlü. Geçişken eğilimin sana esneklik, sarmal güdün ise derinlik veriyor."]),
+    'G-U':rand(["Geçişken kariyer eğilimin belirgin — tek bir yolda kalmak yerine farklı deneyimler arayışındasın. Uzman boyutun da göz ardı edilemeyecek kadar güçlü; büyük ihtimalle her alanda derin bir iz bırakmak istiyorsun ama tek bir yerde kalmak da istemiyorsun.","Farklı deneyimler ararken aynı zamanda her alanda gerçekten derin olmak istiyorsun. Bu ilginç bir kombinasyon — geçişken hareket ve uzman derinliği bir arada."]),
+    'G-D':rand(["Geçişken bir kariyer anlayışın var — çeşitlilik ve esneklik önceliğin. Doğrusal boyutun da orta-güçlü; esnekliğini korurken aynı zamanda belirli alanlarda yukarı tırmanmak istediğini gösteriyor.","Özgürlük ve çeşitlilik seni motive ederken yükselme isteği de göz ardı edilemeyecek kadar belirgin. Bu ikisi arasındaki dengeyi kurmak kariyer kararlarında belirleyici olacak."]),
+    'S-G':rand(["Sarmal kariyer güdün öne çıkıyor — mesleki derinleşme, büyüme ve deneyimlerini anlamlı bir bütüne dönüştürme seni tanımlıyor. Geçişken boyutun da güçlü; bu sarmal büyümeye esnek bir ritim katıyor.","Birikimli büyüme ve periyodik yenilenme kariyer anlayışının özü. Geçişken eğilimin de var — bu ikisi bir arada sana hem derinlik hem özgürlük sunuyor."]),
+    'S-U':rand(["Sarmal büyüme güdün baskın — mesleki gelişim, deneyim birikimi ve her geçişte bir adım daha ileriye gitmek seni motive ediyor. Uzman boyutun da güçlü; hem derinleşmek hem bu derinliği farklı alanlara taşımak istiyorsun.","Hem derinleşmek hem de periyodik olarak yenilenip farklı alanlara açılmak istiyorsun. Sarmal büyümen uzman eğiliminle birleşince çok güçlü bir kariyer profili ortaya çıkıyor."]),
+    'S-D':rand(["Sarmal büyüme güdün belirgin. Doğrusal boyutun da orta-güçlü; büyürken aynı zamanda hiyerarşik olarak da ilerlemeyi önemsiyorsun.","Hem büyümek hem yükselmek istiyorsun — sarmal gelişim ve doğrusal yükselme bir arada kariyer motivasyonunun güçlü bir tablosunu çiziyor."]),
+    'U-S':rand(["Uzman kariyer kalıbı sende belirgin — aynı alanda derinleşmek, güvenilir ve değer verilen biri olmak seni tatmin ediyor. Sarmal boyutun da göz ardı edilemez; zaman zaman yeni alanlara açılmak da istiyor içindeki bir ses.","Tek bir alanda ustalaşmak temel motivasyonun, ama büyüme ve yenilenme isteği de göz ardı edilemeyecek kadar güçlü."]),
+    'U-G':rand(["Uzman kariyer anlayışın öne çıkıyor — istikrar, derinleşme ve belirli bir alanda otorite olmak senin için anlamlı. Geçişken boyutun da orta düzeyde güçlü; tamamen sabit kalmak istemediğini gösteriyor.","Derinleşmek ve istikrar seni tanımlıyor, ama özgürlük ve çeşitlilik isteği de zaman zaman kendini hissettiriyor."]),
+    'U-D':rand(["Uzman kariyer kalıbın baskın — aynı alanda yıllar geçirmek, gerçek bir otorite olmak seni tatmin ediyor. Doğrusal boyutun da güçlü; sadece uzmanlaşmak değil, o uzmanlıkla hiyerarşik olarak da yükselmek istiyorsun.","Derinleşme ve yükselme isteği bir arada. 'Alanının en iyisi olarak tepeye ulaşmak' bu iki boyutun kesişim noktası olabilir."]),
+    'D-S':rand(["Doğrusal kariyer eğilimin belirgin — yükselme, sorumluluk ve statü kazanımı seni güçlü biçimde motive ediyor. Sarmal boyutun da kayda değer; sadece yukarı değil, aynı zamanda genişleyerek büyümek de istiyorsun.","Yükselme odaklı bir kariyer anlayışın var ama büyüme ve çok yönlülük isteği de güçlü. Bu ikisi bir arada liderlik potansiyeli yüksek bir profil oluşturuyor."]),
+    'D-G':rand(["Doğrusal kariyer anlayışın öne çıkıyor — hiyerarşide yükselmek, etki alanını genişletmek ve liderlik rolleri seni motive ediyor. Geçişken boyutun da güçlü; yükselirken çeşitli deneyimler edinmek de istiyorsun.","Yükselme hedefin net ama esneklik ve özgürlük isteği de güçlü. Bu ikisi kariyer yolculuğunda zaman zaman gerilim yaratabilir, dikkatli dengelemek önemli."]),
+    'D-U':rand(["Doğrusal kariyer güdün baskın — yetki, sorumluluk ve statü artışı kariyer başarısının temel göstergeleri senin için. Uzman boyutun da güçlü; 'alanının en iyisi olarak yükselmek' güçlü bir motivasyon kaynağın.","Yükselme ve uzmanlık bir arada. Teknik liderlik veya uzman yöneticilik rolleri bu iki motivasyonu çok iyi birleştirir."])
+  };
+
+  const p1Key=baskin.k+'-'+ikinci.k;
+  const p1=p1Map[p1Key]||`${baskin.name} kariyer eğilimin öne çıkıyor. ${ikinci.name} boyutun da güçlü — bu iki boyut kariyer anlayışını birlikte şekillendiriyor.`;
+
+  // Güçlü yön + öneri
+  const gucluMap={
+    'G':rand(["Güçlü yönün: belirsizlikle barışık olmak ve değişime hızlı uyum sağlamak. Dikkat noktası: aşırı esneklik bazen derinleşmeyi zorlaştırabilir. Öneri: Kariyer yolculuğunda pusula olacak 2-3 temel değerini netleştir.","Güçlü yönün: farklı ortamlara hızla uyum sağlamak ve yeni başlangıçlara açık olmak. Dikkat noktası: çok fazla seçenek arasında kalmak bazen seni köksüzleştirebilir. Öneri: Neyin peşinde olduğunu bilmek esnekliğini daha etkili kullanmana yardımcı olur."]),
+    'S':rand(["Güçlü yönün: öğrenmeyi sevmek ve deneyimlerini anlamlı bir bütüne dönüştürme kapasiten. Dikkat noktası: ustalık arayışı bazen 'hiçbir şey yeterince iyi değil' tuzağına düşürebilir. Öneri: Zaten sahip olduğun birikimi de görünür kılmayı unutma.","Güçlü yönün: sürekli gelişme isteğin ve her deneyimden bir şeyler çıkarma kapasiten. Dikkat noktası: sürekli büyüme baskısı bazen tüketici olabilir. Öneri: Yeterince iyi olanı da kutlamayı öğren."]),
+    'U':rand(["Güçlü yönün: sabır, tutarlılık ve uzun vadeli düşünme kapasiten. Dikkat noktası: değişen iş dünyasında uzmanlığını güncel tutmak önemli. Öneri: Köklerin sağlam olsun ama dalların biraz hareket etsin.","Güçlü yönün: bir konuya hakkıyla hakim olmak için gereken çabayı göstermeye istekli olman. Dikkat noktası: tamamen sabit kalmak zaman zaman fırsatları kaçırmana yol açabilir. Öneri: Uzmanlığını farklı bağlamlarda uygulamak seni besler ve dışarıdan bakış kazandırır."]),
+    'D':rand(["Güçlü yönün: hedef odaklılık ve liderlik isteğin. Dikkat noktası: yükselme odaklı bir kariyer anlayışı bazen işin içsel anlamını ikinci plana itebilir. Öneri: 'Neden yükselmek istiyorum?' sorusunu dönem dönem sor.","Güçlü yönün: rekabetçi ortamlarda performansını koruyabilmek ve kararlı ilerlemek. Dikkat noktası: motivasyonunun yalnızca dışsal kaynaklara bağlı olmaması önemli. Öneri: İşin anlamı ve ilişkiler de kariyer tatmininin bir parçası."])
+  }[baskin.k];
+
+  // Düşük sten yorumları
+  const stenG=hamToSten(G,'Geçişken');
+  const stenS=hamToSten(S,'Sarmal');
+  const stenU=hamToSten(U,'Uzman');
+  const stenD=hamToSten(D,'Doğrusal');
+  const dusuklar=[];
+
+  if(stenG<=2&&baskin.k!=='G') dusuklar.push(rand(["Kariyer anlayışında istikrar ve süreklilik ön planda. Sürprizlere ve ani değişimlere pek açık değilsin — bu aynı kurumda uzun yıllar çalışabilme kapasitesinin işareti.","Belirsizliği tolere etmek yerine öngörülebilir ortamlarda en iyi performansını gösteriyorsun. Sürekli değişim baskısı seni motive etmek yerine yoruyor olabilir.","Geçişken kariyer anlayışı sana uzak geliyor. Seçtiğin yolda kalmak ve derinleşmek senin için çok daha doğal — bu tutarlılık güçlü bir kariyer varlığı oluşturur."]));
+  if(stenS<=2&&baskin.k!=='S') dusuklar.push(rand(["Farklı alanlara sıçramak veya sürekli yeni şeyler öğrenme baskısı seni motive etmiyor. Odağını belirli bir konuya verebilmek daha doğal geliyor sana.","Sarmal büyüme anlayışı senin kariyer tarzına uymuyor. Seçtiğin alanda kalmak ve derinleşmek çok daha tatmin edici.","Geniş perspektif edinmek yerine belirli bir alanda yoğunlaşmak senin için çok daha anlamlı. Sürekli yenilenme baskısı seni beslemekten çok tüketiyor olabilir."]));
+  if(stenU<=2&&baskin.k!=='U') dusuklar.push(rand(["Tek bir alanda uzun yıllar geçirmek senin kariyer anlayışınla örtüşmüyor. Hareketlilik, çeşitlilik ya da yükselme uzmanlık derinliğinden daha çekici.","Uzman kariyer kalıbı sana dar geliyor. Tek bir konuya uzun süre odaklanmak yerine farklı deneyimler edinmek çok daha uyumlu.","Derinleşmek yerine genişlemek istiyorsun — tek bir alanda uzmanlaşmaya odaklanmak seni kısıtlıyor gibi hissettiriyor olabilir."]));
+  if(stenD<=2&&baskin.k!=='D') dusuklar.push(rand(["Hiyerarşik yükselme ve statü kazanımı senin için temel motivasyon kaynağı değil. İşin içeriği, anlamı veya özerklik çok daha belirleyici.","Kariyer başarısını unvan veya statüyle ölçmüyorsun. Pozisyon odaklı bir çevre sende tatminsizlik yaratma riski taşıyor.","Doğrusal yükselme beklentisi olan ortamlar seni baskı altında bırakabilir. Kariyer motivasyonun çok daha içsel kaynaklardan besleniyor."]));
+
+  const dusukMetin=dusuklar.length>0?dusuklar.join(' ')+'\n\n':'';
+  return `${p1}\n\n${dusukMetin}${gucluMap}`;
+}
+
+async function saveData(kko,baskinKKO,yorum){
+  const note=document.getElementById('save-note');
+  note.textContent='Veriler kaydediliyor...';
+  try{
+    const ad=document.getElementById('ad-soyad').value.trim();
+    const params=new URLSearchParams({
+      ad_soyad:ad,
+      kko_gecisken:kko.find(k=>k.f===1).avg.toFixed(2),
+      kko_sarmal:kko.find(k=>k.f===2).avg.toFixed(2),
+      kko_uzman:kko.find(k=>k.f===3).avg.toFixed(2),
+      kko_dogrusal:kko.find(k=>k.f===4).avg.toFixed(2),
+      baskin_kko:baskinKKO,
+      yorum:yorum
+    });
+    const res=await fetch(WEBHOOK+'?'+params.toString(),{method:'GET'});
+    note.textContent='✓ Yanıtların kaydedildi.';
+    setTimeout(()=>note.textContent='',4000);
+  } catch(e){note.textContent='';}
+}
+
+function resetAll(){answers={};page=0;show('intro');}
+</script>
+</body>
+</html>
