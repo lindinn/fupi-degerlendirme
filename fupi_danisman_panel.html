@@ -103,7 +103,9 @@ const WEBHOOK = "https://script.google.com/macros/s/AKfycbzAlSvreppeCCjnor6cEbce
 
 let tumKayitlar = [];
 
-document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+});
 
 function login(){
   if(document.getElementById('pw-input').value === SIFRE){
@@ -322,7 +324,7 @@ async function downloadPDF(r) {
   drawText(p, 'ZORUNLU SECIM — DRIVER KARIYER TIPLERI', M, y, 8, muted, true);
   y -= 14;
 
-  const zsToplam = (parseInt(r.zs_gecisken||0)+parseInt(r.zs_sarmal||0)+parseInt(r.zs_uzman||0)+parseInt(r.zs_dogrusal||0)) || 24;
+  const zsToplam = 12;
   const zsItems = [
     { lbl:'Gecisken', val:parseInt(r.zs_gecisken||0), color:rgb(245/255,166/255,35/255) },
     { lbl:'Sarmal', val:parseInt(r.zs_sarmal||0), color:rgb(127/255,119/255,221/255) },
