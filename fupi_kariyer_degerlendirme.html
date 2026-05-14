@@ -649,7 +649,43 @@ function generateInterpretation(kko,fc,baskinKKO,baskinDriver){
   const oneriKey=baskinKKO.k+'-'+baskinDriver.k;
   const oneri=oneriMap[oneriKey]||oneriMap[baskinKKO.k+'-'+baskinKKO.k]||"Öneri: Kariyer anlayışını düzenli aralıklarla gözden geçirmek, değişen önceliklerini fark etmeni kolaylaştırır. Bugün doğru olan yarın farklılaşabilir — bu esneklik güç.";
 
-  return `${p1}\n\n${p2}\n\n${p3 ? p3+'\n\n' : ''}${gucluMap}\n\n${oneri}`;
+  // Düşük sten yorumları (sten 1-2) — çeşitlendirilmiş
+  const dusukYorumlar = [];
+
+  const stenG = hamToSten(G, 'Geçişken');
+  const stenS = hamToSten(S, 'Sarmal');
+  const stenU = hamToSten(U, 'Uzman');
+  const stenD = hamToSten(D, 'Doğrusal');
+
+  const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+
+  if(stenG <= 2 && baskinKKO.k !== 'G') dusukYorumlar.push(rand([
+    "Kariyer anlayışında istikrar ve süreklilik ön planda. Sürprizlere ve ani değişimlere pek açık değilsin — bu bir eksiklik değil, aynı kurumda uzun yıllar çalışabilme ve derinleşebilme kapasitesinin işareti.",
+    "Belirsizliği tolere etmek yerine öngörülebilir ortamlarda en iyi performansını gösteriyorsun. Sürekli değişim ve yenilik baskısı seni motive etmek yerine yoruyor olabilir — bu çok normal bir eğilim.",
+    "Geçişken kariyer anlayışı sana uzak geliyor. Farklı alanlara sıçramak yerine seçtiğin yolda kalmak ve derinleşmek senin için çok daha doğal — bu tutarlılık güçlü bir kariyer varlığı oluşturur."
+  ]));
+
+  if(stenS <= 2 && baskinKKO.k !== 'S') dusukYorumlar.push(rand([
+    "Farklı alanlara sıçramak veya sürekli yeni şeyler öğrenme baskısı seni motive etmiyor. Odağını belirli bir konuya verebilmek ve bu odakla ilerlemek senin için daha doğal.",
+    "Sarmal büyüme anlayışı — yani her birkaç yılda bir yeni bir alana açılmak — senin kariyer tarzına uymuyor. Seçtiğin alanda kalmak, derinleşmek ve uzmanlaşmak daha tatmin edici geliyor.",
+    "Geniş bir perspektif edinmek yerine belirli bir alanda yoğunlaşmak senin için çok daha anlamlı. Kariyer geçişleri ve sürekli yenilenme baskısı, seni beslemekten çok tüketiyor olabilir."
+  ]));
+
+  if(stenU <= 2 && baskinKKO.k !== 'U') dusukYorumlar.push(rand([
+    "Tek bir alanda uzun yıllar geçirmek veya dar bir uzmanlık alanında kalmak senin kariyer anlayışınla örtüşmüyor. Hareketlilik, çeşitlilik ya da yükselme senin için uzmanlık derinliğinden daha çekici.",
+    "Uzman kariyer kalıbı sana dar geliyor. Tek bir konuya uzun süre odaklanmak yerine farklı deneyimler edinmek, yükselmek ya da özgürce hareket etmek senin enerji kaynaklarınla daha uyumlu.",
+    "Derinleşmek yerine genişlemek istiyorsun — tek bir alanda uzmanlaşmaya odaklanmak seni kısıtlıyor gibi hissettiriyor olabilir. Bu, kariyer anlayışının çok yönlü yapısını yansıtıyor."
+  ]));
+
+  if(stenD <= 2 && baskinKKO.k !== 'D') dusukYorumlar.push(rand([
+    "Hiyerarşik yükselme ve statü kazanımı senin için temel bir motivasyon kaynağı değil. Kurumsal basamakları tırmanmak yerine işin içeriği, anlamı veya özerklik daha belirleyici. Güçlü bir dikey kariyer yapısına sahip kurumlar sana dar gelebilir.",
+    "Kariyer başarısını unvan veya statü artışıyla ölçmüyorsun. Bu seni hiyerarşik kurumsal yapılara karşı mesafeli kılıyor — işin kendisi, ilişkiler veya özgürlük senin için çok daha anlamlı.",
+    "Doğrusal yükselme beklentisi olan ortamlar seni baskı altında bırakabilir. Kariyer motivasyonun daha içsel kaynaklardan beslendiği için pozisyon ve statü odaklı bir çevre, sende tatminsizlik yaratma riski taşıyor."
+  ]));
+
+  const dusukMetin = dusukYorumlar.length > 0 ? dusukYorumlar.join(' ') : '';
+
+  return `${p1}\n\n${p2}\n\n${p3 ? p3+'\n\n' : ''}${dusukMetin ? dusukMetin+'\n\n' : ''}${gucluMap}\n\n${oneri}`;
 }
 
 async function saveData(kko,fc,baskinKKO,baskinDriver,yorum){
