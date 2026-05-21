@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPİ — SCL-90-R Belirti Tarama Listesi</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
+
+:root{
+  --dark:#0f0f1a;
+  --card:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.08);
+  --border-h:rgba(255,255,255,0.15);
+  --orange:#F5A623;
+  --orange-dim:rgba(245,166,35,0.12);
+  --text:#e8e8f0;
+  --muted:#7a7a9a;
+  --faint:#3a3a5a;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--dark);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(245,166,35,0.04) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 60% at 10% 80%,rgba(127,119,221,0.04) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+.wrap{max-width:720px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+
+.header{
+  display:flex;align-items:center;gap:14px;
+  padding-bottom:1.5rem;margin-bottom:2rem;
+  border-bottom:.5px solid var(--border);
+}
+
+.logo-text .name{font-size:20px;font-weight:500;color:#fff;letter-spacing:.06em;line-height:1.15}
+.logo-text .sub{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+
+.sec-badge{display:inline-block;font-size:10px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;font-weight:500}
+.sec-title{font-size:22px;font-weight:400;color:#fff;margin-bottom:.4rem;line-height:1.3}
+.sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
+
+.scale-legend{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2rem;
+  padding:1rem 1.1rem;
+  background:var(--card);border:.5px solid var(--border);border-radius:10px;
+}
+
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.legend-dot{
+  width:22px;height:22px;border-radius:50%;
+  border:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:500;color:var(--orange);
+  font-family:'DM Mono',monospace;
+}
+
+.section-block{margin-bottom:2.5rem}
+
+.subsection-header{
+  padding:.6rem 0;
+  margin-bottom:.5rem;
+  border-bottom:.5px solid var(--border);
+}
+
+.subsection-name{font-size:12px;font-weight:500;color:var(--orange);letter-spacing:.08em;text-transform:uppercase}
+.subsection-desc{font-size:11px;color:var(--faint);margin-top:2px}
+
+.scale-header-labels{
+  display:grid;
+  grid-template-columns:2rem 1fr repeat(5,52px);
+  gap:0;padding:.4rem 0;
+  border-bottom:.5px solid var(--faint);
+  margin-bottom:.3rem;
+}
+
+.scale-header-labels span{
+  font-size:9px;font-weight:500;color:var(--faint);
+  text-align:center;letter-spacing:.05em;text-transform:uppercase;line-height:1.4;
+}
+.scale-header-labels span:nth-child(2){text-align:left}
+
+.q-card{
+  background:var(--card);
+  border:.5px solid var(--border);
+  border-radius:10px;
+  padding:.75rem .9rem;
+  margin-bottom:.4rem;
+  display:grid;
+  grid-template-columns:2rem 1fr repeat(5,52px);
+  align-items:center;
+  gap:0;
+  transition:border-color .2s;
+}
+
+.q-card:hover{border-color:var(--border-h)}
+
+.q-num{font-size:10px;color:var(--faint);font-family:'DM Mono',monospace}
+.q-text{font-size:13px;color:var(--text);line-height:1.5;padding-right:10px}
+
+.q-card label{display:flex;justify-content:center;cursor:pointer}
+.q-card input[type="radio"]{width:17px;height:17px;accent-color:var(--orange);cursor:pointer}
+
+.btn-submit{
+  display:block;width:100%;
+  padding:1rem;
+  background:var(--orange-dim);
+  border:.5px solid var(--orange);
+  border-radius:12px;
+  color:var(--orange);
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:500;
+  letter-spacing:.04em;cursor:pointer;
+  transition:all .2s;margin-top:2rem;
+}
+
+.btn-submit:hover{background:rgba(245,166,35,0.22)}
+.btn-submit:active{transform:scale(.99)}
+
+.error-msg{font-size:12px;color:#e07070;text-align:center;margin-top:.75rem;display:none}
+
+/* SONUÇLAR */
+.results-wrap{display:none;margin-top:3rem}
+
+.gsi-card{
+  background:var(--orange-dim);
+  border:.5px solid rgba(245,166,35,0.3);
+  border-radius:14px;
+  padding:1.5rem 1.75rem;
+  margin-bottom:1.5rem;
+  display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;
+}
+
+.gsi-left{min-width:160px}
+.gsi-label{font-size:9px;color:rgba(245,166,35,.6);letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin-bottom:.5rem}
+.gsi-score-row{display:flex;align-items:baseline;gap:6px}
+.gsi-big{font-size:52px;font-weight:300;color:#fff;line-height:1}
+.gsi-max{font-size:15px;color:var(--muted)}
+.gsi-right{flex:1;min-width:200px}
+.gsi-level{font-size:13px;font-weight:500;color:var(--orange);margin-bottom:.6rem}
+.gsi-comment{font-size:13px;color:var(--muted);line-height:1.7}
+
+.subscales-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:12px;
+  margin-bottom:1.5rem;
+}
+
+.sub-card{
+  background:var(--card);
+  border:.5px solid var(--border);
+  border-radius:12px;
+  padding:1.1rem 1.25rem;
+}
+
+.sub-name{font-size:9px;font-weight:500;color:var(--orange);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem}
+
+.sub-score-row{display:flex;align-items:baseline;gap:5px;margin-bottom:.75rem}
+.sub-score-val{font-size:28px;font-weight:300;color:#fff;line-height:1}
+.sub-score-max{font-size:12px;color:var(--muted)}
+
+.sub-bar-track{height:2px;background:var(--faint);border-radius:2px;overflow:hidden;margin-bottom:.75rem}
+.sub-bar-fill{height:100%;border-radius:2px;background:var(--orange);transition:width .8s cubic-bezier(.4,0,.2,1)}
+.sub-bar-fill.warn{background:#e09040}
+.sub-bar-fill.alert{background:#dc6050}
+
+.sub-badge{
+  display:inline-flex;align-items:center;
+  padding:3px 10px;border-radius:12px;
+  font-size:10px;font-weight:500;
+  margin-bottom:.75rem;
+}
+
+.b-normal{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3)}
+.b-sinir{background:rgba(224,144,64,0.12);color:#e09040;border:.5px solid rgba(224,144,64,.3)}
+.b-klinik{background:rgba(220,96,80,0.12);color:#dc6050;border:.5px solid rgba(220,96,80,.3)}
+
+.sub-comment{font-size:11.5px;color:var(--muted);line-height:1.65}
+
+.disclaimer{
+  font-size:11px;color:var(--faint);
+  text-align:center;line-height:1.9;
+  margin-top:1.5rem;padding-top:1.5rem;
+  border-top:.5px solid var(--border);
+}
+
+@media(max-width:600px){
+  .scale-header-labels,.q-card{grid-template-columns:1.5rem 1fr repeat(5,36px)}
+  .gsi-card{flex-direction:column;gap:1rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-text">
+      <div class="name">FUPİ</div>
+      <div class="sub">Psikolojik Değerlendirme</div>
+    </div>
+  </div>
+
+  <div class="sec-badge">Değerlendirme Aracı</div>
+  <h1 class="sec-title">SCL-90-R Belirti Tarama Listesi</h1>
+  <p class="sec-desc">Bu liste çeşitli şikayet ve sorunların zaman zaman insanları nasıl etkilediğini değerlendirmek için hazırlanmıştır. Lütfen her maddeyi okuyun ve <strong style="color:var(--text)">son bir hafta içinde</strong> (bugün dahil) bu şikayetin sizi ne ölçüde rahatsız ettiğini belirtin.</p>
+
+  <div class="scale-legend">
+    <div class="legend-item"><div class="legend-dot">0</div> Hiç</div>
+    <div class="legend-item"><div class="legend-dot">1</div> Çok Az</div>
+    <div class="legend-item"><div class="legend-dot">2</div> Orta</div>
+    <div class="legend-item"><div class="legend-dot">3</div> Oldukça Fazla</div>
+    <div class="legend-item"><div class="legend-dot">4</div> İleri Derecede</div>
+  </div>
+
+  <form id="scl-form">
+    <div id="items-container"></div>
+    <button type="button" class="btn-submit" onclick="hesapla()">Sonuçlarımı Gör</button>
+    <p class="error-msg" id="error-msg">Lütfen tüm maddeleri yanıtlayın.</p>
+  </form>
+
+  <div class="results-wrap" id="results">
+
+    <div class="sec-badge">Değerlendirme Sonuçları</div>
+    <h2 class="sec-title" style="margin-bottom:1.5rem">Belirti profiliniz</h2>
+
+    <div class="gsi-card">
+      <div class="gsi-left">
+        <div class="gsi-label">Genel Semptom İndeksi</div>
+        <div class="gsi-score-row">
+          <span class="gsi-big" id="gsi-val">—</span>
+          <span class="gsi-max">/ 4.00</span>
+        </div>
+      </div>
+      <div class="gsi-right">
+        <div class="gsi-level" id="gsi-level"></div>
+        <div class="gsi-comment" id="gsi-comment"></div>
+      </div>
+    </div>
+
+    <div class="subscales-grid" id="subscales-grid"></div>
+
+    <p class="disclaimer">
+      Bu değerlendirme tanı koyma amacı taşımaz; klinik bir değerlendirmenin yerini tutmaz.<br>
+      Herhangi bir alt boyutta yüksek skor, o alanda uzman desteği almanızı düşündürebilir.
+    </p>
+  </div>
+
+</div>
+<script>
+const subscales = [
+  {id:"som",name:"Somatizasyon",desc:"Baş ağrısı, mide-bağırsak, kardiyovasküler ve solunum belirtileri",
+   items:[1,4,12,27,40,42,48,49,52,53,56,58]},
+  {id:"obs",name:"Obsesif-Kompulsif",desc:"Tekrarlayıcı düşünce, davranış ve iradeye aykırı dürtüler",
+   items:[3,9,10,28,38,45,46,51,55,65]},
+  {id:"is",name:"Kişilerarası Duyarlılık",desc:"Aşağılanma, yetersizlik ve kişiler arası rahatsızlık",
+   items:[6,21,34,36,37,41,61,69,73]},
+  {id:"dep",name:"Depresyon",desc:"Yas, mutsuzluk, ilgi kaybı, enerji azlığı, umutsuzluk",
+   items:[5,14,15,20,22,26,29,30,31,32,54,71,79]},
+  {id:"anx",name:"Anksiyete",desc:"Gerginlik, panik, korku ve somatik kaygı belirtileri",
+   items:[2,17,23,33,39,57,72,78,80,86]},
+  {id:"hos",name:"Düşmanlık",desc:"Öfke, sinirlilik, kızgınlık ve saldırganlık düşünceleri",
+   items:[11,24,63,67,74,81]},
+  {id:"pho",name:"Fobik Anksiyete",desc:"Kişi, yer veya duruma yönelik ısrarcı, orantısız korku",
+   items:[13,25,47,50,70,75,82]},
+  {id:"par",name:"Paranoid Düşünce",desc:"Yansıtma, kuşkuculuk ve düşmanlıkla ilgili düşünceler",
+   items:[8,18,43,68,76,83]},
+  {id:"psy",name:"Psikotisizm",desc:"Yabancılaşma, izolasyon ve şizoid yaşam biçimi belirtileri",
+   items:[7,16,35,62,77,84,85,87,88,90]}
+];
+
+const allItems = [
+  "Baş ağrıları","Sinirlilik veya içinizin titremesi","Zihninizden atamadığınız, tekrarlayıcı düşünceler",
+  "Bayılacakmış gibi hissetme ya da baş dönmesi","Cinsel istek veya ilginin kaybı","Başkaları tarafından eleştirilme duygusu",
+  "Herhangi bir kimsenin düşüncelerinizi kontrol edebileceği fikri","Sorunlarınızın büyük bir kısmı için başkalarını suçlama eğilimi",
+  "Olayları anımsamakta güçlük","Dikkatsizlik ya da uykusuzluk konusundaki endişe","Kolayca sinirlenme ve öfkelenme",
+  "Göğüs ya da kalp ağrıları","Açık yerlerde yürümekten korkma","Dermanınızın ya da enerjinizin azalması",
+  "İntihar düşünceleri ya da bunun fantezisini kurma","Seslerin ya da seslerin kaynağı olan şeylerin uzakta olduğunu duyma",
+  "Vücudunuzun herhangi bir yerinde titreme","Çoğu kimseye güvenilmeme duygusu","İştahsızlık",
+  "Kolayca ağlama ya da gözlerinizin dolması","Karşı cinsiyetteki kişilerle utangaçlık ve rahatsızlık duyma",
+  "Tuzağa düşürülmüş ya da kısıtlanmış olma duygusu","Herhangi bir neden olmaksızın aniden korkuya kapılma",
+  "Kontrol edemediğiniz öfke patlamaları","Evden tek başına çıkmaktan korkma","Kendinizi suçlama eğilimi",
+  "Belin ağrıması","İşleri bitirmekte güçlük","Yalnızlık duygusu","Karamsar olma",
+  "Her şey için fazla endişe duyma","Hiçbir şeye ilgi duymama","Korku hissi",
+  "Duygularınızın kolayca incinmesi","Öte insanların düşüncelerinizden haberdar olduğunu sanma",
+  "Başkalarının sizi anlamadığı duygusu","Başkalarının size iyi davranmadığı duygusu",
+  "Yaptığınız işlerin doğru olup olmadığından şüphe etme","Kalp çarpıntısı","Mide bulantısı ya da midenin alt üst olması",
+  "Kendini aşağılama duygusu","Kaslarınızda ağrı ve sızı","Başkalarının sizi gözlediği duygusu",
+  "Uykuya dalmakta güçlük","Yaptığınız şeyleri defalarca kontrol etme",
+  "Karar vermekte güçlük","Otobüste, sinemada ya da kalabalık yerlerde bulunmaktan korkma",
+  "Nefes almakta güçlük","Sıcaklık ya da soğukluk nöbetleri",
+  "Sizi ürkütmesi nedeniyle bazı yerler, yollar veya nesnelerden kaçınma",
+  "Aklınızın hiçbir şeyle dolmadığı hissi","Vücudunuzun bazı bölgelerinde uyuşma ya da karıncalanma",
+  "Gelecek hakkında ümitsizlik duygusu","Kendini yoğunlaştırmakta güçlük","Vücudunuzun çeşitli bölgelerinde zayıflık hissi",
+  "Gerginlik ve sıkıntı hissi","Kolların ya da bacakların ağırlaşması","Ölüm ya da ölme düşünceleri",
+  "Aşırı yemek yeme","Bakıldığında rahatsızlık duyma","Kendinize ait olmayan düşünceler",
+  "Başkalarına zarar vermek isteği","Sabahları her zamanki kadar erken uyanma",
+  "Banyo yapmak, giyinmek gibi şeyleri defalarca yineleme","Uyku bozukluğu",
+  "Bazı şeyleri kırıp dökme ya da mahvetme isteği","Başkalarının sahip olmadığı düşünce ya da inançlara sahip olma",
+  "Başkalarına karşı aşırı çekingenlik","Kalabalık yerlerde rahatsızlık duyma","Her şeyin çok güç olduğu duygusu",
+  "Dehşete kapılma nöbetleri ya da panik atakları","Toplum içinde yemek ya da içmekten rahatsızlık duyma",
+  "Başkalarıyla sık sık tartışmaya girme","Yalnız kalındığında tedirginlik duyma",
+  "Başkalarının başarılarınıza saygı göstermediği duygusu","Başkalarının yanındayken bile yalnızlık duygusu",
+  "O derece tedirgin olma ki oturamama","Değersizlik duygusu","Kötü bir şeyin size olacağı önsezisi",
+  "Bağırma ya da eşya fırlatma","Bayıltacağından korkma","Toplu taşıtlarda seyahat için aşırı sıkıntı duyma",
+  "Yorgunluk hissi","Mide rahatsızlığı ya da hazımsızlık","İçinizi titretecek kadar fena düşünceler",
+  "Başkalarına karşı birinin kişisel hesabını kapatma fikri","Uyuklarken bile kötü düşüncelerin aklınıza gelmesi",
+  "Eksik bir şeyleri olduğu ya da bir şeyleri kaybetme korkusu",
+  "Başkalarının sizin gibi olağan olayları dert etmediği duygusu"
+];
+
+const subComments = {
+  som:{normal:"Bedensel belirtiler normal aralıktadır. Fiziksel şikayetler gündelik yaşamı önemli ölçüde etkilemiyor görünmektedir.",sinir:"Bedensel belirtilerde sınır düzeyi gözlemlenmektedir. Stresle ilişkili fiziksel tepkiler dikkat gerektiren bir düzeydedir.",klinik:"Bedensel belirtiler klinik düzeyde yoğundur. Fiziksel şikayetlerin psikolojik bileşenleri olup olmadığının uzman tarafından değerlendirilmesi önerilebilir."},
+  obs:{normal:"Obsesif-kompulsif belirtiler normal aralıktadır. Yineleyici düşünce ve davranışlar gündelik işlevselliği olumsuz etkilememektedir.",sinir:"Bazı obsesif-kompulsif belirtiler sınır düzeyindedir. Takıntılı düşünceler hafif düzeyde rahatsızlık oluşturuyor olabilir.",klinik:"Obsesif-kompulsif belirtiler klinik düzeyde yoğundur. Müdahale edilmesi güç düşünce döngüleri yaşam kalitesini olumsuz etkileyebilir."},
+  is:{normal:"Kişilerarası duyarlılık normal aralıktadır. Sosyal ilişkilerde belirgin güçlük ya da yetersizlik duygusu bulunmamaktadır.",sinir:"Kişilerarası duyarlılıkta sınır düzeyi gözlemlenmektedir. İlişkilerde zaman zaman aşağılanma ya da yetersizlik duyguları yaşanabilmektedir.",klinik:"Kişilerarası duyarlılık klinik düzeyde yüksektir. Sosyal etkileşimlerin belirgin stres yarattığı görünmektedir; profesyonel destek önerilebilir."},
+  dep:{normal:"Depresif belirtiler normal aralıktadır. Ruh hali genel olarak dengeli görünmektedir.",sinir:"Depresif belirtiler sınır düzeyindedir. Mutsuzluk, ilgi kaybı veya enerji azlığı hafif düzeyde hissedilmektedir.",klinik:"Depresif belirtiler klinik düzeyde yoğundur. Uzun süreli mutsuzluk ya da intihar düşünceleri varsa bir uzmanla görüşmek önemle önerilir."},
+  anx:{normal:"Anksiyete belirtileri normal aralıktadır. Kaygı ve gerginlik düzeyi gündelik yaşamı olumsuz etkilememektedir.",sinir:"Anksiyete belirtileri sınır düzeyindedir. Zaman zaman belirgin kaygı ya da bedensel gerginlik yaşandığı görünmektedir.",klinik:"Anksiyete belirtileri klinik düzeyde yoğundur. Yoğun kaygı veya panik belirtileri için uzman desteği önerilebilir."},
+  hos:{normal:"Öfke ve düşmanlık belirtileri normal aralıktadır. Sinirlilik gündelik yaşamı önemli ölçüde etkilememektedir.",sinir:"Öfke belirtileri sınır düzeyindedir. Kontrol edilmesi güç öfke tepkileri zaman zaman sorun yaratıyor olabilir.",klinik:"Öfke ve düşmanlık belirtileri klinik düzeyde yoğundur. Yoğun öfke patlamaları için profesyonel destek değerlendirilmelidir."},
+  pho:{normal:"Fobik anksiyete belirtileri normal aralıktadır. Özgül korku ya da kaçınma davranışları işlevselliği kısıtlamamaktadır.",sinir:"Fobik belirtiler sınır düzeyindedir. Bazı durum veya ortamlardan orantısız korku duyulduğu görünmektedir.",klinik:"Fobik anksiyete klinik düzeyde yoğundur. Yaşamı kısıtlayan ısrarcı korkular için bilişsel-davranışçı terapi gibi destekler etkili olabilmektedir."},
+  par:{normal:"Paranoid düşünce belirtileri normal aralıktadır. Başkalarına yönelik güvensizlik ve kuşku normal sınırlar içindedir.",sinir:"Paranoid düşünceler sınır düzeyindedir. Başkalarının niyetlerine yönelik aşırı şüpheci düşünceler zaman zaman belirginleşmektedir.",klinik:"Paranoid düşünceler klinik düzeyde yoğundur. Süregelen kuşku ve yansıtma örüntüleri için uzman değerlendirmesi önerilir."},
+  psy:{normal:"Psikotisizm belirtileri normal aralıktadır. Gerçeklik algısı ve sosyal bağlantı düzeyi yeterlidir.",sinir:"Psikotisizm belirtileri sınır düzeyindedir. Yabancılaşma ya da izolasyon duyguları zaman zaman yaşanmaktadır.",klinik:"Psikotisizm belirtileri klinik düzeyde yoğundur. Alışılmadık algısal deneyimler ya da garip düşünceler için profesyonel değerlendirme önemle önerilir."}
+};
+
+const gsiComments = {
+  normal:"Genel belirti yoğunluğunuz normal aralıkta bulunmaktadır. Yanıtlarınız, gündelik yaşamı anlamlı ölçüde etkileyen psikolojik bir sıkıntı örüntüsü göstermemektedir.",
+  sinir:"Genel belirti yoğunluğunuz sınır düzeyindedir. Belirli alanlarda önemli sıkıntılar yaşanabilmektedir. Stres yönetimi ve destek kaynaklarına başvurmak yararlı olabilir.",
+  klinik:"Genel belirti yoğunluğunuz klinik düzeyde yüksektir. Birden fazla alanda yaşadığınız sıkıntı, bir ruh sağlığı uzmanıyla görüşmeyi değerlendirmenizi güçlü biçimde önermektedir."
+};
+
+function getSubLevel(avg){return avg<1.0?'normal':avg<1.5?'sinir':'klinik'}
+function getGSILevel(avg){return avg<0.5?'normal':avg<1.0?'sinir':'klinik'}
+
+const levelLabel = {normal:'Normal Aralık',sinir:'Sınır Düzey',klinik:'Klinik Düzey'};
+const badgeClass = {normal:'b-normal',sinir:'b-sinir',klinik:'b-klinik'};
+const barClass = {normal:'sub-bar-fill',sinir:'sub-bar-fill warn',klinik:'sub-bar-fill alert'};
+const gsiLevelLabel = {normal:'Normal Aralık — Genel belirti yoğunluğu düşük',sinir:'Sınır Düzey — Dikkat gerektiren belirtiler mevcut',klinik:'Klinik Düzey — Uzman desteği önerilir'};
+
+function renderItems() {
+  const container = document.getElementById('items-container');
+  subscales.forEach(sub => {
+    const header = document.createElement('div');
+    header.className = 'subsection-header';
+    header.innerHTML = `<div class="subsection-name">${sub.name}</div><div class="subsection-desc">${sub.desc}</div>`;
+    container.appendChild(header);
+
+    const colLabels = document.createElement('div');
+    colLabels.className = 'scale-header-labels';
+    colLabels.innerHTML = '<span></span><span></span><span>Hiç</span><span>Çok Az</span><span>Orta</span><span>Fazla</span><span>İleri</span>';
+    container.appendChild(colLabels);
+
+    sub.items.forEach(n => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.innerHTML = `
+        <span class="q-num">${n}</span>
+        <span class="q-text">${allItems[n-1]}</span>
+        ${[0,1,2,3,4].map(v=>`<label><input type="radio" name="item_${n}" value="${v}"></label>`).join('')}
+      `;
+      container.appendChild(card);
+    });
+  });
+}
+
+renderItems();
+
+function hesapla() {
+  const allNums = subscales.flatMap(s=>s.items);
+  for (const n of allNums) {
+    if (!document.querySelector(`input[name="item_${n}"]:checked`)) {
+      const e = document.getElementById('error-msg');
+      e.style.display='block';
+      setTimeout(()=>{e.style.display='none'},4000);
+      return;
+    }
+  }
+
+  let totalSum=0, totalCount=0;
+  const subResults = {};
+
+  subscales.forEach(sub => {
+    let sum=0;
+    sub.items.forEach(n=>{
+      const val = parseInt(document.querySelector(`input[name="item_${n}"]:checked`).value);
+      sum+=val; totalSum+=val; totalCount++;
+    });
+    subResults[sub.id] = {avg: sum/sub.items.length, sum};
+  });
+
+  const gsi = totalSum/totalCount;
+  const gsiLvl = getGSILevel(gsi);
+
+  document.getElementById('gsi-val').textContent = gsi.toFixed(2);
+  document.getElementById('gsi-level').textContent = gsiLevelLabel[gsiLvl];
+  document.getElementById('gsi-comment').textContent = gsiComments[gsiLvl];
+
+  const grid = document.getElementById('subscales-grid');
+  grid.innerHTML='';
+
+  subscales.forEach(sub => {
+    const {avg} = subResults[sub.id];
+    const lvl = getSubLevel(avg);
+    const pct = Math.min((avg/4)*100,100).toFixed(1);
+
+    const card = document.createElement('div');
+    card.className = 'sub-card';
+    card.innerHTML = `
+      <div class="sub-name">${sub.name}</div>
+      <div class="sub-score-row">
+        <span class="sub-score-val">${avg.toFixed(2)}</span>
+        <span class="sub-score-max">/ 4.00</span>
+      </div>
+      <div class="sub-bar-track"><div class="${barClass[lvl]}" style="width:${pct}%"></div></div>
+      <div class="sub-badge ${badgeClass[lvl]}">${levelLabel[lvl]}</div>
+      <div class="sub-comment">${subComments[sub.id][lvl]}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const r = document.getElementById('results');
+  r.style.display='block';
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
