@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPİ — Danışman Paneli / SCL-90</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
+:root{--dark:#0f0f1a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--orange:#F5A623;--orange-dim:rgba(245,166,35,0.12);--text:#e8e8f0;--muted:#7a7a9a;--faint:#3a3a5a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(245,166,35,0.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+.login-wrap{max-width:380px;margin:8vh auto 0;padding:2rem;background:var(--card);border:.5px solid var(--border);border-radius:16px;position:relative;z-index:1}
+.login-title{font-size:20px;font-weight:500;color:#fff;margin-bottom:.35rem}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+.field-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;display:block}
+.field-input{width:100%;background:rgba(255,255,255,0.03);border:.5px solid var(--border);border-radius:8px;padding:.7rem 1rem;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s;margin-bottom:1rem}
+.field-input:focus{border-color:var(--orange)}
+.btn-main{background:var(--orange);color:#0f0f1a;border:none;border-radius:10px;padding:.65rem 1.5rem;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-main:hover{opacity:.88}
+.login-err{font-size:12px;color:#e07b7b;margin-top:.75rem;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+.screen{display:none}.screen.active{display:block}
+.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;margin-bottom:2rem;border-bottom:.5px solid var(--border)}
+.header-left{display:flex;align-items:center;gap:12px}
+.panel-badge{font-size:10px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.btn-sm{background:transparent;color:var(--muted);border:.5px solid var(--border);border-radius:8px;padding:.4rem .9rem;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.btn-sm:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.btn-refresh{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3);border-radius:8px;padding:.4rem .9rem;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:2rem}
+.stat-box{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
+.stat-num{font-size:28px;font-weight:500;color:#fff;margin-bottom:2px;font-family:'DM Mono',monospace}
+.stat-lbl{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:.6rem .6rem;text-align:left;border-bottom:.5px solid var(--border);font-weight:500;white-space:nowrap}
+td{padding:.65rem .6rem;border-bottom:.5px solid rgba(255,255,255,.04);color:var(--text);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+.chip{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
+.ch-n{background:rgba(245,166,35,.12);color:#F5A623}
+.ch-s{background:rgba(224,144,64,.12);color:#e09040}
+.ch-k{background:rgba(220,96,80,.12);color:#dc6050}
+.btn-pdf{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3);border-radius:6px;padding:.3rem .7rem;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500}
+.btn-pdf:hover{background:rgba(245,166,35,.2)}
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:14px;line-height:1.8}
+.loading-msg{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- GİRİŞ -->
+<div id="login-screen" class="screen active">
+  <div class="login-wrap">
+    <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ" style="height:48px;width:auto;margin-bottom:1.5rem;display:block">
+    <div class="login-title">Danışman Paneli</div>
+    <div class="login-sub">SCL-90-R — Belirti Değerlendirmesi</div>
+    <label class="field-label">Şifre</label>
+    <input class="field-input" type="password" id="pw-input" placeholder="••••••••">
+    <button class="btn-main" onclick="login()">Giriş Yap</button>
+    <div class="login-err" id="login-err">Şifre yanlış. Tekrar deneyin.</div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel-screen" class="screen">
+<div class="wrap">
+  <div class="header">
+    <div class="header-left">
+      <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ" style="height:40px;width:auto">
+      <div>
+        <div class="panel-badge">Danışman Paneli — SCL-90-R</div>
+        <div style="font-size:12px;color:var(--muted)" id="panel-date"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-refresh" onclick="loadData()">↻ Yenile</button>
+      <button class="btn-sm" onclick="logout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Toplam kayıt</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-klinik">—</div><div class="stat-lbl">Klinik düzey GSI</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-son">—</div><div class="stat-lbl">Son danışan</div></div>
+  </div>
+
+  <div id="table-wrap"><div class="loading-msg">Yükleniyor...</div></div>
+</div>
+</div>
+
+<script>
+const SIFRE = "Claude2026!";
+const WEBHOOK = "https://script.google.com/macros/s/AKfycbx92BUY2ygAlYOaxngBBfmq5mK5rQf97XtES7gEFON9JKCNHltUPhLveJc41vD5qniL/exec";
+const FONT_URL = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
+
+let tumKayitlar = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+});
+
+function login() {
+  if(document.getElementById('pw-input').value === SIFRE) {
+    document.getElementById('login-err').style.display='none';
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('panel-screen').classList.add('active');
+    document.getElementById('panel-date').textContent = new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+    loadData();
+  } else {
+    document.getElementById('login-err').style.display='block';
+  }
+}
+
+function logout() {
+  document.getElementById('panel-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('pw-input').value='';
+}
+
+async function loadData() {
+  document.getElementById('table-wrap').innerHTML='<div class="loading-msg">Veriler yükleniyor...</div>';
+  try {
+    const res = await fetch(WEBHOOK+'?action=read&form=scl90');
+    const raw = await res.json();
+    if(!raw || raw.length < 2) {
+      document.getElementById('table-wrap').innerHTML='<div class="empty">Henüz kayıt yok.<br><small>Danışanlar formu doldurdukça burada görünecek.</small></div>';
+      ['stat-total','stat-klinik','stat-son'].forEach(id=>document.getElementById(id).textContent=id==='stat-son'?'—':'0');
+      return;
+    }
+    const rows = raw.slice(1);
+    tumKayitlar = rows.map(r => ({
+      tarih:r[0]||'', ad_soyad:r[1]||'',
+      gsi:r[2]||'', som:r[3]||'', obs:r[4]||'', is:r[5]||'',
+      dep:r[6]||'', anx:r[7]||'', hos:r[8]||'',
+      pho:r[9]||'', par:r[10]||'', psy:r[11]||'',
+      gsi_duzey:r[12]||'', som_duzey:r[13]||'', obs_duzey:r[14]||'',
+      is_duzey:r[15]||'', dep_duzey:r[16]||'', anx_duzey:r[17]||'',
+      hos_duzey:r[18]||'', pho_duzey:r[19]||'', par_duzey:r[20]||'', psy_duzey:r[21]||''
+    }));
+    document.getElementById('stat-total').textContent = tumKayitlar.length;
+    document.getElementById('stat-klinik').textContent = tumKayitlar.filter(r=>r.gsi_duzey==='Klinik').length;
+    const son = tumKayitlar[tumKayitlar.length-1];
+    document.getElementById('stat-son').textContent = son ? son.ad_soyad : '—';
+    renderTable();
+  } catch(err) {
+    document.getElementById('table-wrap').innerHTML='<div class="empty">Veriler yüklenemedi. Sayfayı yenileyin.</div>';
+  }
+}
+
+function chipCls(d) {
+  if((d||'').toLowerCase()==='normal') return 'chip ch-n';
+  if((d||'').toLowerCase()==='sınır') return 'chip ch-s';
+  return 'chip ch-k';
+}
+
+function renderTable() {
+  const subs = ['som','obs','is','dep','anx','hos','pho','par','psy'];
+  const subNames = {som:'Som',obs:'O-K',is:'KD',dep:'Dep',anx:'Anx',hos:'Düş',pho:'Fob',par:'Par',psy:'Psi'};
+
+  const rows = [...tumKayitlar].reverse().map((r,i) => `
+    <tr>
+      <td style="color:var(--faint);font-family:'DM Mono',monospace;font-size:11px">${tumKayitlar.length-i}</td>
+      <td style="font-weight:500;white-space:nowrap">${r.ad_soyad||'—'}</td>
+      <td style="color:var(--muted);font-size:11px;white-space:nowrap">${r.tarih||'—'}</td>
+      <td><span class="${chipCls(r.gsi_duzey)}">${r.gsi||'—'}</span></td>
+      ${subs.map(s=>`<td><span class="${chipCls(r[s+'_duzey'])}">${r[s]||'—'}</span></td>`).join('')}
+      <td><button class="btn-pdf" onclick="downloadPDF(tumKayitlar[${tumKayitlar.length-1-i}])">⬇ PDF</button></td>
+    </tr>`).join('');
+
+  document.getElementById('table-wrap').innerHTML = `<table>
+    <thead><tr>
+      <th>#</th><th>Ad Soyad</th><th>Tarih</th><th>GSI</th>
+      ${subs.map(s=>`<th>${subNames[s]}</th>`).join('')}
+      <th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── PDF ──────────────────────────────────────────────────────────────────
+const subComments = {
+  som:{Normal:"Bedensel belirtiler normal aralıktadır. Fiziksel şikayetler gündelik yaşamı önemli ölçüde etkilemiyor görünmektedir.",Sınır:"Bedensel belirtilerde sınır düzeyi gözlemlenmektedir. Stresle ilişkili fiziksel tepkiler dikkat gerektiren bir düzeydedir.",Klinik:"Bedensel belirtiler klinik düzeyde yoğundur. Fiziksel şikayetlerin psikolojik bileşenleri olup olmadığının uzman tarafından değerlendirilmesi önerilebilir."},
+  obs:{Normal:"Obsesif-kompulsif belirtiler normal aralıktadır.",Sınır:"Bazı obsesif-kompulsif belirtiler sınır düzeyindedir. Takıntılı düşünceler hafif düzeyde rahatsızlık oluşturuyor olabilir.",Klinik:"Obsesif-kompulsif belirtiler klinik düzeyde yoğundur. Müdahale edilmesi güç düşünce döngüleri yaşam kalitesini olumsuz etkileyebilir."},
+  is:{Normal:"Kişilerarası duyarlılık normal aralıktadır.",Sınır:"Kişilerarası duyarlılıkta sınır düzeyi gözlemlenmektedir. İlişkilerde zaman zaman aşağılanma ya da yetersizlik duyguları yaşanabilmektedir.",Klinik:"Kişilerarası duyarlılık klinik düzeyde yüksektir. Sosyal etkileşimlerin belirgin stres yarattığı görünmektedir; profesyonel destek önerilebilir."},
+  dep:{Normal:"Depresif belirtiler normal aralıktadır.",Sınır:"Depresif belirtiler sınır düzeyindedir. Mutsuzluk, ilgi kaybı veya enerji azlığı hafif düzeyde hissedilmektedir.",Klinik:"Depresif belirtiler klinik düzeyde yoğundur. Uzun süreli mutsuzluk ya da intihar düşünceleri varsa bir uzmanla görüşmek önemle önerilir."},
+  anx:{Normal:"Anksiyete belirtileri normal aralıktadır.",Sınır:"Anksiyete belirtileri sınır düzeyindedir. Zaman zaman belirgin kaygı ya da bedensel gerginlik yaşandığı görünmektedir.",Klinik:"Anksiyete belirtileri klinik düzeyde yoğundur. Yoğun kaygı veya panik belirtileri için uzman desteği önerilebilir."},
+  hos:{Normal:"Öfke ve düşmanlık belirtileri normal aralıktadır.",Sınır:"Öfke belirtileri sınır düzeyindedir. Kontrol edilmesi güç öfke tepkileri zaman zaman sorun yaratıyor olabilir.",Klinik:"Öfke ve düşmanlık belirtileri klinik düzeyde yoğundur. Yoğun öfke patlamaları için profesyonel destek değerlendirilmelidir."},
+  pho:{Normal:"Fobik anksiyete belirtileri normal aralıktadır.",Sınır:"Fobik belirtiler sınır düzeyindedir. Bazı durum veya ortamlardan orantısız korku duyulduğu görünmektedir.",Klinik:"Fobik anksiyete klinik düzeyde yoğundur. Yaşamı kısıtlayan ısrarcı korkular için bilişsel-davranışçı terapi gibi destekler etkili olabilmektedir."},
+  par:{Normal:"Paranoid düşünce belirtileri normal aralıktadır.",Sınır:"Paranoid düşünceler sınır düzeyindedir. Başkalarının niyetlerine yönelik aşırı şüpheci düşünceler zaman zaman belirginleşmektedir.",Klinik:"Paranoid düşünceler klinik düzeyde yoğundur. Süregelen kuşku ve yansıtma örüntüleri için uzman değerlendirmesi önerilir."},
+  psy:{Normal:"Psikotisizm belirtileri normal aralıktadır.",Sınır:"Psikotisizm belirtileri sınır düzeyindedir. Yabancılaşma ya da izolasyon duyguları zaman zaman yaşanmaktadır.",Klinik:"Psikotisizm belirtileri klinik düzeyde yoğundur. Alışılmadık algısal deneyimler ya da garip düşünceler için profesyonel değerlendirme önemle önerilir."}
+};
+
+const subNames = {som:"Somatizasyon",obs:"Obsesif-Kompulsif",is:"Kişilerarası Duyarlılık",dep:"Depresyon",anx:"Anksiyete",hos:"Düşmanlık",pho:"Fobik Anksiyete",par:"Paranoid Düşünce",psy:"Psikotisizm"};
+const subColors = [
+  rgb(245/255,166/255,35/255), rgb(127/255,119/255,221/255), rgb(29/255,158/255,117/255),
+  rgb(55/255,138/255,221/255), rgb(200/255,100/255,150/255), rgb(220/255,140/255,60/255),
+  rgb(100/255,180/255,160/255), rgb(160/255,120/255,200/255), rgb(180/255,160/255,100/255)
+];
+
+function rgb(r,g,b){return {r,g,b,type:'RGB'}}
+
+async function downloadPDF(r) {
+  const { PDFDocument, rgb:pdfRgb, StandardFonts } = PDFLib;
+  function RGB(r,g,b){return pdfRgb(r,g,b)}
+
+  let fontBytes;
+  try { const res=await fetch(FONT_URL); fontBytes=await res.arrayBuffer(); } catch(e){fontBytes=null;}
+
+  const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
+  let font, fontBold;
+  if(fontBytes){font=await doc.embedFont(fontBytes);fontBold=await doc.embedFont(fontBytes);}
+  else{font=await doc.embedFont(StandardFonts.Helvetica);fontBold=await doc.embedFont(StandardFonts.HelveticaBold);}
+
+  const pageW=595, pageH=842, M=48, CW=pageW-M*2;
+  const orange=RGB(245/255,166/255,35/255);
+  const dark=RGB(15/255,15/255,26/255);
+  const white=RGB(1,1,1);
+  const mutedC=RGB(0.47,0.47,0.6);
+  const faintC=RGB(0.23,0.23,0.35);
+
+  function addPage(){const pg=doc.addPage([pageW,pageH]);return{pg,y:pageH-M}}
+  let {pg:p, y} = addPage();
+
+  function dt(pg,text,x,yy,size,color,bold){
+    pg.drawText(String(text||''),{x,y:yy,size,font:bold?fontBold:font,color});
+  }
+  function mw(text,size){return font.widthOfTextAtSize(String(text||''),size)}
+  function wrapText(text,maxW,size){
+    const words=String(text||'').split(' ');const lines=[];let cur='';
+    for(const w of words){const t=cur?cur+' '+w:w;if(font.widthOfTextAtSize(t,size)>maxW){if(cur)lines.push(cur);cur=w;}else{cur=t;}}
+    if(cur)lines.push(cur);return lines;
+  }
+  function levelColor(d){
+    if((d||'').toLowerCase()==='normal') return orange;
+    if((d||'').toLowerCase()==='sınır') return RGB(0.87,0.56,0.25);
+    return RGB(0.86,0.38,0.31);
+  }
+
+  // HEADER
+  p.drawRectangle({x:0,y:pageH-120,width:pageW,height:120,color:dark});
+  p.drawRectangle({x:0,y:pageH-120,width:4,height:120,color:orange});
+  dt(p,'FUPİ PSİKOLOJİK DEĞERLENDİRME — fupi.com.tr',M,pageH-34,9,orange,true);
+  dt(p,'Belirti Değerlendirme Raporu',M,pageH-60,18,white,true);
+  dt(p,'SCL-90-R Semptom Kontrol Listesi',M,pageH-86,9,mutedC,false);
+  dt(p,String(r.tarih||''),pageW-M-mw(r.tarih,9),pageH-86,9,mutedC,false);
+  y = pageH-142;
+
+  // İSİM
+  p.drawRectangle({x:M,y:y-40,width:CW,height:40,color:RGB(0.16,0.14,0.06),borderColor:orange,borderWidth:1,borderOpacity:0.7});
+  dt(p,'DANIŞAN',M+12,y-14,8,orange,true);
+  dt(p,String(r.ad_soyad||'—'),M+12,y-30,13,white,true);
+  y -= 56;
+
+  // GSI KARTI
+  dt(p,'GENEL SEMPTOM İNDEKSİ (GSI)',M,y,8,mutedC,true);
+  y -= 14;
+  const gsiLvl = r.gsi_duzey||'Normal';
+  const gsiColor = levelColor(gsiLvl);
+  p.drawRectangle({x:M,y:y-50,width:CW,height:50,color:RGB(0.08,0.08,0.14),borderColor:gsiColor,borderWidth:1,borderOpacity:0.6});
+  dt(p,String(r.gsi||'—'),M+16,y-22,28,white,false);
+  dt(p,'/ 4.00',M+72,y-22,11,mutedC,false);
+  const barX=M+110, barW=CW-130, barH=7;
+  p.drawRectangle({x:barX,y:y-26,width:barW,height:barH,color:RGB(0.22,0.22,0.33)});
+  const gsiPct=Math.min(parseFloat(r.gsi)||0,4)/4;
+  if(gsiPct>0) p.drawRectangle({x:barX,y:y-26,width:barW*gsiPct,height:barH,color:gsiColor});
+  dt(p,'● '+gsiLvl+' Düzey',M+16,y-42,9,gsiColor,true);
+  y -= 68;
+
+  // ALT BOYUTLAR — 2 sütun grid
+  dt(p,'ALT BOYUT SKORLARI',M,y,8,mutedC,true);
+  y -= 14;
+
+  const subs = ['som','obs','is','dep','anx','hos','pho','par','psy'];
+  const COL=2, cardW=(CW-10)/COL, cardH=68;
+
+  for(let i=0;i<subs.length;i++){
+    const col=i%COL;
+    const row=Math.floor(i/COL);
+    const cx=M+col*(cardW+10);
+    const cy=y-row*(cardH+8);
+
+    // Yeni sayfa kontrolü
+    if(cy-cardH < M+60 && i>0 && col===0){
+      const np=addPage();
+      p=np.pg;y=np.y;
+      dt(p,'ALT BOYUT SKORLARI (devam)',M,y,8,mutedC,true);
+      y-=14;
+      // i'yi yeniden hesapla
+      const remaining=subs.slice(i);
+      for(let j=0;j<remaining.length;j++){
+        const s=remaining[j];
+        const cc=j%COL;
+        const cr=Math.floor(j/COL);
+        const ccx=M+cc*(cardW+10);
+        const ccy=y-cr*(cardH+8);
+        const sColor=subColors[i+j]||orange;
+        const duzey=r[s+'_duzey']||'Normal';
+        const dColor=levelColor(duzey);
+        p.drawRectangle({x:ccx,y:ccy-cardH,width:cardW,height:cardH,color:RGB(0.06,0.06,0.12),borderColor:dColor,borderWidth:0.5,borderOpacity:0.5});
+        dt(p,subNames[s].toUpperCase(),ccx+10,ccy-12,7,dColor,true);
+        dt(p,String(r[s]||'—'),ccx+10,ccy-28,18,white,false);
+        dt(p,'/ 4.00',ccx+46,ccy-28,8,mutedC,false);
+        const bx=ccx+10,bw=cardW-20,bh=4;
+        p.drawRectangle({x:bx,y:ccy-38,width:bw,height:bh,color:RGB(0.22,0.22,0.33)});
+        const pct=Math.min(parseFloat(r[s])||0,4)/4;
+        if(pct>0) p.drawRectangle({x:bx,y:ccy-38,width:bw*pct,height:bh,color:dColor});
+        dt(p,'● '+duzey,ccx+10,ccy-50,8,dColor,true);
+        const cLines=wrapText((subComments[s]&&subComments[s][duzey])||'',cardW-22,7);
+        if(cLines[0]) dt(p,cLines[0],ccx+10,ccy-62,7,faintC,false);
+      }
+      y=y-Math.ceil(remaining.length/COL)*(cardH+8)-16;
+      break;
+    }
+
+    const s=subs[i];
+    const sColor=subColors[i]||orange;
+    const duzey=r[s+'_duzey']||'Normal';
+    const dColor=levelColor(duzey);
+    p.drawRectangle({x:cx,y:cy-cardH,width:cardW,height:cardH,color:RGB(0.06,0.06,0.12),borderColor:dColor,borderWidth:0.5,borderOpacity:0.5});
+    dt(p,subNames[s].toUpperCase(),cx+10,cy-12,7,dColor,true);
+    dt(p,String(r[s]||'—'),cx+10,cy-28,18,white,false);
+    dt(p,'/ 4.00',cx+46,cy-28,8,mutedC,false);
+    const bx2=cx+10,bw2=cardW-20,bh2=4;
+    p.drawRectangle({x:bx2,y:cy-38,width:bw2,height:bh2,color:RGB(0.22,0.22,0.33)});
+    const pct2=Math.min(parseFloat(r[s])||0,4)/4;
+    if(pct2>0) p.drawRectangle({x:bx2,y:cy-38,width:bw2*pct2,height:bh2,color:dColor});
+    dt(p,'● '+duzey,cx+10,cy-50,8,dColor,true);
+    const cLines2=wrapText((subComments[s]&&subComments[s][duzey])||'',cardW-22,7);
+    if(cLines2[0]) dt(p,cLines2[0],cx+10,cy-62,7,faintC,false);
+
+    if(i===subs.length-1){
+      y=cy-Math.ceil((subs.length-(subs.length%COL===0?COL:subs.length%COL))/COL+1)*(cardH+8);
+      if(subs.length%COL!==0) y=cy-(Math.floor(subs.length/COL))*(cardH+8)-cardH-16;
+      else y=cy-((subs.length/COL)-1)*(cardH+8)-cardH-16;
+    }
+  }
+
+  // FOOTER
+  const pages=doc.getPages();
+  const lastPage=pages[pages.length-1];
+  lastPage.drawRectangle({x:0,y:0,width:pageW,height:50,color:dark});
+  lastPage.drawRectangle({x:0,y:50,width:pageW,height:1,color:orange});
+  dt(lastPage,'FUPİ Psikolojik Değerlendirme — fupi.com.tr',M,34,8,mutedC,false);
+  dt(lastPage,'Bu rapor FUPİ Değerlendirme Sistemi tarafından otomatik oluşturulmuştur. Tanı amaçlı kullanılamaz.',M,20,7,faintC,false);
+  const bugun=new Date().toLocaleDateString('tr-TR');
+  dt(lastPage,'Rapor tarihi: '+bugun,pageW-M-mw('Rapor tarihi: '+bugun,8),20,8,mutedC,false);
+
+  const pdfBytes=await doc.save();
+  const blob=new Blob([pdfBytes],{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const ad=(r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  a.href=url;a.download='FUPİ_SCL90_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf';
+  a.click();URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

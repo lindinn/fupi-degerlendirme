@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPİ — Danışman Paneli / STAI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap');
+:root{--dark:#0f0f1a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--orange:#F5A623;--orange-dim:rgba(245,166,35,0.12);--blue:#6B9FD4;--text:#e8e8f0;--muted:#7a7a9a;--faint:#3a3a5a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(245,166,35,0.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+.login-wrap{max-width:380px;margin:8vh auto 0;padding:2rem;background:var(--card);border:.5px solid var(--border);border-radius:16px;position:relative;z-index:1}
+.login-title{font-size:20px;font-weight:500;color:#fff;margin-bottom:.35rem}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+.field-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;display:block}
+.field-input{width:100%;background:rgba(255,255,255,0.03);border:.5px solid var(--border);border-radius:8px;padding:.7rem 1rem;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s;margin-bottom:1rem}
+.field-input:focus{border-color:var(--orange)}
+.btn-main{background:var(--orange);color:#0f0f1a;border:none;border-radius:10px;padding:.65rem 1.5rem;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-main:hover{opacity:.88}
+.login-err{font-size:12px;color:#e07b7b;margin-top:.75rem;display:none}
+.wrap{max-width:1000px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+.screen{display:none}.screen.active{display:block}
+.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;margin-bottom:2rem;border-bottom:.5px solid var(--border)}
+.header-left{display:flex;align-items:center;gap:12px}
+.panel-badge{font-size:10px;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.btn-sm{background:transparent;color:var(--muted);border:.5px solid var(--border);border-radius:8px;padding:.4rem .9rem;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.btn-sm:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.btn-refresh{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3);border-radius:8px;padding:.4rem .9rem;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.btn-refresh:hover{background:rgba(245,166,35,.2)}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:2rem}
+.stat-box{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
+.stat-num{font-size:28px;font-weight:500;color:#fff;margin-bottom:2px;font-family:'DM Mono',monospace}
+.stat-lbl{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:.6rem .75rem;text-align:left;border-bottom:.5px solid var(--border);font-weight:500;white-space:nowrap}
+td{padding:.75rem .75rem;border-bottom:.5px solid rgba(255,255,255,.04);color:var(--text);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+.chip{display:inline-block;font-size:11px;padding:2px 9px;border-radius:12px;font-weight:500;white-space:nowrap}
+.chip-low{background:rgba(245,166,35,.15);color:#F5A623}
+.chip-mid{background:rgba(200,160,80,.15);color:#c8a050}
+.chip-high{background:rgba(220,96,80,.15);color:#dc6050}
+.chip-low-b{background:rgba(107,159,212,.15);color:#6B9FD4}
+.chip-mid-b{background:rgba(150,180,200,.15);color:#96b4c8}
+.chip-high-b{background:rgba(180,130,160,.15);color:#b482a0}
+.btn-pdf{background:var(--orange-dim);color:var(--orange);border:.5px solid rgba(245,166,35,.3);border-radius:6px;padding:.35rem .8rem;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;font-weight:500}
+.btn-pdf:hover{background:rgba(245,166,35,.2)}
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:14px;line-height:1.8}
+.loading-msg{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- GİRİŞ -->
+<div id="login-screen" class="screen active">
+  <div class="login-wrap">
+    <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ" style="height:48px;width:auto;margin-bottom:1.5rem;display:block">
+    <div class="login-title">Danışman Paneli</div>
+    <div class="login-sub">STAI — Kaygı Değerlendirmesi</div>
+    <label class="field-label">Şifre</label>
+    <input class="field-input" type="password" id="pw-input" placeholder="••••••••">
+    <button class="btn-main" onclick="login()">Giriş Yap</button>
+    <div class="login-err" id="login-err">Şifre yanlış. Tekrar deneyin.</div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel-screen" class="screen">
+<div class="wrap">
+  <div class="header">
+    <div class="header-left">
+      <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ" style="height:40px;width:auto">
+      <div>
+        <div class="panel-badge">Danışman Paneli — STAI</div>
+        <div style="font-size:12px;color:var(--muted)" id="panel-date"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-refresh" onclick="loadData()">↻ Yenile</button>
+      <button class="btn-sm" onclick="logout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Toplam kayıt</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-yuksek">—</div><div class="stat-lbl">Yüksek kaygı (Sürekli)</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-son">—</div><div class="stat-lbl">Son danışan</div></div>
+  </div>
+
+  <div id="table-wrap"><div class="loading-msg">Yükleniyor...</div></div>
+</div>
+</div>
+
+<script>
+const SIFRE = "Claude2026!";
+const WEBHOOK = "https://script.google.com/macros/s/AKfycbzOILj-RR8epy_3DSNxpKgw_Ny87HhuhC6TAtIz67pKusRXUpqRyPvsJKP5j7BSiSHE/exec";
+const FONT_URL = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
+
+let tumKayitlar = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+});
+
+function login() {
+  if(document.getElementById('pw-input').value === SIFRE) {
+    document.getElementById('login-err').style.display='none';
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('panel-screen').classList.add('active');
+    document.getElementById('panel-date').textContent = new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+    loadData();
+  } else {
+    document.getElementById('login-err').style.display='block';
+  }
+}
+
+function logout() {
+  document.getElementById('panel-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('pw-input').value='';
+}
+
+async function loadData() {
+  document.getElementById('table-wrap').innerHTML='<div class="loading-msg">Veriler yükleniyor...</div>';
+  try {
+    const res = await fetch(WEBHOOK+'?action=read&form=stai');
+    const raw = await res.json();
+    if(!raw || raw.length < 2) {
+      document.getElementById('table-wrap').innerHTML='<div class="empty">Henüz kayıt yok.<br><small>Danışanlar formu doldurdukça burada görünecek.</small></div>';
+      document.getElementById('stat-total').textContent='0';
+      document.getElementById('stat-yuksek').textContent='0';
+      document.getElementById('stat-son').textContent='—';
+      return;
+    }
+    const rows = raw.slice(1);
+    tumKayitlar = rows.map(r => ({
+      tarih:        r[0]||'',
+      ad_soyad:     r[1]||'',
+      state_skor:   r[2]||'',
+      state_duzey:  r[3]||'',
+      trait_skor:   r[4]||'',
+      trait_duzey:  r[5]||''
+    }));
+    document.getElementById('stat-total').textContent = tumKayitlar.length;
+    document.getElementById('stat-yuksek').textContent = tumKayitlar.filter(r=>r.trait_duzey==='Yüksek').length;
+    const son = tumKayitlar[tumKayitlar.length-1];
+    document.getElementById('stat-son').textContent = son ? son.ad_soyad : '—';
+    renderTable();
+  } catch(err) {
+    document.getElementById('table-wrap').innerHTML='<div class="empty">Veriler yüklenemedi. Sayfayı yenileyin.</div>';
+  }
+}
+
+function chipClass(duzey, isBlue) {
+  const d = (duzey||'').toLowerCase();
+  if(isBlue) {
+    if(d==='düşük') return 'chip chip-low-b';
+    if(d==='orta')  return 'chip chip-mid-b';
+    return 'chip chip-high-b';
+  }
+  if(d==='düşük') return 'chip chip-low';
+  if(d==='orta')  return 'chip chip-mid';
+  return 'chip chip-high';
+}
+
+function renderTable() {
+  const rows = [...tumKayitlar].reverse().map((r,i) => `
+    <tr>
+      <td style="color:var(--faint);font-family:'DM Mono',monospace;font-size:11px">${tumKayitlar.length-i}</td>
+      <td style="font-weight:500;white-space:nowrap">${r.ad_soyad||'—'}</td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${r.tarih||'—'}</td>
+      <td><span class="${chipClass(r.state_duzey,false)}">${r.state_duzey||'—'}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${r.state_skor||'—'} / 80</td>
+      <td><span class="${chipClass(r.trait_duzey,true)}">${r.trait_duzey||'—'}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${r.trait_skor||'—'} / 80</td>
+      <td><button class="btn-pdf" onclick="downloadPDF(tumKayitlar[${tumKayitlar.length-1-i}])">⬇ PDF</button></td>
+    </tr>`).join('');
+
+  document.getElementById('table-wrap').innerHTML = `<table>
+    <thead><tr>
+      <th>#</th><th>Ad Soyad</th><th>Tarih</th>
+      <th>Durumluk</th><th>Skor</th>
+      <th>Sürekli</th><th>Skor</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── PDF ──────────────────────────────────────────────────────────────────
+const stateComments = {
+  'Düşük':"Ani kaygı düzeyi düşük aralıktadır. Değerlendirme anında rahat ve sakin bir iç durum söz konusudur; anlık kaygı belirtileri minimal düzeydedir.",
+  'Orta':"Ani kaygı düzeyi orta aralıktadır. Değerlendirme anında belirli bir gerilim ya da endişe hissi yaşandığı görünmektedir. Duygu düzenleme tekniklerinden yararlanmak faydalı olabilir.",
+  'Yüksek':"Ani kaygı düzeyi yüksek aralıktadır. Değerlendirme anında belirgin gerginlik ve huzursuzluk deneyimlendiği görünmektedir. Uzman desteği önerilebilir."
+};
+const traitComments = {
+  'Düşük':"Genel kaygı eğilimi düşük aralıktadır. Stresli durumlarla başa çıkmada güçlü iç kaynaklara sahip olduğu ve genel olarak sakin bir ruh hali deneyimlediği görülmektedir.",
+  'Orta':"Genel kaygı eğilimi orta aralıktadır. Endişeye yatkınlık konusunda belirli bir hassasiyet söz konusudur. Stres yönetimi çalışmaları ve gerekirse profesyonel destek faydalı olabilir.",
+  'Yüksek':"Genel kaygı eğilimi yüksek aralıktadır. Kaygıya yüksek yatkınlık yaşam kalitesini olumsuz etkileyebilir. Ruh sağlığı uzmanıyla görüşmesi önemle önerilebilir."
+};
+
+async function downloadPDF(r) {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  let fontBytes;
+  try {
+    const res = await fetch(FONT_URL);
+    fontBytes = await res.arrayBuffer();
+  } catch(e) { fontBytes = null; }
+
+  const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
+
+  let font, fontBold;
+  if(fontBytes) {
+    font = await doc.embedFont(fontBytes);
+    fontBold = await doc.embedFont(fontBytes);
+  } else {
+    font = await doc.embedFont(StandardFonts.Helvetica);
+    fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  }
+
+  const pageW=595, pageH=842, M=56, CW=pageW-M*2;
+  const orange = rgb(245/255,166/255,35/255);
+  const blue   = rgb(107/255,159/255,212/255);
+  const dark   = rgb(15/255,15/255,26/255);
+  const white  = rgb(1,1,1);
+  const muted  = rgb(0.47,0.47,0.6);
+  const faint  = rgb(0.23,0.23,0.35);
+
+  const p = doc.addPage([pageW, pageH]);
+  let y = pageH - M;
+
+  function dt(text, x, yy, size, color, bold) {
+    p.drawText(String(text||''), { x, y:yy, size, font: bold?fontBold:font, color });
+  }
+  function mw(text, size) { return font.widthOfTextAtSize(String(text||''), size); }
+
+  function wrapText(text, maxW, size) {
+    const words = String(text||'').split(' ');
+    const lines = [];
+    let cur = '';
+    for(const w of words) {
+      const t = cur ? cur+' '+w : w;
+      if(font.widthOfTextAtSize(t, size) > maxW) { if(cur) lines.push(cur); cur=w; }
+      else { cur=t; }
+    }
+    if(cur) lines.push(cur);
+    return lines;
+  }
+
+  // HEADER
+  p.drawRectangle({ x:0, y:pageH-130, width:pageW, height:130, color:dark });
+  p.drawRectangle({ x:0, y:pageH-130, width:4, height:130, color:orange });
+  dt('FUPİ PSİKOLOJİK DEĞERLENDİRME — fupi.com.tr', M, pageH-38, 9, orange, true);
+  dt('Kaygı Değerlendirme Raporu', M, pageH-68, 18, white, true);
+  dt('Durumluk-Sürekli Kaygı Envanteri (STAI)', M, pageH-96, 9, muted, false);
+  dt(String(r.tarih||''), pageW-M-mw(r.tarih,9), pageH-96, 9, muted, false);
+  y = pageH - 155;
+
+  // İSİM
+  p.drawRectangle({ x:M, y:y-44, width:CW, height:44, color:rgb(0.16,0.14,0.06), borderColor:orange, borderWidth:1, borderOpacity:0.7 });
+  dt('DANIŞAN', M+14, y-16, 8, orange, true);
+  dt(String(r.ad_soyad||'—'), M+14, y-34, 14, white, true);
+  y -= 62;
+
+  // FONKSİYON: skor kartı çiz
+  function drawScoreCard(label, skor, duzey, acikColor, commentText, barColor) {
+    const lvlLabel = duzey==='Düşük'?'Düşük Düzey':duzey==='Orta'?'Orta Düzey':'Yüksek Düzey';
+    // Başlık
+    dt(label.toUpperCase(), M, y, 8, muted, true);
+    y -= 14;
+    // Skor + bar
+    dt(String(skor), M, y, 42, white, false);
+    dt('/ 80', M+52, y, 12, muted, false);
+    const barX=M+100, barW=CW-110, barH=8;
+    p.drawRectangle({ x:barX, y:y-8, width:barW, height:barH, color:rgb(0.22,0.22,0.33) });
+    const pct = Math.min(parseInt(skor)||0, 80)/80;
+    if(pct>0) p.drawRectangle({ x:barX, y:y-8, width:barW*pct, height:barH, color:barColor });
+    y -= 20;
+    // Düzey chip
+    dt('●  '+lvlLabel, M, y, 10, acikColor, true);
+    y -= 18;
+    // Yorum kutusu
+    const lines = wrapText(commentText, CW-28, 9);
+    const boxH = lines.length*13+18;
+    p.drawRectangle({ x:M, y:y-boxH, width:CW, height:boxH, color:rgb(0.06,0.06,0.12), borderColor:barColor, borderWidth:0.5, borderOpacity:0.4 });
+    let ty = y-13;
+    for(const ln of lines) { dt(ln, M+14, ty, 9, muted, false); ty-=13; }
+    y -= boxH+18;
+  }
+
+  // Düzey rengi
+  function duzeyColor(duzey, isBlue) {
+    if(duzey==='Düşük') return isBlue ? blue : orange;
+    if(duzey==='Orta')  return rgb(0.78,0.62,0.31);
+    return rgb(0.86,0.38,0.31);
+  }
+
+  drawScoreCard(
+    'Durumluk Kaygı — Şu anki durum',
+    r.state_skor, r.state_duzey,
+    duzeyColor(r.state_duzey, false),
+    stateComments[r.state_duzey]||'',
+    orange
+  );
+
+  y -= 8;
+
+  drawScoreCard(
+    'Sürekli Kaygı — Genel eğilim',
+    r.trait_skor, r.trait_duzey,
+    duzeyColor(r.trait_duzey, true),
+    traitComments[r.trait_duzey]||'',
+    blue
+  );
+
+  // FOOTER
+  p.drawRectangle({ x:0, y:0, width:pageW, height:56, color:dark });
+  p.drawRectangle({ x:0, y:56, width:pageW, height:1, color:orange });
+  dt('FUPİ Psikolojik Değerlendirme — fupi.com.tr', M, 36, 8, muted, false);
+  dt('Bu rapor FUPİ Değerlendirme Sistemi tarafından otomatik oluşturulmuştur. Tanı amaçlı kullanılamaz.', M, 22, 7, faint, false);
+  const bugun = new Date().toLocaleDateString('tr-TR');
+  dt('Rapor tarihi: '+bugun, pageW-M-mw('Rapor tarihi: '+bugun, 8), 22, 8, muted, false);
+
+  const pdfBytes = await doc.save();
+  const blob = new Blob([pdfBytes], {type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ad = (r.ad_soyad||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-ZA-Za-z0-9_]/g,'');
+  a.href=url; a.download='FUPİ_STAI_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf';
+  a.click(); URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
