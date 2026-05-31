@@ -337,10 +337,7 @@ function renderScenarios() {
     const block = document.createElement('div');
     block.className = 'comp-block';
 
-    const title = document.createElement('div');
-    title.className = 'comp-title';
-    title.textContent = comp.title;
-    block.appendChild(title);
+
 
     comp.scenarios.forEach(sc => {
       const card = document.createElement('div');
