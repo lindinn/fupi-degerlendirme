@@ -268,178 +268,214 @@ function renderTable() {
 
 // --- PDF ---
 function tr(s) {
-  return (s || '').toString()
+  return (s||'').toString()
     .replace(/\u0130/g,'I').replace(/\u0131/g,'i')
     .replace(/\u011e/g,'G').replace(/\u011f/g,'g')
     .replace(/\u00dc/g,'U').replace(/\u00fc/g,'u')
     .replace(/\u015e/g,'S').replace(/\u015f/g,'s')
     .replace(/\u00d6/g,'O').replace(/\u00f6/g,'o')
     .replace(/\u00c7/g,'C').replace(/\u00e7/g,'c')
-    .replace(/\u2014/g,'-').replace(/\u2019/g,"'");
+    .replace(/\u2014/g,'-');
 }
 
 async function generatePDF(idx) {
   const r = window._filteredData[idx];
   const { PDFDocument, rgb, StandardFonts } = PDFLib;
-
   const doc = await PDFDocument.create();
-  const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-  const fontReg  = await doc.embedFont(StandardFonts.Helvetica);
 
-  const W = 595, H = 842, M = 48;
-  const purple      = rgb(0.235, 0.204, 0.537);
-  const lightPurple = rgb(0.933, 0.929, 0.996);
-  const green       = rgb(0.082, 0.341, 0.145);
-  const yellow      = rgb(0.522, 0.396, 0.024);
-  const red         = rgb(0.447, 0.110, 0.157);
-  const gray        = rgb(0.4,   0.4,   0.4);
-  const white       = rgb(1,     1,     1);
+  // Roboto ile Turkce karakter destegi
+  let fontReg, fontBold, useTR = false;
+  try {
+    const bytes = await fetch('https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf')
+      .then(res => { if (!res.ok) throw new Error(res.status); return res.arrayBuffer(); });
+    fontReg  = await doc.embedFont(bytes);
+    fontBold = await doc.embedFont(bytes);
+    useTR = true;
+  } catch(e) {
+    fontReg  = await doc.embedFont(StandardFonts.Helvetica);
+    fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  }
+  function t(s) { return useTR ? String(s||'') : tr(s); }
+
+  // FUPi logo renkleri (tam deger)
+  const W=595, H=842, M=44;
+  const PURPLE   = rgb(0.235,0.204,0.537);  // #3C3489
+  const LTPURPLE = rgb(0.933,0.929,0.996);  // #EEEDFE
+  const GREEN    = rgb(0.447,0.671,0.141);   // #72AB24 logo yesil
+  const ORANGE   = rgb(0.949,0.580,0.059);   // #F2940F logo turuncu
+  const RED      = rgb(0.843,0.059,0.078);   // #D70F14 logo kirmizi
+  const MAVI     = rgb(0.380,0.573,0.773);   // #6192C5 logo mavi
+  const MOR      = rgb(0.635,0.180,0.498);   // #A22E7F logo mor
+  const LGRAY    = rgb(0.88,0.88,0.88);
+  const GRAY     = rgb(0.45,0.45,0.45);
+  const WHITE    = rgb(1,1,1);
+  const DARK     = rgb(0.12,0.12,0.12);
+
+  // Yetkinlik barlari icin sabit renkler (logo sirasinda)
+  const YT_COLORS = [ORANGE, GREEN, MAVI, PURPLE, RED, MOR, rgb(0.204,0.596,0.859)];
+
+  // Seviye rengi ve etiketi
+  function svColor(key) { return key==='guclu'?GREEN : key==='gelistirilebilir'?ORANGE : RED; }
+  function svLabel(key) { return key==='guclu'?t('Guclu Alan') : key==='gelistirilebilir'?t('Gelistirilebilir') : t('Oncelikli Gelisim'); }
 
   const bugun = new Date().toLocaleDateString('tr-TR');
 
   function addPage() {
-    const p = doc.addPage([W, H]);
-    p.drawRectangle({ x:0, y:H-56, width:W, height:56, color:purple });
-    p.drawText('FUPI', { x:M, y:H-38, size:22, font:fontBold, color:white });
-    p.drawText('Durumsal Yargi Testi Raporu', { x:M+62, y:H-38, size:11, font:fontReg, color:rgb(0.85,0.85,1) });
-    p.drawText('Bu rapor degerlendirme amaciyla hazirlanmistir.', { x:M, y:18, size:7.5, font:fontReg, color:gray });
-    p.drawText(bugun, { x:W-M-50, y:18, size:7.5, font:fontReg, color:gray });
+    const p = doc.addPage([W,H]);
+    p.drawRectangle({x:0,y:H-50,width:W,height:50,color:PURPLE});
+    p.drawText('FUPI', {x:M,y:H-32,size:18,font:fontBold,color:WHITE});
+    p.drawText(t('Durumsal Yargi Testi Raporu'), {x:M+52,y:H-32,size:10.5,font:fontReg,color:rgb(0.85,0.85,0.98)});
+    p.drawRectangle({x:0,y:28,width:W,height:0.5,color:LGRAY});
+    p.drawText(t('Bu rapor degerlendirme amaciyla hazirlanmistir.'), {x:M,y:14,size:7,font:fontReg,color:GRAY});
+    p.drawText(bugun, {x:W-M-44,y:14,size:7,font:fontReg,color:GRAY});
     return p;
   }
 
   let page = addPage();
-  let y = H - 80;
+  let y = H-68;
 
-  // Katilimci bilgisi
-  const isim = tr(r['Ad Soyad'] || '-');
-  page.drawRectangle({ x:M, y:y-44, width:W-2*M, height:52, color:lightPurple, borderRadius:4 });
-  page.drawText('Katilimci', { x:M+14, y:y-14, size:9, font:fontReg, color:gray });
-  page.drawText(isim, { x:M+14, y:y-30, size:14, font:fontBold, color:purple });
-  const rawTarih = r['Zaman Damgasi'] || r['Zaman Damgas\u0131'] || '';
-  const tarih = rawTarih ? new Date(rawTarih).toLocaleDateString('tr-TR') : '-';
-  page.drawText('Uygulama Tarihi: ' + tarih, { x:W-M-130, y:y-22, size:9, font:fontReg, color:gray });
-  y -= 68;
+  // --- Katilimci bilgisi ---
+  page.drawRectangle({x:M,y:y-42,width:W-2*M,height:48,color:LTPURPLE,borderRadius:4});
+  page.drawText(t('Katilimci'), {x:M+12,y:y-12,size:7.5,font:fontReg,color:GRAY});
+  page.drawText(t(r['Ad Soyad']||'-'), {x:M+12,y:y-27,size:13,font:fontBold,color:PURPLE});
+  const rawT = r['Zaman Damgasi']||r['Zaman Damgas\u0131']||'';
+  const tarih = rawT ? new Date(rawT).toLocaleDateString('tr-TR') : '-';
+  page.drawText(t('Uygulama Tarihi: ')+tarih, {x:W-M-128,y:y-20,size:8,font:fontReg,color:GRAY});
+  y -= 60;
 
-  // Genel puan
-  const toplamPct = Math.round(r['Toplam_%'] || 0);
-  const svTop = seviye(toplamPct);
-  const topColor = svTop.key === 'guclu' ? green : svTop.key === 'gelistirilebilir' ? yellow : red;
-  const svTopLabel = svTop.key === 'guclu' ? 'Guclu Alan' : svTop.key === 'gelistirilebilir' ? 'Gelistirilebilir' : 'Oncelikli Gelisim';
+  // --- Genel Durum ---
+  const totPct = Math.round(r['Toplam_%']||0);
+  const svTop = seviye(totPct);
+  const topClr = svColor(svTop.key);
 
-  page.drawText('GENEL PUAN', { x:M, y:y, size:9, font:fontBold, color:gray });
-  y -= 16;
-  page.drawRectangle({ x:M, y:y-8, width:W-2*M, height:28, color:lightPurple, borderRadius:3 });
-  const barBgW = W-2*M-16-90;
-  page.drawRectangle({ x:M+8, y:y-4, width:barBgW, height:20, color:rgb(0.87,0.87,0.87), borderRadius:3 });
-  const barW = Math.max(1, Math.round(barBgW * toplamPct / 100));
-  page.drawRectangle({ x:M+8, y:y-4, width:barW, height:20, color:topColor, borderRadius:3 });
-  page.drawText(toplamPct + '%', { x:M+8+barBgW+8, y:y+4, size:13, font:fontBold, color:topColor });
-  page.drawText(svTopLabel, { x:W-M-90, y:y+4, size:8.5, font:fontBold, color:topColor });
-  y -= 42;
-
-  page.drawText('YETKINLIK BAZINDA SONUCLAR', { x:M, y:y, size:9, font:fontBold, color:gray });
-  y -= 8;
-  page.drawRectangle({ x:M, y:y-1, width:W-2*M, height:1, color:purple });
+  page.drawText(t('GENEL DURUM'), {x:M,y:y,size:8,font:fontBold,color:GRAY});
   y -= 16;
 
-  const ytAdlari = [
-    'Analiz ve Problem Cozme',
-    'Isbirligi Gelistirme',
-    'Degisime Uyum ve Ceviklik',
-    'Etkili Iletisim ve Muzakere',
-    'Yenilikcilik',
-    'Teknoloji ve Bilgi Okuryazarligi',
-    'Basarma Arzusu ve Girisimcilik'
-  ];
+  // Bar + puan sag tarafta
+  const gbW = W-2*M-60;
+  page.drawRectangle({x:M,y:y-5,width:gbW,height:16,color:LGRAY,borderRadius:3});
+  page.drawRectangle({x:M,y:y-5,width:Math.max(2,Math.round(gbW*totPct/100)),height:16,color:topClr,borderRadius:3});
+  page.drawText(String(totPct), {x:M+gbW+10,y:y+1,size:20,font:fontBold,color:topClr});
+  y -= 22;
 
+  // Seviye etiketi
+  page.drawText(svLabel(svTop.key), {x:M,y:y,size:8.5,font:fontBold,color:topClr});
+  y -= 22;
+
+  // Ayirici
+  page.drawRectangle({x:M,y:y,width:W-2*M,height:0.5,color:LGRAY});
+  y -= 14;
+
+  // Yetkinlik baslik
+  page.drawText(t('YETKINLIK BAZINDA SONUCLAR'), {x:M,y:y,size:8,font:fontBold,color:PURPLE});
+  y -= 16;
+
+  // Yorumlar (ASCII - Roboto yoksa guvenli)
   const yorumlar = {
     'Y1_Analiz_%': {
-      guclu:           'Sorunlarin nedenlerini sistematik bicimde arastirir, veri odakli kararlar alir ve alternatif cozumler uretir.',
-      gelistirilebilir:'Temel problem analizi yapabilmekle birlikte cok boyutlu degerlendirme ve sistematik cozum gelistirme becerilerini guclendirmesi onerilir.',
-      oncelikli:       'Problem tanimlama ve cozum gelistirme sureclerinde yapilandirilmis yaklasimlar benimsenmesi oncelikli gelisim alani olarak one cikmaktadir.'
+      guclu:           t('Sorunlarin nedenlerini sistematik bicimde arastirir, veri odakli kararlar alir ve alternatif cozumler uretir.'),
+      gelistirilebilir:t('Temel problem analizi yapabilmekle birlikte cok boyutlu degerlendirme ve sistematik cozum gelistirme becerilerini guclendirmesi onerilir.'),
+      oncelikli:       t('Problem tanimlama ve cozum gelistirme sureclerinde yapilandirilmis yaklasimlar benimsenmesi oncelikli gelisim alani olarak one cikmaktadir.')
     },
     'Y2_Isbirligi_%': {
-      guclu:           'Ekip ici dinamiklere duyarlidir, farkli bakis acilarini entegre eder ve is birligi ortami yaratir.',
-      gelistirilebilir:'Temel is birligi becerilerine sahip olmakla birlikte ekip ici catisma yonetimi ve beklenti yonetimi konularinda gelisim potansiyeli tasimaktadir.',
-      oncelikli:       'Ekip calismasi dinamiklerini kavrama ve is birligi ortami olusturma becerileri oncelikli gelisim alani olarak degerlendirilmektedir.'
+      guclu:           t('Ekip ici dinamiklere duyarlidir, farkli bakis acilarini entegre eder ve is birligi ortami yaratir.'),
+      gelistirilebilir:t('Temel is birligi becerilerine sahip olmakla birlikte ekip ici catisma yonetimi ve beklenti yonetimi konularinda gelisim potansiyeli tasimaktadir.'),
+      oncelikli:       t('Ekip calismasi dinamiklerini kavrama ve is birligi ortami olusturma becerileri oncelikli gelisim alani olarak degerlendirilmektedir.')
     },
     'Y3_Degisim_%': {
-      guclu:           'Degisen kosullara hizla uyum saglar, belirsizlik ortaminda alternatif planlar gelistirebilir.',
-      gelistirilebilir:'Degisime genel olarak acik olmakla birlikte ani ve kapsamli degisiklikler karsisinda esnekligini artirmasi onerilir.',
-      oncelikli:       'Degisim sureclerine uyum ve cevik davranis gelistirme oncelikli calisma alani olarak belirlenmektedir.'
+      guclu:           t('Degisen kosullara hizla uyum saglar, belirsizlik ortaminda alternatif planlar gelistirebilir.'),
+      gelistirilebilir:t('Degisime genel olarak acik olmakla birlikte ani ve kapsamli degisiklikler karsisinda esnekligini artirmasi onerilir.'),
+      oncelikli:       t('Degisim sureclerine uyum ve cevik davranis gelistirme oncelikli calisma alani olarak belirlenmektedir.')
     },
     'Y4_Iletisim_%': {
-      guclu:           'Dusuncelerini acik ve ikna edici bicimde ifade eder, etkin dinleme ve muzakere becerilerine hakimdir.',
-      gelistirilebilir:'Temel iletisim becerileri yeterli duzeyde olmakla birlikte ikna edici argumantas yon ve muzakere stratejileri konusunda gelisim onerilmektedir.',
-      oncelikli:       'Etkili iletisim kurma ve muzakere sureclerini yonetme becerileri oncelikli gelisim alani olarak one cikmaktadir.'
+      guclu:           t('Dusuncelerini acik ve ikna edici bicimde ifade eder, etkin dinleme ve muzakere becerilerine hakimdir.'),
+      gelistirilebilir:t('Temel iletisim becerileri yeterli duzeyde olmakla birlikte ikna edici argumantas yon ve muzakere stratejileri konusunda gelisim onerilmektedir.'),
+      oncelikli:       t('Etkili iletisim kurma ve muzakere sureclerini yonetme becerileri oncelikli gelisim alani olarak one cikmaktadir.')
     },
     'Y5_Yenilikcilik_%': {
-      guclu:           'Alisildik disinda cozumler uretir, mevcut surecleri sorgular ve yeni yaklasimlar i benimsemekten cekinmez.',
-      gelistirilebilir:'Yenilikci dusunce potansiyeli tasimakla birlikte risk alma ve farkli yaklasimlar deneme konusunda daha proaktif bir tutum gelistirilmesi onerilir.',
-      oncelikli:       'Yaratici problem cozme ve yenilikci yaklasimlar gelistirme becerileri oncelikli gelisim alani olarak degerlendirilmektedir.'
+      guclu:           t('Alisildik disinda cozumler uretir, mevcut surecleri sorgular ve yeni yaklasimlar i benimsemekten cekinmez.'),
+      gelistirilebilir:t('Yenilikci dusunce potansiyeli tasimakla birlikte risk alma ve farkli yaklasimlar deneme konusunda daha proaktif bir tutum gelistirilmesi onerilir.'),
+      oncelikli:       t('Yaratici problem cozme ve yenilikci yaklasimlar gelistirme becerileri oncelikli gelisim alani olarak degerlendirilmektedir.')
     },
     'Y6_Teknoloji_%': {
-      guclu:           'Dijital araclara hakimdir, bilgi ihtiyacini dogru kaynaklardan karsilar ve yeni teknolojilere hizla uyum saglar.',
-      gelistirilebilir:'Temel teknoloji kullanimi yeterli olmakla birlikte bilgi degerlendirme ve dijital araclari etkin kullanma konusunda gelisim onerilmektedir.',
-      oncelikli:       'Teknoloji ve bilgi okuryazarligi becerileri oncelikli gelisim alani olarak belirlenmektedir.'
+      guclu:           t('Dijital araclara hakimdir, bilgi ihtiyacini dogru kaynaklardan karsilar ve yeni teknolojilere hizla uyum saglar.'),
+      gelistirilebilir:t('Temel teknoloji kullanimi yeterli olmakla birlikte bilgi degerlendirme ve dijital araclari etkin kullanma konusunda gelisim onerilmektedir.'),
+      oncelikli:       t('Teknoloji ve bilgi okuryazarligi becerileri oncelikli gelisim alani olarak belirlenmektedir.')
     },
     'Y7_Basarma_%': {
-      guclu:           'Hedef odakli calisir, engellerle karsilastiginda motivasyonunu korur ve sorumluluk almaktan cekinmez.',
-      gelistirilebilir:'Basari motivasyonu temel duzeyde mevcut olmakla birlikte zorluklar karsisinda kararliligi surdurme ve inisiyatif alma konusunda gelisim potansiyeli tasimaktadir.',
-      oncelikli:       'Hedef belirleme, motivasyonu koruma ve engellere ragmen isi tamamlama becerileri oncelikli gelisim alani olarak degerlendirilmektedir.'
+      guclu:           t('Hedef odakli calisir, engellerle karsilastiginda motivasyonunu korur ve sorumluluk almaktan cekinmez.'),
+      gelistirilebilir:t('Basari motivasyonu temel duzeyde mevcut olmakla birlikte zorluklar karsisinda kararliligi surdurme ve inisiyatif alma konusunda gelisim potansiyeli tasimaktadir.'),
+      oncelikli:       t('Hedef belirleme, motivasyonu koruma ve engellere ragmen isi tamamlama becerileri oncelikli gelisim alani olarak degerlendirilmektedir.')
     }
   };
 
-  for (let i = 0; i < YETKINLIKLER.length; i++) {
-    const yt = YETKINLIKLER[i];
-    const pct = Math.round(r[yt.key] || 0);
-    const sv = seviye(pct);
-    const color = sv.key === 'guclu' ? green : sv.key === 'gelistirilebilir' ? yellow : red;
-    const svLabel = sv.key === 'guclu' ? 'Guclu Alan' : sv.key === 'gelistirilebilir' ? 'Gelistirilebilir' : 'Oncelikli Gelisim';
+  const ytAdlari = [
+    t('Analiz ve Problem Cozme'),
+    t('Isbirligi Gelistirme'),
+    t('Degisime Uyum ve Ceviklik'),
+    t('Etkili Iletisim ve Muzakere'),
+    t('Yenilikcilik'),
+    t('Teknoloji ve Bilgi Okuryazarligi'),
+    t('Basarma Arzusu ve Girisimcilik')
+  ];
+
+  for (let i=0; i<YETKINLIKLER.length; i++) {
+    const yt    = YETKINLIKLER[i];
+    const pct   = Math.round(r[yt.key]||0);
+    const sv    = seviye(pct);
+    const barClr= YT_COLORS[i];   // logo rengi - sabit per yetkinlik
+    const svClr = svColor(sv.key); // seviye rengi
     const yorum = yorumlar[yt.key][sv.key];
 
-    if (y - 80 < 60) { page = addPage(); y = H - 80; }
+    // Blok icin yer kontrol
+    if (y - 72 < 48) { page=addPage(); y=H-68; }
 
-    page.drawText((i+1) + '. ' + ytAdlari[i], { x:M, y:y, size:10, font:fontBold, color:purple });
+    // Satir 1: isim (sol) + puan sayisi (sag)
+    const adW = fontBold.widthOfTextAtSize(String(pct), 16);
+    page.drawText((i+1)+'. '+ytAdlari[i], {x:M,y:y,size:9,font:fontBold,color:PURPLE});
+    page.drawText(String(pct), {x:W-M-adW,y:y,size:16,font:fontBold,color:barClr});
     y -= 16;
 
-    const bW = W - 2*M - 90;
-    page.drawRectangle({ x:M, y:y-4, width:bW, height:14, color:rgb(0.9,0.9,0.9), borderRadius:2 });
-    page.drawRectangle({ x:M, y:y-4, width:Math.max(1,Math.round(bW*pct/100)), height:14, color:color, borderRadius:2 });
-    page.drawText(pct + '%', { x:M+bW+8, y:y-1, size:10, font:fontBold, color:color });
-    page.drawText(svLabel, { x:W-M-90, y:y-1, size:8.5, font:fontBold, color:color });
-    y -= 20;
+    // Satir 2: Bar (tam genislik)
+    const bW = W-2*M;
+    page.drawRectangle({x:M,y:y-4,width:bW,height:11,color:LGRAY,borderRadius:2});
+    page.drawRectangle({x:M,y:y-4,width:Math.max(2,Math.round(bW*pct/100)),height:11,color:barClr,borderRadius:2});
+    y -= 18;
 
+    // Satir 3: Seviye etiketi
+    page.drawText(svLabel(sv.key), {x:M,y:y,size:7.5,font:fontBold,color:svClr});
+    y -= 13;
+
+    // Yorum satirlari
     const words = yorum.split(' ');
-    let line = '';
-    const lines = [];
-    const maxLineW = W - 2*M - 10;
-    words.forEach(function(w) {
-      const test = line ? line + ' ' + w : w;
-      if (fontReg.widthOfTextAtSize(test, 8.5) > maxLineW) { lines.push(line); line = w; }
-      else line = test;
+    let line='';
+    const ls=[];
+    const mxW=W-2*M;
+    words.forEach(w=>{
+      const test=line?line+' '+w:w;
+      if(fontReg.widthOfTextAtSize(test,7.5)>mxW){ls.push(line);line=w;}
+      else line=test;
     });
-    if (line) lines.push(line);
-
-    lines.forEach(function(l) {
-      if (y < 60) { page = addPage(); y = H - 80; }
-      page.drawText(l, { x:M, y:y, size:8.5, font:fontReg, color:rgb(0.25,0.25,0.25) });
-      y -= 12;
+    if(line)ls.push(line);
+    ls.forEach(l=>{
+      if(y<48){page=addPage();y=H-68;}
+      page.drawText(l,{x:M,y:y,size:7.5,font:fontReg,color:DARK});
+      y-=11;
     });
 
-    y -= 10;
-    if (i < YETKINLIKLER.length - 1) {
-      page.drawRectangle({ x:M, y:y+6, width:W-2*M, height:0.5, color:rgb(0.88,0.88,0.88) });
-      y -= 4;
+    y-=6;
+    if(i<YETKINLIKLER.length-1){
+      page.drawRectangle({x:M,y:y+3,width:W-2*M,height:0.5,color:LGRAY});
+      y-=8;
     }
   }
 
-  const pdfBytes = await doc.save();
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const ad = tr(r['Ad Soyad'] || 'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-  a.href = url; a.download = 'FUPI_DYT_' + ad + '_' + bugun.replace(/\./g,'-') + '.pdf';
+  const pdfBytes=await doc.save();
+  const blob=new Blob([pdfBytes],{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const ad=tr(r['Ad Soyad']||'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  a.href=url; a.download='FUPI_DYT_'+ad+'_'+bugun.replace(/\./g,'-')+'.pdf';
   a.click(); URL.revokeObjectURL(url);
 }
 </script>
