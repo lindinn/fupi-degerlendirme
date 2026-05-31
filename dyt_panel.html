@@ -266,26 +266,24 @@ function renderTable() {
   window._filteredData = filtered;
 }
 
-// ─── Türkçe → ASCII (pdf-lib WinAnsi uyumu) ──────────────────────────────────
-function tr(s) {
-  return (s || '').toString()
-    .replace(/İ/g,'I').replace(/ı/g,'i')
-    .replace(/Ğ/g,'G').replace(/ğ/g,'g')
-    .replace(/Ü/g,'U').replace(/ü/g,'u')
-    .replace(/Ş/g,'S').replace(/ş/g,'s')
-    .replace(/Ö/g,'O').replace(/ö/g,'o')
-    .replace(/Ç/g,'C').replace(/ç/g,'c')
-    .replace(/—/g,'-');
-}
+// --- PDF ---
+const FONT_URL = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
 
-// ─── PDF ──────────────────────────────────────────────────────────────────────
 async function generatePDF(idx) {
   const r = window._filteredData[idx];
   const { PDFDocument, rgb, StandardFonts } = PDFLib;
 
   const doc = await PDFDocument.create();
-  const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-  const fontReg  = await doc.embedFont(StandardFonts.Helvetica);
+
+  let fontReg, fontBold;
+  try {
+    const fontBytes = await fetch(FONT_URL).then(res => res.arrayBuffer());
+    fontReg  = await doc.embedFont(fontBytes);
+    fontBold = await doc.embedFont(fontBytes); // Roboto Regular for both
+  } catch(e) {
+    fontReg  = await doc.embedFont(StandardFonts.Helvetica);
+    fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  }
 
   const W = 595, H = 842;
   const M = 48;
@@ -314,8 +312,8 @@ async function generatePDF(idx) {
 
   // Katılımcı bilgisi
   page.drawRectangle({ x:M, y:y-44, width:W-2*M, height:52, color:lightPurple, borderRadius:4 });
-  page.drawText('Katilimci', { x:M+14, y:y-14, size:9, font:fontReg, color:gray });
-  page.drawText(tr(r['Ad Soyad'] || '-'), { x:M+14, y:y-30, size:14, font:fontBold, color:purple });
+  page.drawText('Katılımcı', { x:M+14, y:y-14, size:9, font:fontReg, color:gray });
+  page.drawText(r['Ad Soyad'] || '-', { x:M+14, y:y-30, size:14, font:fontBold, color:purple });
   const tarih = r['Zaman Damgasi'] ? new Date(r['Zaman Damgasi']).toLocaleDateString('tr-TR') : (r['Zaman Damgası'] ? new Date(r['Zaman Damgası']).toLocaleDateString('tr-TR') : '-');
   page.drawText('Uygulama Tarihi: ' + tarih, { x:W-M-130, y:y-22, size:9, font:fontReg, color:gray });
   y -= 68;
@@ -324,7 +322,7 @@ async function generatePDF(idx) {
   const toplamPct = Math.round(r['Toplam_%'] || 0);
   const svTop = seviye(toplamPct);
   const topColor = svTop.key === 'guclu' ? green : svTop.key === 'gelistirilebilir' ? yellow : red;
-  const svTopLabel = svTop.key === 'guclu' ? 'Guclu Alan' : svTop.key === 'gelistirilebilir' ? 'Gelistirilebilir' : 'Oncelikli Gelisim';
+  const svTopLabel = svTop.key === 'guclu' ? 'Güçlü Alan' : svTop.key === 'gelistirilebilir' ? 'Geliştirilebilir' : 'Öncelikli Gelişim';
 
   page.drawText('GENEL PUAN', { x:M, y:y, size:9, font:fontBold, color:gray });
   y -= 16;
@@ -337,58 +335,58 @@ async function generatePDF(idx) {
   page.drawText(svTopLabel, { x:W-M-75, y:y+4, size:8.5, font:fontBold, color:topColor });
   y -= 42;
 
-  page.drawText('YETKINLIK BAZINDA SONUCLAR', { x:M, y:y, size:9, font:fontBold, color:gray });
+  page.drawText('YETKİNLİK BAZINDA SONUÇLAR', { x:M, y:y, size:9, font:fontBold, color:gray });
   y -= 8;
   page.drawRectangle({ x:M, y:y-1, width:W-2*M, height:1, color:purple });
   y -= 16;
 
   // Yetkinlik adları ASCII
   const ytAdlari = [
-    'Analiz ve Problem Cozme',
-    'Isbirligi Gelistirme',
-    'Degisime Uyum ve Ceviklik',
-    'Etkili Iletisim ve Muzakere',
-    'Yenilikcilik',
-    'Teknoloji ve Bilgi Okuryazarligi',
-    'Basarma Arzusu ve Girisimcilik'
+    'Analiz ve Problem Çözme',
+    'İşbirliği Geliştirme',
+    'Değişime Uyum ve Çeviklik',
+    'Etkili İletişim ve Müzakere',
+    'Yenilikçilik',
+    'Teknoloji ve Bilgi Okuryazarlığı',
+    'Başarma Arzusu ve Girişimcilik'
   ];
 
   // Yorumlar ASCII
-  const yorumlarASCII = {
+  const yorumlarTR = {
     'Y1_Analiz_%': {
-      guclu:           'Sorunlarin nedenlerini sistematik bicimde arastirir, veri odakli kararlar alir ve alternatif cozumler uretir.',
-      gelistirilebilir:'Temel problem analizi yapabilmekle birlikte cok boyutlu degerlendirme ve sistematik cozum gelistirme becerilerini guclendirmesi onerilir.',
-      oncelikli:       'Problem tanimlama ve cozum gelistirme sureclerinde yapilandirilmis yaklasimlar benimsenmesi oncelikli gelisim alani olarak one cikmaktadir.'
+      guclu:           'Sorunların nedenlerini sistematik biçimde araştırır, veri odaklı kararlar alır ve alternatif çözümler üretir.',
+      gelistirilebilir:'Temel problem analizi yapabilmekle birlikte çok boyutlu değerlendirme ve sistematik çözüm geliştirme becerilerini güçlendirmesi önerilir.',
+      oncelikli:       'Problem tanımlama ve çözüm geliştirme süreçlerinde yapılandırılmış yaklaşımların benimsenmesi öncelikli gelişim alanı olarak öne çıkmaktadır.'
     },
     'Y2_Isbirligi_%': {
-      guclu:           'Ekip ici dinamiklere duyarlidir, farkli bakis acilarini entegre eder ve is birligi ortami yaratir.',
-      gelistirilebilir:'Temel is birligi becerilerine sahip olmakla birlikte ekip ici catisma yonetimi ve beklenti yonetimi konularinda gelisim potansiyeli tasimaktadir.',
-      oncelikli:       'Ekip calismasi dinamiklerini kavrama ve is birligi ortami olusturma becerileri oncelikli gelisim alani olarak degerlendirilmektedir.'
+      guclu:           'Ekip içi dinamiklere duyarlıdır, farklı bakış açılarını entegre eder ve iş birliği ortamı yaratır.',
+      gelistirilebilir:'Temel iş birliği becerilerine sahip olmakla birlikte ekip içi çatışma yönetimi ve beklenti yönetimi konularında gelişim potansiyeli taşımaktadır.',
+      oncelikli:       'Ekip çalışması dinamiklerini kavrama ve iş birliği ortamı oluşturma becerileri öncelikli gelişim alanı olarak değerlendirilmektedir.'
     },
     'Y3_Degisim_%': {
-      guclu:           'Degisen kosullara hizla uyum saglar, belirsizlik ortaminda alternatif planlar gelistirebilir.',
-      gelistirilebilir:'Degisime genel olarak acik olmakla birlikte ani ve kapsamli degisiklikler karsisinda esnekligini artirmasi onerilir.',
-      oncelikli:       'Degisim sureclerine uyum ve cevik davranis gelistirme oncelikli calisma alani olarak belirlenmektedir.'
+      guclu:           'Değişen koşullara hızla uyum sağlar, belirsizlik ortamında alternatif planlar geliştirebilir.',
+      gelistirilebilir:'Değişime genel olarak açık olmakla birlikte ani ve kapsamlı değişiklikler karşısında esnekliğini artırması önerilir.',
+      oncelikli:       'Değişim süreçlerine uyum ve çevik davranış geliştirme öncelikli çalışma alanı olarak belirlenmektedir.'
     },
     'Y4_Iletisim_%': {
-      guclu:           'Dusuncelerini acik ve ikna edici bicimde ifade eder, etkin dinleme ve muzakere becerilerine hakimdir.',
-      gelistirilebilir:'Temel iletisim becerileri yeterli duzeyde olmakla birlikte ikna edici argumantas yon ve muzakere stratejileri konusunda gelisim onerilmektedir.',
-      oncelikli:       'Etkili iletisim kurma ve muzakere sureclerini yonetme becerileri oncelikli gelisim alani olarak one cikmaktadir.'
+      guclu:           'Düşüncelerini açık ve ikna edici biçimde ifade eder, etkin dinleme ve müzakere becerilerine hâkimdir.',
+      gelistirilebilir:'Temel iletişim becerileri yeterli düzeyde olmakla birlikte ikna edici argümantasyon ve müzakere stratejileri konusunda gelişim önerilmektedir.',
+      oncelikli:       'Etkili iletişim kurma ve müzakere süreçlerini yönetme becerileri öncelikli gelişim alanı olarak öne çıkmaktadır.'
     },
     'Y5_Yenilikcilik_%': {
-      guclu:           'Alisildik disinda cozumler uretir, mevcut surecleri sorgular ve yeni yaklasimlar i benimsemekten cekinmez.',
-      gelistirilebilir:'Yenilikci dusunce potansiyeli tasimakla birlikte risk alma ve farkli yaklasimlar i deneme konusunda daha proaktif bir tutum gelistirilmesi onerilir.',
-      oncelikli:       'Yaratici problem cozme ve yenilikci yaklasimlar gelistirme becerileri oncelikli gelisim alani olarak degerlendirilmektedir.'
+      guclu:           'Alışılmışın dışında çözümler üretir, mevcut süreçleri sorgular ve yeni yaklaşımları benimsemekten çekinmez.',
+      gelistirilebilir:'Yenilikçi düşünce potansiyeli taşımakla birlikte risk alma ve farklı yaklaşımları deneme konusunda daha proaktif bir tutum geliştirilmesi önerilir.',
+      oncelikli:       'Yaratıcı problem çözme ve yenilikçi yaklaşımlar geliştirme becerileri öncelikli gelişim alanı olarak değerlendirilmektedir.'
     },
     'Y6_Teknoloji_%': {
-      guclu:           'Dijital araclara hakimdir, bilgi ihtiyacini dogru kaynaklardan karsilar ve yeni teknolojilere hizla uyum saglar.',
-      gelistirilebilir:'Temel teknoloji kullanimi yeterli olmakla birlikte bilgi degerlendirme ve dijital araclari etkin kullanma konusunda gelisim onerilmektedir.',
-      oncelikli:       'Teknoloji ve bilgi okuryazarligi becerileri oncelikli gelisim alani olarak belirlenmektedir.'
+      guclu:           'Dijital araçlara hâkimdir, bilgi ihtiyacını doğru kaynaklardan karşılar ve yeni teknolojilere hızla uyum sağlar.',
+      gelistirilebilir:'Temel teknoloji kullanımı yeterli olmakla birlikte bilgi değerlendirme ve dijital araçları etkin kullanma konusunda gelişim önerilmektedir.',
+      oncelikli:       'Teknoloji ve bilgi okuryazarlığı becerileri öncelikli gelişim alanı olarak belirlenmektedir.'
     },
     'Y7_Basarma_%': {
-      guclu:           'Hedef odakli calisir, engellerle karsilastiginda motivasyonunu korur ve sorumluluk almaktan cekinmez.',
-      gelistirilebilir:'Basari motivasyonu temel duzeyde mevcut olmakla birlikte zorluklar karsisinda kararlilig i surdurme ve inisiyatif alma konusunda gelisim potansiyeli tasimaktadir.',
-      oncelikli:       'Hedef belirleme, motivasyonu koruma ve engellere ragmen isi tamamlama becerileri oncelikli gelisim alani olarak degerlendirilmektedir.'
+      guclu:           'Hedef odaklı çalışır, engellerle karşılaştığında motivasyonunu korur ve sorumluluk almaktan çekinmez.',
+      gelistirilebilir:'Başarı motivasyonu temel düzeyde mevcut olmakla birlikte zorluklar karşısında kararlılığı sürdürme ve inisiyatif alma konusunda gelişim potansiyeli taşımaktadır.',
+      oncelikli:       'Hedef belirleme, motivasyonu koruma ve engellere rağmen işi tamamlama becerileri öncelikli gelişim alanı olarak değerlendirilmektedir.'
     }
   };
 
@@ -397,8 +395,8 @@ async function generatePDF(idx) {
     const pct = Math.round(r[yt.key] || 0);
     const sv = seviye(pct);
     const color = sv.key === 'guclu' ? green : sv.key === 'gelistirilebilir' ? yellow : red;
-    const svLabel = sv.key === 'guclu' ? 'Guclu Alan' : sv.key === 'gelistirilebilir' ? 'Gelistirilebilir' : 'Oncelikli Gelisim';
-    const yorum = yorumlarASCII[yt.key][sv.key];
+    const svLabel = sv.key === 'guclu' ? 'Güçlü Alan' : sv.key === 'gelistirilebilir' ? 'Geliştirilebilir' : 'Öncelikli Gelişim';
+    const yorum = yorumlarTR[yt.key][sv.key];
 
     if (y - 80 < 60) { page = addPage(); y = H - 80; }
 
@@ -441,7 +439,7 @@ async function generatePDF(idx) {
   const blob = new Blob([pdfBytes], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const ad = tr(r['Ad Soyad'] || 'rapor').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  const ad = r['Ad Soyad'] || 'rapor'.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
   a.href = url; a.download = 'FUPI_DYT_' + ad + '_' + bugun.replace(/\./g,'-') + '.pdf';
   a.click(); URL.revokeObjectURL(url);
 }
