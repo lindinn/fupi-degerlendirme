@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUPİ — DYT Danışman Paneli</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js">
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f4f4f8; color: #222; font-size: 14px; }
@@ -303,6 +304,7 @@ async function generatePDF(idx) {
     if (!r) throw new Error('Katılımcı verisi bulunamadı.');
 
     const doc = await PDFDocument.create();
+    doc.registerFontkit(fontkit);
 
     // Roboto font embed (Türkçe karakter desteği)
     let fontReg, fontBold;
