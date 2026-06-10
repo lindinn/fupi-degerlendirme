@@ -317,14 +317,17 @@ async function generatePDF(idx) {
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
 
-  let customFont;
+  // Roboto (Türkçe karakter desteği)
+  const fontUrl = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
+  const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+  const customFont = await doc.embedFont(fontBytes, { subset: true });
+
+  // Logo
+  let logoImage = null;
   try {
-    const fontUrl = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
-    const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
-    customFont = await doc.embedFont(fontBytes, { subset: true });
-  } catch {
-    customFont = await doc.embedFont(StandardFonts.Helvetica);
-  }
+    const logoBytes = await fetch('https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png').then(res => res.arrayBuffer());
+    logoImage = await doc.embedPng(logoBytes);
+  } catch(e) {}
 
   const page = doc.addPage([595, 842]);
   const { width, height } = page.getSize();
@@ -335,9 +338,16 @@ async function generatePDF(idx) {
   // Üst bant
   page.drawRectangle({ x: 0, y: height - 80, width, height: 80, color: rgb(0.15, 0.14, 0.35) });
 
-  // Başlık
-  page.drawText('Mesleki Yonelim Olcegi (MYO)', { x: 40, y: height - 35, size: 16, font: customFont, color: rgb(1,1,1) });
-  page.drawText('FUPi Kariyer Tasarimi', { x: 40, y: height - 55, size: 10, font: customFont, color: rgb(0.6,0.6,0.8) });
+  // Logo
+  if (logoImage) {
+    const logoDims = logoImage.scaleToFit(110, 36);
+    page.drawImage(logoImage, { x: 40, y: height - 58, width: logoDims.width, height: logoDims.height });
+  }
+
+  // Başlık metni (logonun yanına veya olmadığında)
+  const baslikX = logoImage ? 170 : 40;
+  page.drawText('Mesleki Yönelim Ölçeği (MYO)', { x: baslikX, y: height - 35, size: 14, font: customFont, color: rgb(1,1,1) });
+  page.drawText('FUPİ Kariyer Tasarımı', { x: baslikX, y: height - 55, size: 9, font: customFont, color: rgb(0.6,0.6,0.8) });
 
   // Ad soyad ve tarih
   page.drawText(r['ad_soyad'] || '', { x: 40, y: height - 110, size: 18, font: customFont, color: rgb(1,1,1) });
@@ -369,30 +379,21 @@ async function generatePDF(idx) {
     const color = barColors[b.no - 1];
     const isTop3 = i < 3;
 
-    // Satır arka planı (top3 için vurgulu)
     if (isTop3) {
       page.drawRectangle({ x: 35, y: y - 8, width: width - 70, height: rowH - 6, color: rgb(0.12, 0.11, 0.25), opacity: 0.8 });
     }
 
-    // Boyut adı
-    const adKisa = b.ad.length > 28 ? b.ad.slice(0, 27) + '.' : b.ad;
-    page.drawText(adKisa, { x: labelX, y: y + 8, size: isTop3 ? 10 : 9, font: customFont, color: isTop3 ? rgb(1,1,1) : rgb(0.65,0.65,0.8) });
-
-    // Bar arka planı
+    page.drawText(b.ad, { x: labelX, y: y + 8, size: isTop3 ? 10 : 9, font: customFont, color: isTop3 ? rgb(1,1,1) : rgb(0.65,0.65,0.8) });
     page.drawRectangle({ x: barX, y: y + 4, width: barMaxW, height: 10, color: rgb(0.15,0.15,0.3) });
-
-    // Bar dolgu
     page.drawRectangle({ x: barX, y: y + 4, width: barMaxW * pct, height: 10, color });
-
-    // Değer
     page.drawText(val.toFixed(2), { x: valX, y: y + 6, size: 9, font: customFont, color: rgb(0.9,0.9,1) });
 
     y -= rowH;
   });
 
-  // Alt not
+  // Alt bilgi — copyright
   page.drawLine({ start: { x: 40, y: 55 }, end: { x: width - 40, y: 55 }, thickness: 0.5, color: rgb(0.2,0.2,0.4) });
-  page.drawText('Bu rapor FUPi Kariyer Tasarimi tarafindan olusturulmustur. www.fupi.com.tr', { x: 40, y: 35, size: 8, font: customFont, color: rgb(0.4,0.4,0.6) });
+  page.drawText('© FUPİ Kariyer Tasarımı — Tüm hakları FUPİ\'ye aittir. | www.fupi.com.tr', { x: 40, y: 35, size: 8, font: customFont, color: rgb(0.4,0.4,0.6) });
 
   const bytes = await doc.save();
   const blob = new Blob([bytes], { type: 'application/pdf' });
