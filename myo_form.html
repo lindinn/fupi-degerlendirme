@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYO — Mesleki Yönelim Ölçeği</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --bg: #f8f7ff;
+    --card: #ffffff;
+    --border: #e8e5f5;
+    --primary: #3C3489;
+    --primary-light: #EEEDFE;
+    --primary-mid: #534AB7;
+    --text: #1a1830;
+    --muted: #6b648f;
+    --faint: #b8b2d8;
+    --success: #2e9e6b;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--primary);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .header-logo { height: 36px; width: auto; }
+  .header-title {
+    color: rgba(255,255,255,0.9);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* INTRO */
+  .intro-wrap {
+    max-width: 640px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+  }
+  .intro-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem 2.5rem;
+  }
+  .intro-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+  }
+  .intro-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .info-chips {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+  }
+  .chip {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+  .name-section label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+  .name-row { display: flex; gap: 0.75rem; }
+  .name-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: var(--primary-mid); }
+  .btn-start {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.65rem 1.75rem;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+  .btn-start:hover { opacity: 0.88; }
+  .input-error {
+    font-size: 12px;
+    color: #c0392b;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  /* FORM */
+  .form-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .progress-bar-wrap {
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--primary-mid);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+    margin-bottom: 0.4rem;
+  }
+
+  .likert-header {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 52px);
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .likert-header-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .madde-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 52px);
+    gap: 0.5rem;
+    padding: 1rem 1rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    transition: border-color 0.2s;
+  }
+  .madde-card:hover { border-color: var(--faint); }
+  .madde-card.answered { border-color: rgba(83,74,183,0.2); background: rgba(238,237,254,0.3); }
+
+  .madde-no-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .madde-no {
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .madde-metin {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .radio-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .radio-cell input[type="radio"] { display: none; }
+  .radio-cell label {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .radio-cell input[type="radio"]:checked + label {
+    background: var(--primary-mid);
+    border-color: var(--primary-mid);
+    color: #fff;
+  }
+  .radio-cell label:hover {
+    border-color: var(--primary-mid);
+    color: var(--primary);
+  }
+
+  .btn-submit {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 2rem;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-top: 2rem;
+    width: 100%;
+  }
+  .btn-submit:hover { opacity: 0.88; }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .submit-note {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.75rem;
+  }
+  .eksik-uyari {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  /* SONUÇ */
+  .sonuc-wrap {
+    max-width: 640px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+  }
+  .sonuc-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    text-align: center;
+  }
+  .sonuc-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 24px;
+  }
+  .sonuc-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+  .sonuc-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 600px) {
+    .madde-card {
+      grid-template-columns: 1fr repeat(5, 40px);
+      gap: 0.3rem;
+      padding: 0.875rem 0.75rem;
+    }
+    .radio-cell label {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+    }
+    .likert-header {
+      grid-template-columns: 1fr repeat(5, 40px);
+      gap: 0.3rem;
+    }
+    .likert-header-label { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="header-logo" src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo_white.png" 
+       onerror="this.style.display='none'" alt="FUPİ">
+  <div>
+    <div class="header-title">Mesleki Yönelim Ölçeği</div>
+    <div class="header-sub">MYO © FUPİ Kariyer Tasarımı</div>
+  </div>
+</div>
+
+<!-- GİRİŞ EKRANI -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-wrap">
+    <div class="intro-card">
+      <h2>Mesleki Yönelim Ölçeği</h2>
+      <p>Bu ölçek, iş ve çalışma yaşamına ilişkin ilgi ve yönelimlerinizi belirlemeye yönelik geliştirilmiştir. Yanıtlarınızda doğru ya da yanlış yoktur — sizin için gerçekten uygun olan seçeneği işaretlemeniz yeterlidir.</p>
+      <div class="info-chips">
+        <span class="chip">65 madde</span>
+        <span class="chip">~10 dakika</span>
+        <span class="chip">Gönüllülük esası</span>
+      </div>
+      <div class="name-section">
+        <label>Adınız ve Soyadınız</label>
+        <div class="name-row">
+          <input class="name-input" type="text" id="input-ad" placeholder="Adınız">
+          <input class="name-input" type="text" id="input-soyad" placeholder="Soyadınız">
+        </div>
+        <div class="input-error" id="name-error">Lütfen adınızı ve soyadınızı girin.</div>
+      </div>
+      <button class="btn-start" onclick="startForm()">Başla →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM EKRANI -->
+<div id="screen-form" class="screen">
+  <div class="form-wrap">
+    <div class="progress-label" id="progress-label">0 / 65</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+
+    <div class="likert-header">
+      <div></div>
+      <div class="likert-header-label">Hiç uygun değil</div>
+      <div class="likert-header-label">Uygun değil</div>
+      <div class="likert-header-label">Kararsızım</div>
+      <div class="likert-header-label">Uygun</div>
+      <div class="likert-header-label">Tamamen uygun</div>
+    </div>
+
+    <div id="maddeler-container"></div>
+
+    <div class="eksik-uyari" id="eksik-uyari">
+      Lütfen tüm soruları yanıtlayın. Yanıtsız sorular kırmızıyla işaretlendi.
+    </div>
+
+    <button class="btn-submit" id="btn-submit" onclick="submitForm()">
+      Yanıtlarımı Gönder
+    </button>
+    <div class="submit-note">Yanıtlarınız güvenli biçimde kaydedilecektir.</div>
+  </div>
+</div>
+
+<!-- SONUÇ EKRANI -->
+<div id="screen-sonuc" class="screen">
+  <div class="sonuc-wrap">
+    <div class="sonuc-card">
+      <div class="sonuc-icon">✓</div>
+      <h2>Yanıtlarınız Kaydedildi</h2>
+      <p>Katılımınız için teşekkür ederiz. Sonuçlarınız danışmanınız tarafından değerlendirilecek ve sizinle paylaşılacaktır.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const WEBHOOK = 'https://script.google.com/macros/s/AKfycbwgavSv0pI0SdLhxMkVnSD1IuabFZpyyI78s1aMRik-pOHjldYJaDJcnF36MG3Qwymz3A/exec';
+
+const MADDELER = [
+  {
+    "id": 1,
+    "boyut": "B9",
+    "kod": "MYT62",
+    "metin": "İşimde başkalarını etkileyerek somut sonuçlar üretmek isterim."
+  },
+  {
+    "id": 2,
+    "boyut": "B12",
+    "kod": "MYT78",
+    "metin": "Ham bir malzemeyi işleyerek özgün bir ürüne dönüştürmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 3,
+    "boyut": "B2",
+    "kod": "MYT14",
+    "metin": "İşimde teknik sorunları elleriyle ve aletlerle çözmek hoşuma gider."
+  },
+  {
+    "id": 4,
+    "boyut": "B5",
+    "kod": "MYT31",
+    "metin": "Matematiksel veya istatistiksel yöntemlerin işimin merkezinde olmasını isterim."
+  },
+  {
+    "id": 5,
+    "boyut": "B10",
+    "kod": "MYT66",
+    "metin": "Belirli kural ve prosedürlere göre yürütülen işlerin merkezinde yer almaktan keyif alırım."
+  },
+  {
+    "id": 6,
+    "boyut": "B8",
+    "kod": "MYT56",
+    "metin": "İşimin odağında insan ilişkilerinin ve empatinin yer almasını isterim."
+  },
+  {
+    "id": 7,
+    "boyut": "B5",
+    "kod": "MYT30",
+    "metin": "Sayısal veya matematiksel problemleri adım adım çözmeyi gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 8,
+    "boyut": "B13",
+    "kod": "MYT89",
+    "metin": "Piyasa koşullarını takip edip ticari stratejiler geliştirmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 9,
+    "boyut": "B11",
+    "kod": "MYT72",
+    "metin": "Bitki veya hayvanların yetiştirilmesi ve bakımının işin özünde olduğu yerlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 10,
+    "boyut": "B2",
+    "kod": "MYT11",
+    "metin": "Teknik bilgi ve becerilerimin işimin merkezinde olduğu yerlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 11,
+    "boyut": "B6",
+    "kod": "MYT38",
+    "metin": "Yazılı veya sözlü argümanları analiz etmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 12,
+    "boyut": "B4",
+    "kod": "MYT25",
+    "metin": "İşimin özünde görsel ya da işitsel estetiğin olmasını isterim."
+  },
+  {
+    "id": 13,
+    "boyut": "B9",
+    "kod": "MYT61",
+    "metin": "Bir süreci veya projeyi başından sonuna kadar yönetmenin işin merkezinde olduğu işler ilgimi çeker."
+  },
+  {
+    "id": 14,
+    "boyut": "B8",
+    "kod": "MYT55",
+    "metin": "İnsanların hayatını kolaylaştırmaya veya iyileştirmeye yönelik işler ilgimi çeker."
+  },
+  {
+    "id": 15,
+    "boyut": "B4",
+    "kod": "MYT26",
+    "metin": "İzleyicide veya dinleyicide duyusal bir deneyim yaratan ürünler ortaya koyduğum işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 16,
+    "boyut": "B5",
+    "kod": "MYT34",
+    "metin": "Verilerin ve sayıların belirleyici olduğu, mantıksal bir düzen içinde ilerleyen işler ilgimi çeker."
+  },
+  {
+    "id": 17,
+    "boyut": "B11",
+    "kod": "MYT75",
+    "metin": "İşimin doğal ortamlarda ve açık havada geçmesini isterim."
+  },
+  {
+    "id": 18,
+    "boyut": "B9",
+    "kod": "MYT58",
+    "metin": "Önemli kararlar almayı ve sorumluluk üstlenmeyi gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 19,
+    "boyut": "B7",
+    "kod": "MYT44",
+    "metin": "Dijital platformlar aracılığıyla içerik üretmeyi gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 20,
+    "boyut": "B4",
+    "kod": "MYT23",
+    "metin": "Renk, form veya kompozisyon gibi estetik unsurlarla çalışmayı gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 21,
+    "boyut": "B7",
+    "kod": "MYT48",
+    "metin": "Dijital ortamda rekabet etmeyi veya performans sergilemeyi içeren işler ilgimi çeker."
+  },
+  {
+    "id": 22,
+    "boyut": "B3",
+    "kod": "MYT17",
+    "metin": "Bir kavramı veya duyguyu özgün biçimde ifade etmeyi gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 23,
+    "boyut": "B6",
+    "kod": "MYT37",
+    "metin": "Kavramlar arasındaki ilişkileri keşfetmeyi gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 24,
+    "boyut": "B9",
+    "kod": "MYT59",
+    "metin": "Başkalarına ilham verip onları harekete geçirmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 25,
+    "boyut": "B10",
+    "kod": "MYT69",
+    "metin": "Sonuçların ve süreçlerin önceden belirlendiği işler ilgimi çeker."
+  },
+  {
+    "id": 26,
+    "boyut": "B13",
+    "kod": "MYT88",
+    "metin": "Kazanç ve kayıp hesaplamayı gerektiren kararlar almaktan keyif alırım."
+  },
+  {
+    "id": 27,
+    "boyut": "B7",
+    "kod": "MYT46",
+    "metin": "İşimin dijital dünyada var olmayı ve etkileşim kurmayı gerektirmesini isterim."
+  },
+  {
+    "id": 28,
+    "boyut": "B5",
+    "kod": "MYT32",
+    "metin": "Sayılar ve formüller aracılığıyla sonuçlar üretmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 29,
+    "boyut": "B12",
+    "kod": "MYT80",
+    "metin": "Malzemeyle doğrudan temas kurarak somut ürünler ürettiğim işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 30,
+    "boyut": "B1",
+    "kod": "MYT2",
+    "metin": "Hareket, denge ve koordinasyon gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 31,
+    "boyut": "B12",
+    "kod": "MYT79",
+    "metin": "El becerisinin ve ince motor kontrolün işimin özünde olmasını isterim."
+  },
+  {
+    "id": 32,
+    "boyut": "B5",
+    "kod": "MYT29",
+    "metin": "Sayısal verilerle çalışmayı ve örüntüler keşfetmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 33,
+    "boyut": "B11",
+    "kod": "MYT76",
+    "metin": "Çevre ve doğal yaşamı korumaya yönelik sorumlulukların işimin merkezinde olmasını isterim."
+  },
+  {
+    "id": 34,
+    "boyut": "B3",
+    "kod": "MYT19",
+    "metin": "Henüz var olmayan şeyleri hayal edip ortaya koymanın işimin odağında olmasını isterim."
+  },
+  {
+    "id": 35,
+    "boyut": "B1",
+    "kod": "MYT5",
+    "metin": "İşimin sürekli bedensel hareket içermesini isterim."
+  },
+  {
+    "id": 36,
+    "boyut": "B13",
+    "kod": "MYT86",
+    "metin": "Ticari fırsatları değerlendirmeyi ve kazanca dönüştürmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 37,
+    "boyut": "B6",
+    "kod": "MYT42",
+    "metin": "Anlam ve yorumun belirleyici olduğu işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 38,
+    "boyut": "B10",
+    "kod": "MYT68",
+    "metin": "İşimin belirli bir düzen ve ritim içinde aktığı ortamlarda çalışmaktan keyif alırım."
+  },
+  {
+    "id": 39,
+    "boyut": "B6",
+    "kod": "MYT39",
+    "metin": "Bir konuyu derinlemesine araştırıp ele almayı gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 40,
+    "boyut": "B11",
+    "kod": "MYT74",
+    "metin": "Ekosistemlerin ve doğal süreçlerin işleyişiyle ilgilenmeyi gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 41,
+    "boyut": "B3",
+    "kod": "MYT21",
+    "metin": "Standart çözümlerin yetersiz kaldığı, özgün düşüncenin gerektiği işler ilgimi çeker."
+  },
+  {
+    "id": 42,
+    "boyut": "B8",
+    "kod": "MYT53",
+    "metin": "İşimde insanları dinlemeyi ve anlamayı gerektiren sorumlulukların olmasını isterim."
+  },
+  {
+    "id": 43,
+    "boyut": "B10",
+    "kod": "MYT67",
+    "metin": "Sürprizlerin ve ani değişimlerin az olduğu iş ortamlarında çalışmayı isterim."
+  },
+  {
+    "id": 44,
+    "boyut": "B8",
+    "kod": "MYT51",
+    "metin": "İnsanlarla birebir ya da grup halinde çalışmayı gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 45,
+    "boyut": "B7",
+    "kod": "MYT47",
+    "metin": "Sürekli gelişen teknolojik araçları takip etmeyi ve uygulamayı gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 46,
+    "boyut": "B12",
+    "kod": "MYT81",
+    "metin": "Ustalık ve sabır gerektiren el işçiliğinin merkezde olduğu işler ilgimi çeker."
+  },
+  {
+    "id": 47,
+    "boyut": "B3",
+    "kod": "MYT16",
+    "metin": "Özgün ve yaratıcı düşüncenin ön planda olduğu ortamlarda çalışmayı isterim."
+  },
+  {
+    "id": 48,
+    "boyut": "B11",
+    "kod": "MYT73",
+    "metin": "Doğal kaynakları korumaya veya sürdürülebilir biçimde kullanmaya yönelik işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 49,
+    "boyut": "B1",
+    "kod": "MYT3",
+    "metin": "İşimde bedenimi aktif biçimde kullanmayı isterim."
+  },
+  {
+    "id": 50,
+    "boyut": "B1",
+    "kod": "MYT6",
+    "metin": "İşimde fiziksel kapasitemi zorlayan görevler üstlenmekten keyif alırım."
+  },
+  {
+    "id": 51,
+    "boyut": "B6",
+    "kod": "MYT40",
+    "metin": "İşimde dili hassas ve etkili biçimde kullanmamın beklenmesini isterim."
+  },
+  {
+    "id": 52,
+    "boyut": "B8",
+    "kod": "MYT52",
+    "metin": "Başkalarının gelişimine ve iyiliğine katkı sağladığım işler ilgimi çeker."
+  },
+  {
+    "id": 53,
+    "boyut": "B2",
+    "kod": "MYT13",
+    "metin": "Bir sistemi kurup çalışır hale getirdiğim işler ilgimi çeker."
+  },
+  {
+    "id": 54,
+    "boyut": "B7",
+    "kod": "MYT49",
+    "metin": "İşimin büyük bölümünün dijital platformlar üzerinden yürümesini isterim."
+  },
+  {
+    "id": 55,
+    "boyut": "B12",
+    "kod": "MYT82",
+    "metin": "Bir ürünü başından sonuna kadar bizzat elleriyle üretmeyi gerektiren işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 56,
+    "boyut": "B9",
+    "kod": "MYT60",
+    "metin": "Bir ekibi bizzat kurup koordine etmenin işin özünde olduğu yerlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 57,
+    "boyut": "B2",
+    "kod": "MYT10",
+    "metin": "Çalışırken alet ve ekipman kullanmaktan keyif alırım."
+  },
+  {
+    "id": 58,
+    "boyut": "B13",
+    "kod": "MYT91",
+    "metin": "Satış, pazarlama veya finansal planlama içeriğine sahip işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 59,
+    "boyut": "B2",
+    "kod": "MYT12",
+    "metin": "İşimde mekanik veya elektronik sistemlerle doğrudan çalışmayı isterim."
+  },
+  {
+    "id": 60,
+    "boyut": "B13",
+    "kod": "MYT90",
+    "metin": "İşimin odağında para ve sermayenin verimli kullanımının olmasını isterim."
+  },
+  {
+    "id": 61,
+    "boyut": "B4",
+    "kod": "MYT22",
+    "metin": "Görsel açıdan etkileyici ürünler tasarlamayı gerektiren işler ilgimi çeker."
+  },
+  {
+    "id": 62,
+    "boyut": "B4",
+    "kod": "MYT28",
+    "metin": "İşimin bir bölümünün insanlara estetik bir deneyim yaşatmayı amaçlamasını isterim."
+  },
+  {
+    "id": 63,
+    "boyut": "B10",
+    "kod": "MYT70",
+    "metin": "Standart prosedürlere ve net görev tanımlarına sahip işlerde çalışmaktan keyif alırım."
+  },
+  {
+    "id": 64,
+    "boyut": "B1",
+    "kod": "MYT7",
+    "metin": "Fiziksel becerilerimi sürekli geliştirebildiğim işler ilgimi çeker."
+  },
+  {
+    "id": 65,
+    "boyut": "B3",
+    "kod": "MYT18",
+    "metin": "Alışılmışın dışında yaklaşımlar geliştirmeyi gerektiren işler ilgimi çeker."
+  }
+];
+
+const BOYUT_LABELS = {
+  B1: "Fiziksel/Bedensel",
+  B2: "Teknik/Mekanik",
+  B3: "Fikirsel/İfadesel Yaratıcılık",
+  B4: "Estetik/Duyusal Yaratıcılık",
+  B5: "Sayısal/Mantıksal Analitik",
+  B6: "Sözel/Kavramsal Analitik",
+  B7: "Teknoloji/Dijital",
+  B8: "İnsan Odaklı/Sosyal",
+  B9: "Yönetim/Liderlik",
+  B10: "Rutin/İstikrar",
+  B11: "Doğa/Canlı Sistemler",
+  B12: "Zanaat/El Becerisi",
+  B13: "Ticari/Finansal"
+};
+
+let katilimciAd = '';
+
+function startForm() {
+  const ad = document.getElementById('input-ad').value.trim();
+  const soyad = document.getElementById('input-soyad').value.trim();
+  if (!ad || !soyad) {
+    document.getElementById('name-error').style.display = 'block';
+    return;
+  }
+  katilimciAd = ad + ' ' + soyad;
+  document.getElementById('name-error').style.display = 'none';
+  buildForm();
+  showScreen('screen-form');
+}
+
+function buildForm() {
+  const container = document.getElementById('maddeler-container');
+  container.innerHTML = '';
+  MADDELER.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'madde-card';
+    card.id = 'card-' + m.id;
+
+    let radioHTML = '';
+    for (let v = 1; v <= 5; v++) {
+      radioHTML += `
+        <div class="radio-cell">
+          <input type="radio" name="m${m.id}" id="m${m.id}_${v}" value="${v}" onchange="onAnswer(${m.id})">
+          <label for="m${m.id}_${v}">${v}</label>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="madde-no-text">
+        <div class="madde-no">${i + 1}</div>
+        <div class="madde-metin">${m.metin}</div>
+      </div>
+      ${radioHTML}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function onAnswer(id) {
+  const card = document.getElementById('card-' + id);
+  card.classList.add('answered');
+  card.style.borderColor = '';
+  updateProgress();
+}
+
+function updateProgress() {
+  let answered = 0;
+  MADDELER.forEach(m => {
+    if (document.querySelector(`input[name="m${m.id}"]:checked`)) answered++;
+  });
+  const pct = Math.round((answered / MADDELER.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = answered + ' / ' + MADDELER.length;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+async function submitForm() {
+  // Eksik kontrol
+  const eksik = [];
+  MADDELER.forEach(m => {
+    if (!document.querySelector(`input[name="m${m.id}"]:checked`)) {
+      eksik.push(m.id);
+    }
+  });
+
+  if (eksik.length > 0) {
+    document.getElementById('eksik-uyari').style.display = 'block';
+    MADDELER.forEach(m => {
+      const card = document.getElementById('card-' + m.id);
+      if (eksik.includes(m.id)) {
+        card.style.borderColor = '#e74c3c';
+        card.style.background = 'rgba(231,76,60,0.04)';
+      }
+    });
+    document.getElementById('card-' + eksik[0]).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Gönderiliyor...';
+
+  // Verileri topla
+  const yanıtlar = {};
+  const boyut_toplam = {};
+  const boyut_sayac = {};
+
+  MADDELER.forEach(m => {
+    const val = parseInt(document.querySelector(`input[name="m${m.id}"]:checked`).value);
+    yanıtlar[m.kod] = val;
+    if (!boyut_toplam[m.boyut]) { boyut_toplam[m.boyut] = 0; boyut_sayac[m.boyut] = 0; }
+    boyut_toplam[m.boyut] += val;
+    boyut_sayac[m.boyut]++;
+  });
+
+  // Boyut ortalamaları
+  const boyut_ort = {};
+  Object.keys(boyut_toplam).forEach(b => {
+    boyut_ort[b] = (boyut_toplam[b] / boyut_sayac[b]).toFixed(2);
+  });
+
+  // En yüksek 3 boyut
+  const sirali = Object.entries(boyut_ort)
+    .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]))
+    .slice(0, 3)
+    .map(([b]) => BOYUT_LABELS[b]);
+
+  const payload = {
+    tarih: new Date().toLocaleString('tr-TR'),
+    ad_soyad: katilimciAd,
+    ...yanıtlar,
+    ...Object.fromEntries(Object.entries(boyut_ort).map(([b, v]) => [b + '_ort', v])),
+    en_yuksek_3: sirali.join(' | ')
+  };
+
+  try {
+    await fetch(WEBHOOK, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    showScreen('screen-sonuc');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Yanıtlarımı Gönder';
+    alert('Bağlantı hatası. Lütfen tekrar deneyin.');
+  }
+}
+</script>
+</body>
+</html>
