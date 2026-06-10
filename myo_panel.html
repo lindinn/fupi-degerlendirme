@@ -255,7 +255,7 @@ function renderTable() {
     const en_yuksek_3 = sirali.slice(0,3);
 
     html += '<tr>';
-    html += '<td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">' + (allData.indexOf(r)+1) + '</td>';
+    html += '<td style="color:var(--muted);font-size:12px;font-family:monospace">' + (allData.indexOf(r)+1) + '</td>';
     html += '<td style="font-weight:500;color:#fff">' + (r['ad_soyad']||'—') + '</td>';
     html += '<td style="color:var(--muted);font-size:12px">' + (r['tarih']||'—') + '</td>';
     html += '<td><div class="profil-chips">';
@@ -263,7 +263,7 @@ function renderTable() {
       html += '<span class="pchip pchip-' + b.no + '">' + b.ad + '</span>';
     });
     html += '</div></td>';
-    html += '<td style="font-family:'DM Mono',monospace;font-size:13px">' + (parseFloat(r[sirali[0].key])||0).toFixed(2) + '</td>';
+    html += '<td style="font-family:monospace;font-size:13px">' + (parseFloat(r[sirali[0].key])||0).toFixed(2) + '</td>';
     html += '<td><button class="btn-pdf" onclick="openDetail(' + i + ')">Profil</button></td>';
     html += '<td><button class="btn-pdf" onclick="generatePDF(' + i + ')">PDF</button></td>';
     html += '</tr>';
