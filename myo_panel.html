@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYO — Danışman Paneli</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap');
+  :root {
+    --dark: #0f0f1a;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --primary: #7B6FE8;
+    --primary-dim: rgba(123,111,232,0.12);
+    --text: #e8e8f0;
+    --muted: #7a7a9a;
+    --faint: #3a3a5a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "DM Sans", sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  .login-wrap { max-width: 380px; margin: 8vh auto 0; padding: 2rem; background: var(--card); border: .5px solid var(--border); border-radius: 16px; }
+  .login-title { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: .35rem; }
+  .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
+  .field-label { font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: .4rem; display: block; }
+  .field-input { width: 100%; background: rgba(255,255,255,0.03); border: .5px solid var(--border); border-radius: 8px; padding: .7rem 1rem; font-size: 14px; font-family: "DM Sans", sans-serif; color: var(--text); outline: none; transition: border-color .2s; margin-bottom: 1rem; }
+  .field-input:focus { border-color: var(--primary); }
+  .btn-main { background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: .65rem 1.5rem; font-size: 14px; font-weight: 500; font-family: "DM Sans", sans-serif; cursor: pointer; width: 100%; transition: opacity .15s; }
+  .btn-main:hover { opacity: .88; }
+  .login-err { font-size: 12px; color: #e07b7b; margin-top: .75rem; display: none; }
+
+  /* PANEL */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 1.25rem; margin-bottom: 2rem; border-bottom: .5px solid var(--border); }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .panel-badge { font-size: 10px; color: var(--primary); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; }
+  .btn-sm { background: transparent; color: var(--muted); border: .5px solid var(--border); border-radius: 8px; padding: .4rem .9rem; font-size: 12px; font-family: "DM Sans", sans-serif; cursor: pointer; transition: all .15s; }
+  .btn-sm:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+  .btn-refresh { background: var(--primary-dim); color: var(--primary); border: .5px solid rgba(123,111,232,.3); border-radius: 8px; padding: .4rem .9rem; font-size: 12px; font-family: "DM Sans", sans-serif; cursor: pointer; transition: all .15s; }
+  .btn-refresh:hover { background: rgba(123,111,232,.2); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 2rem; }
+  .stat-box { background: var(--card); border: .5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .stat-num { font-size: 28px; font-weight: 500; color: #fff; margin-bottom: 2px; font-family: "DM Mono", monospace; }
+  .stat-lbl { font-size: 11px; color: var(--muted); }
+
+  .toolbar { display: flex; gap: 10px; margin-bottom: 1.25rem; align-items: center; }
+  .search-input { background: var(--card); border: .5px solid var(--border); border-radius: 8px; padding: .5rem 1rem; font-size: 13px; font-family: "DM Sans", sans-serif; color: var(--text); outline: none; width: 220px; transition: border-color .2s; }
+  .search-input:focus { border-color: var(--primary); }
+  .search-input::placeholder { color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding: .6rem .75rem; text-align: left; border-bottom: .5px solid var(--border); font-weight: 500; white-space: nowrap; }
+  td { padding: .75rem .75rem; border-bottom: .5px solid rgba(255,255,255,.04); color: var(--text); vertical-align: middle; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+
+  .profil-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pchip { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
+  .pchip-1  { background: rgba(255,120,80,.15);  color: #ff7850; }
+  .pchip-2  { background: rgba(80,180,255,.15);  color: #50b4ff; }
+  .pchip-3  { background: rgba(180,120,255,.15); color: #b478ff; }
+  .pchip-4  { background: rgba(255,180,80,.15);  color: #ffb450; }
+  .pchip-5  { background: rgba(80,255,180,.15);  color: #50ffb4; }
+  .pchip-6  { background: rgba(255,80,180,.15);  color: #ff50b4; }
+  .pchip-7  { background: rgba(80,255,80,.15);   color: #50ff50; }
+  .pchip-8  { background: rgba(255,200,80,.15);  color: #ffc850; }
+  .pchip-9  { background: rgba(80,120,255,.15);  color: #5078ff; }
+  .pchip-10 { background: rgba(200,80,80,.15);   color: #c85050; }
+  .pchip-11 { background: rgba(80,200,120,.15);  color: #50c878; }
+  .pchip-12 { background: rgba(200,160,80,.15);  color: #c8a050; }
+  .pchip-13 { background: rgba(160,80,200,.15);  color: #a050c8; }
+
+  .btn-pdf { background: var(--primary-dim); color: var(--primary); border: .5px solid rgba(123,111,232,.3); border-radius: 6px; padding: .35rem .8rem; font-size: 11px; font-family: "DM Sans", sans-serif; cursor: pointer; transition: all .15s; white-space: nowrap; font-weight: 500; }
+  .btn-pdf:hover { background: rgba(123,111,232,.2); }
+  .empty { text-align: center; padding: 3rem; color: var(--muted); font-size: 14px; line-height: 1.8; }
+  .loading-msg { text-align: center; padding: 3rem; color: var(--muted); font-size: 14px; }
+
+  /* DETAY MODALİ */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #16162a; border: .5px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 680px; max-height: 85vh; overflow-y: auto; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .modal-name { font-size: 18px; font-weight: 600; color: #fff; }
+  .modal-date { font-size: 12px; color: var(--muted); }
+  .modal-close { background: transparent; border: .5px solid var(--border); color: var(--muted); border-radius: 8px; padding: .3rem .8rem; cursor: pointer; font-size: 13px; font-family: "DM Sans", sans-serif; }
+  .boyut-row { display: grid; grid-template-columns: 180px 1fr 40px; gap: 1rem; align-items: center; margin-bottom: .75rem; }
+  .boyut-label { font-size: 12px; color: var(--muted); }
+  .bar-wrap { background: rgba(255,255,255,0.06); border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .boyut-val { font-size: 13px; font-weight: 500; color: #fff; text-align: right; font-family: "DM Mono", monospace; }
+  .modal-top3 { margin-top: 1.5rem; padding-top: 1.25rem; border-top: .5px solid var(--border); }
+  .top3-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
+</style>
+</head>
+<body>
+
+<!-- GİRİŞ -->
+<div id="login-screen" class="screen active">
+  <div class="login-wrap">
+    <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ" style="height:44px;width:auto;margin-bottom:1.5rem;display:block">
+    <div class="login-title">MYO Danışman Paneli</div>
+    <div class="login-sub">Devam etmek için şifrenizi girin.</div>
+    <label class="field-label">Şifre</label>
+    <input class="field-input" type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn-main" onclick="login()">Giriş yap</button>
+    <div class="login-err" id="login-err">Şifre yanlış. Tekrar deneyin.</div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel-screen" class="screen">
+<div class="wrap">
+  <div class="header">
+    <div class="header-left">
+      <img src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ" style="height:38px;width:auto">
+      <div>
+        <div class="panel-badge">MYO Danışman Paneli</div>
+        <div style="font-size:12px;color:var(--muted)" id="panel-date"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-refresh" onclick="loadData()">↻ Yenile</button>
+      <button class="btn-sm" onclick="logout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Toplam kayıt</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-en-yuksek">—</div><div class="stat-lbl">En yaygın 1. boyut</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-son">—</div><div class="stat-lbl">Son katılımcı</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input class="search-input" type="text" id="search-input" placeholder="İsimle ara…" oninput="renderTable()">
+  </div>
+
+  <div id="table-wrap"><div class="loading-msg">Yükleniyor…</div></div>
+</div>
+</div>
+
+<!-- DETAY MODALİ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-header">
+      <div>
+        <div class="modal-name" id="modal-name">—</div>
+        <div class="modal-date" id="modal-date">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">Kapat</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const PASSWORD = 'Claude2026!';
+const WEBHOOK = 'https://script.google.com/macros/s/AKfycbwgavSv0pI0SdLhxMkVnSD1IuabFZpyyI78s1aMRik-pOHjldYJaDJcnF36MG3Qwymz3A/exec';
+
+const BOYUTLAR = [
+  { key: 'B1_ort',  ad: 'Fiziksel/Bedensel',           no: 1  },
+  { key: 'B2_ort',  ad: 'Teknik/Mekanik',               no: 2  },
+  { key: 'B3_ort',  ad: 'Fikirsel/İfadesel Yaratıcılık',no: 3  },
+  { key: 'B4_ort',  ad: 'Estetik/Duyusal Yaratıcılık',  no: 4  },
+  { key: 'B5_ort',  ad: 'Sayısal/Mantıksal Analitik',   no: 5  },
+  { key: 'B6_ort',  ad: 'Sözel/Kavramsal Analitik',     no: 6  },
+  { key: 'B7_ort',  ad: 'Teknoloji/Dijital',            no: 7  },
+  { key: 'B8_ort',  ad: 'İnsan Odaklı/Sosyal',          no: 8  },
+  { key: 'B9_ort',  ad: 'Yönetim/Liderlik',             no: 9  },
+  { key: 'B10_ort', ad: 'Rutin/İstikrar',               no: 10 },
+  { key: 'B11_ort', ad: 'Doğa/Canlı Sistemler',         no: 11 },
+  { key: 'B12_ort', ad: 'Zanaat/El Becerisi',           no: 12 },
+  { key: 'B13_ort', ad: 'Ticari/Finansal',              no: 13 },
+];
+
+const BAR_COLORS = [
+  '#ff7850','#50b4ff','#b478ff','#ffb450','#50ffb4',
+  '#ff50b4','#50ff50','#ffc850','#5078ff','#c85050',
+  '#50c878','#c8a050','#a050c8'
+];
+
+let allData = [];
+
+function login() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === PASSWORD) {
+    showScreen('panel-screen');
+    document.getElementById('panel-date').textContent = new Date().toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'});
+    loadData();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function logout() {
+  showScreen('login-screen');
+  document.getElementById('pw-input').value = '';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function loadData() {
+  document.getElementById('table-wrap').innerHTML = '<div class="loading-msg">Yükleniyor…</div>';
+  try {
+    const res = await fetch(WEBHOOK + '?action=read');
+    allData = await res.json();
+    updateStats();
+    renderTable();
+  } catch (err) {
+    document.getElementById('table-wrap').innerHTML = '<div class="empty">Veri yüklenemedi. Lütfen tekrar deneyin.</div>';
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = allData.length;
+  if (allData.length > 0) {
+    document.getElementById('stat-son').textContent = (allData[allData.length-1]['ad_soyad'] || '—').split(' ')[0];
+
+    // En yaygın 1. boyut
+    const boyut_sayac = {};
+    allData.forEach(r => {
+      const en_yuksek = BOYUTLAR.slice().sort((a,b) => parseFloat(r[b.key]||0) - parseFloat(r[a.key]||0))[0];
+      boyut_sayac[en_yuksek.no] = (boyut_sayac[en_yuksek.no] || 0) + 1;
+    });
+    const en_yaygin = Object.entries(boyut_sayac).sort((a,b) => b[1]-a[1])[0];
+    const boyut_adi = BOYUTLAR.find(b => b.no == en_yaygin[0]);
+    document.getElementById('stat-en-yuksek').textContent = 'B' + en_yaygin[0];
+    document.getElementById('stat-en-yuksek').nextElementSibling.textContent = boyut_adi ? boyut_adi.ad : 'En yaygın 1. boyut';
+  }
+}
+
+function renderTable() {
+  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  const filtered = allData.filter(r => (r['ad_soyad']||'').toLowerCase().includes(q));
+  window._filtered = filtered;
+
+  if (filtered.length === 0) {
+    document.getElementById('table-wrap').innerHTML = '<div class="empty">Kayıt bulunamadı.</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr>';
+  html += '<th>#</th><th>Ad Soyad</th><th>Tarih</th><th>En Yüksek 3 Boyut</th><th>1. Boyut Ort.</th><th></th><th></th>';
+  html += '</tr></thead><tbody>';
+
+  filtered.forEach((r, i) => {
+    const sirali = BOYUTLAR.slice().sort((a,b) => parseFloat(r[b.key]||0) - parseFloat(r[a.key]||0));
+    const en_yuksek_3 = sirali.slice(0,3);
+
+    html += '<tr>';
+    html += '<td style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace">' + (allData.indexOf(r)+1) + '</td>';
+    html += '<td style="font-weight:500;color:#fff">' + (r['ad_soyad']||'—') + '</td>';
+    html += '<td style="color:var(--muted);font-size:12px">' + (r['tarih']||'—') + '</td>';
+    html += '<td><div class="profil-chips">';
+    en_yuksek_3.forEach(b => {
+      html += '<span class="pchip pchip-' + b.no + '">' + b.ad + '</span>';
+    });
+    html += '</div></td>';
+    html += '<td style="font-family:'DM Mono',monospace;font-size:13px">' + (parseFloat(r[sirali[0].key])||0).toFixed(2) + '</td>';
+    html += '<td><button class="btn-pdf" onclick="openDetail(' + i + ')">Profil</button></td>';
+    html += '<td><button class="btn-pdf" onclick="generatePDF(' + i + ')">PDF</button></td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('table-wrap').innerHTML = html;
+}
+
+function openDetail(idx) {
+  const r = window._filtered[idx];
+  document.getElementById('modal-name').textContent = r['ad_soyad'] || '—';
+  document.getElementById('modal-date').textContent = r['tarih'] || '—';
+
+  const sirali = BOYUTLAR.slice().sort((a,b) => parseFloat(r[b.key]||0) - parseFloat(r[a.key]||0));
+
+  let html = '<div style="margin-bottom:1.5rem">';
+  sirali.forEach((b, i) => {
+    const val = parseFloat(r[b.key] || 0);
+    const pct = (val / 5) * 100;
+    const color = BAR_COLORS[b.no - 1];
+    html += '<div class="boyut-row">';
+    html += '<div class="boyut-label">' + b.ad + '</div>';
+    html += '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';
+    html += '<div class="boyut-val">' + val.toFixed(2) + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="modal-top3"><div class="top3-label">En Yüksek 3 Boyut</div><div class="profil-chips">';
+  sirali.slice(0,3).forEach(b => {
+    html += '<span class="pchip pchip-' + b.no + '" style="font-size:12px;padding:4px 12px">' + b.ad + '</span>';
+  });
+  html += '</div></div>';
+
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// PDF
+async function generatePDF(idx) {
+  const r = window._filtered[idx];
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
+
+  let customFont;
+  try {
+    const fontUrl = 'https://lindinn.github.io/fupi-degerlendirme/Roboto-Regular.ttf';
+    const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+    customFont = await doc.embedFont(fontBytes, { subset: true });
+  } catch {
+    customFont = await doc.embedFont(StandardFonts.Helvetica);
+  }
+
+  const page = doc.addPage([595, 842]);
+  const { width, height } = page.getSize();
+
+  // Arka plan
+  page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0.07, 0.07, 0.13) });
+
+  // Üst bant
+  page.drawRectangle({ x: 0, y: height - 80, width, height: 80, color: rgb(0.15, 0.14, 0.35) });
+
+  // Başlık
+  page.drawText('Mesleki Yonelim Olcegi (MYO)', { x: 40, y: height - 35, size: 16, font: customFont, color: rgb(1,1,1) });
+  page.drawText('FUPi Kariyer Tasarimi', { x: 40, y: height - 55, size: 10, font: customFont, color: rgb(0.6,0.6,0.8) });
+
+  // Ad soyad ve tarih
+  page.drawText(r['ad_soyad'] || '', { x: 40, y: height - 110, size: 18, font: customFont, color: rgb(1,1,1) });
+  page.drawText(r['tarih'] || '', { x: 40, y: height - 132, size: 10, font: customFont, color: rgb(0.5,0.5,0.7) });
+
+  // Ayraç
+  page.drawLine({ start: { x: 40, y: height - 148 }, end: { x: width - 40, y: height - 148 }, thickness: 0.5, color: rgb(0.2,0.2,0.4) });
+
+  // Boyut çubukları
+  const sirali = BOYUTLAR.slice().sort((a,b) => parseFloat(r[b.key]||0) - parseFloat(r[a.key]||0));
+
+  const barColors = [
+    rgb(1,0.47,0.31), rgb(0.31,0.71,1), rgb(0.71,0.47,1), rgb(1,0.71,0.31),
+    rgb(0.31,1,0.71), rgb(1,0.31,0.71), rgb(0.31,1,0.31), rgb(1,0.78,0.31),
+    rgb(0.31,0.47,1), rgb(0.78,0.31,0.31), rgb(0.31,0.78,0.47), rgb(0.78,0.63,0.31),
+    rgb(0.63,0.31,0.78)
+  ];
+
+  let y = height - 175;
+  const rowH = 36;
+  const barMaxW = 300;
+  const labelX = 40;
+  const barX = 230;
+  const valX = 545;
+
+  sirali.forEach((b, i) => {
+    const val = parseFloat(r[b.key] || 0);
+    const pct = val / 5;
+    const color = barColors[b.no - 1];
+    const isTop3 = i < 3;
+
+    // Satır arka planı (top3 için vurgulu)
+    if (isTop3) {
+      page.drawRectangle({ x: 35, y: y - 8, width: width - 70, height: rowH - 6, color: rgb(0.12, 0.11, 0.25), opacity: 0.8 });
+    }
+
+    // Boyut adı
+    const adKisa = b.ad.length > 28 ? b.ad.slice(0, 27) + '.' : b.ad;
+    page.drawText(adKisa, { x: labelX, y: y + 8, size: isTop3 ? 10 : 9, font: customFont, color: isTop3 ? rgb(1,1,1) : rgb(0.65,0.65,0.8) });
+
+    // Bar arka planı
+    page.drawRectangle({ x: barX, y: y + 4, width: barMaxW, height: 10, color: rgb(0.15,0.15,0.3) });
+
+    // Bar dolgu
+    page.drawRectangle({ x: barX, y: y + 4, width: barMaxW * pct, height: 10, color });
+
+    // Değer
+    page.drawText(val.toFixed(2), { x: valX, y: y + 6, size: 9, font: customFont, color: rgb(0.9,0.9,1) });
+
+    y -= rowH;
+  });
+
+  // Alt not
+  page.drawLine({ start: { x: 40, y: 55 }, end: { x: width - 40, y: 55 }, thickness: 0.5, color: rgb(0.2,0.2,0.4) });
+  page.drawText('Bu rapor FUPi Kariyer Tasarimi tarafindan olusturulmustur. www.fupi.com.tr', { x: 40, y: 35, size: 8, font: customFont, color: rgb(0.4,0.4,0.6) });
+
+  const bytes = await doc.save();
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'MYO_' + (r['ad_soyad']||'rapor').replace(/\s+/g,'_') + '.pdf';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
