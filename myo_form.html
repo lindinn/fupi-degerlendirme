@@ -337,8 +337,7 @@
 <body>
 
 <div class="header">
-  <img class="header-logo" src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo_white.png" 
-       onerror="this.style.display='none'" alt="FUPİ">
+  <img class="header-logo" src="https://lindinn.github.io/fupi-degerlendirme/fupi_logo.png" alt="FUPİ">
   <div>
     <div class="header-title">Mesleki Yönelim Ölçeği</div>
     <div class="header-sub">MYO © FUPİ Kariyer Tasarımı</div>
@@ -357,11 +356,8 @@
         <span class="chip">Gönüllülük esası</span>
       </div>
       <div class="name-section">
-        <label>Adınız ve Soyadınız</label>
-        <div class="name-row">
-          <input class="name-input" type="text" id="input-ad" placeholder="Adınız">
-          <input class="name-input" type="text" id="input-soyad" placeholder="Soyadınız">
-        </div>
+        <label>Adınız Soyadınız</label>
+        <input class="name-input" type="text" id="input-adsoyad" placeholder="Adınız Soyadınız" style="width:100%">
         <div class="input-error" id="name-error">Lütfen adınızı ve soyadınızı girin.</div>
       </div>
       <button class="btn-start" onclick="startForm()">Başla →</button>
@@ -825,13 +821,12 @@ const BOYUT_LABELS = {
 let katilimciAd = '';
 
 function startForm() {
-  const ad = document.getElementById('input-ad').value.trim();
-  const soyad = document.getElementById('input-soyad').value.trim();
-  if (!ad || !soyad) {
+  const adsoyad = document.getElementById('input-adsoyad').value.trim();
+  if (!adsoyad) {
     document.getElementById('name-error').style.display = 'block';
     return;
   }
-  katilimciAd = ad + ' ' + soyad;
+  katilimciAd = adsoyad;
   document.getElementById('name-error').style.display = 'none';
   buildForm();
   showScreen('screen-form');
