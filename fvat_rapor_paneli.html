@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FUPİ — FVAT PRO Rapor Paneli</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F0EFF8;font-family:system-ui,Arial,sans-serif;color:#222;}
+.header{background:#3C3489;padding:13px 24px;display:flex;align-items:center;gap:14px;}
+.logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:3px;}
+.logo-sub{font-size:7px;color:#bbb;letter-spacing:2px;margin-top:2px;}
+.header-title{color:#EEEDFE;font-size:13px;font-weight:600;border-left:2px solid #534AB7;padding-left:14px;}
+.main{max-width:1080px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;}
+.card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(60,52,137,0.08);}
+.card-title{font-size:13px;font-weight:700;color:#3C3489;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #EEEDFE;}
+.danisan-input{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#222;}
+.danisan-input:focus{outline:none;border-color:#3C3489;}
+.boyut-list{display:flex;flex-direction:column;gap:10px;}
+.boyut-row{padding:10px 12px;border-radius:8px;border:1px solid #E0E0E8;background:#FAFAFA;}
+.boyut-row.cat-dusuk{background:#FFEBEE;border-color:#EF9A9A;}
+.boyut-row.cat-ortalama{background:#F5F5F5;border-color:#bbb;}
+.boyut-row.cat-yuksek{background:#E8F5E9;border-color:#72AB24;}
+.boyut-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.boyut-name{font-size:12px;font-weight:700;color:#333;flex:1;}
+.puan-input{width:64px;padding:5px 8px;border:2px solid #ddd;border-radius:7px;font-size:15px;font-weight:800;text-align:center;font-family:inherit;}
+.puan-input:focus{outline:none;}
+.cat-dusuk .puan-input{color:#C62828;border-color:#EF9A9A;}
+.cat-ortalama .puan-input{color:#555;border-color:#bbb;}
+.cat-yuksek .puan-input{color:#2E7D32;border-color:#72AB24;}
+.hiz-row{display:flex;align-items:center;gap:8px;}
+.hiz-label{font-size:11px;color:#777;white-space:nowrap;}
+.hiz-select{flex:1;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:11px;font-family:inherit;color:#333;background:#fff;}
+.hiz-select:focus{outline:none;border-color:#3C3489;}
+.gen-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#3C3489;color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:14px;}
+.gen-btn:hover{background:#534AB7;}
+/* CHART */
+.chart-panel{position:sticky;top:16px;}
+.toplam-badge{text-align:center;padding:12px;background:linear-gradient(135deg,#3C3489,#534AB7);border-radius:10px;margin-bottom:12px;color:#fff;}
+.toplam-num{font-size:32px;font-weight:900;}
+.toplam-lbl{font-size:10px;opacity:0.8;margin-top:2px;}
+.chart-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.chart-name{font-size:10.5px;color:#444;width:70px;flex-shrink:0;}
+.bar-bg{flex:1;height:18px;background:#F0F0F8;border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.25s;}
+.chart-val{font-size:11px;font-weight:800;width:20px;text-align:right;flex-shrink:0;}
+.chart-hiz{font-size:9px;width:36px;text-align:right;flex-shrink:0;color:#999;}
+/* RAPOR */
+.rapor-section{max-width:1080px;margin:0 auto 30px;padding:0 16px;display:none;}
+.rapor-card{background:#fff;border-radius:12px;padding:28px 32px;box-shadow:0 2px 10px rgba(60,52,137,0.08);}
+.rapor-header{background:#3C3489;border-radius:10px;padding:18px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+.rapor-baslik{color:#fff;font-size:16px;font-weight:700;}
+.rapor-alt{color:#EEEDFE;font-size:12px;margin-top:3px;}
+.pdf-btn{padding:8px 20px;background:#fff;color:#3C3489;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.pdf-btn:hover{background:#EEEDFE;}
+/* BOYUT BLOK */
+.boyut-blok{margin-bottom:28px;page-break-inside:avoid;break-inside:avoid;}
+.boyut-blok-baslik{font-size:15px;font-weight:700;color:#222;margin-bottom:8px;}
+.boyut-tanim{font-size:13px;line-height:1.75;color:#444;margin-bottom:12px;}
+.seviye-kutu{border-radius:10px;padding:16px 20px;border-width:2px;border-style:solid;page-break-inside:avoid;break-inside:avoid;}
+.seviye-kutu.yuksek{border-color:#72AB24;background:#F1F8E9;}
+.seviye-kutu.ortalama{border-color:#9E9E9E;background:#F5F5F5;}
+.seviye-kutu.dusuk{border-color:#D70F14;background:#FFF5F5;}
+.seviye-etiket{font-style:italic;font-weight:700;font-size:12.5px;margin-bottom:8px;}
+.seviye-kutu.yuksek .seviye-etiket{color:#2E7D32;}
+.seviye-kutu.ortalama .seviye-etiket{color:#555;}
+.seviye-kutu.dusuk .seviye-etiket{color:#C62828;}
+.seviye-metin{font-size:13px;line-height:1.8;color:#333;}
+.hiz-notu{margin-top:9px;padding-top:9px;border-top:1px solid #ddd;font-size:12px;color:#555;font-style:italic;line-height:1.6;}
+/* AYRIŞMA */
+.ayrisma-blok{margin-bottom:20px;padding:14px 18px;border-radius:10px;border-left:4px solid #F2940F;background:#FFF8F0;page-break-inside:avoid;}
+.ayrisma-baslik{font-size:12px;font-weight:700;color:#E65100;margin-bottom:6px;}
+.ayrisma-metin{font-size:12.5px;color:#333;line-height:1.75;}
+/* GENEL YORUM */
+.genel-blok{margin-top:24px;padding:18px 22px;border-radius:10px;background:#EEEDFE;border:2px solid #3C3489;page-break-inside:avoid;}
+.genel-baslik{font-size:14px;font-weight:700;color:#3C3489;margin-bottom:10px;}
+.genel-metin{font-size:13px;line-height:1.85;color:#333;}
+/* FOOTER */
+.rapor-footer{margin-top:32px;padding-top:12px;border-top:1px solid #ddd;text-align:center;font-size:11px;color:#aaa;}
+@media print{
+  body{background:#fff;}
+  .main,.pdf-btn{display:none!important;}
+  .rapor-section{display:block!important;margin:0;padding:0;}
+  .rapor-card{box-shadow:none;padding:16px 0;}
+  @page{margin:15mm;size:A4;}
+}
+@media(max-width:700px){
+  .main{grid-template-columns:1fr;}
+  .chart-panel{position:static;}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><div class="logo">FUPİ</div><div class="logo-sub">KARİYER TASARIMI</div></div>
+  <div class="header-title">FVAT PRO — Genel Yetenek Testi Rapor Paneli</div>
+</div>
+
+<div class="main">
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-title">👤 Danışan</div>
+      <input class="danisan-input" id="danisan-ad" type="text" placeholder="Ad Soyad"/>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 FVAT PRO Puanları <span style="font-size:10px;font-weight:400;color:#999;">— 1 ile 10 arası sten puanı</span></div>
+      <div class="boyut-list" id="boyut-list"></div>
+      <button class="gen-btn" onclick="generateRapor()">📄 Raporu Oluştur</button>
+    </div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="card">
+      <div class="toplam-badge">
+        <div class="toplam-num" id="toplam-num">—</div>
+        <div class="toplam-lbl">TOPLAM ORTALAMA</div>
+      </div>
+      <div class="card-title">📈 Profil Grafiği</div>
+      <div id="chart-bars"></div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#666;"><div style="width:9px;height:9px;border-radius:2px;background:#72AB24;"></div>Yüksek (8–10)</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#666;"><div style="width:9px;height:9px;border-radius:2px;background:#9E9E9E;"></div>Ortalama (4–7)</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#666;"><div style="width:9px;height:9px;border-radius:2px;background:#EF9A9A;"></div>Düşük (1–3)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rapor-section" id="rapor-section">
+  <div class="rapor-card">
+    <div class="rapor-header">
+      <div>
+        <div class="rapor-baslik">FVAT PRO — Genel Yetenek Testi Raporu</div>
+        <div class="rapor-alt" id="rapor-alt"></div>
+      </div>
+      <button class="pdf-btn" onclick="window.print()">🖨 PDF Kaydet</button>
+    </div>
+    <div id="rapor-icerik"></div>
+    <div class="rapor-footer">© FUPİ Kariyer Tasarımı — Bu rapor değerlendirme amacıyla hazırlanmıştır. | www.fupi.com.tr</div>
+  </div>
+</div>
+
+<script>
+const BOYUTLAR = [
+  {key:"sozel",   name:"Sözel"},
+  {key:"sayisal", name:"Sayısal"},
+  {key:"analitik",name:"Analitik"},
+  {key:"dikkat",  name:"Dikkat"},
+];
+
+const scores = {sozel:6, sayisal:5, analitik:9, dikkat:9};
+const hizlar  = {sozel:"dusuk", sayisal:"orta", analitik:"dusuk", dikkat:"yuksek"};
+
+// ── TANIM METİNLERİ ──
+const TANIM = {
+  sozel:    "Sözel boyut, bireyin yazılı metinleri doğru anlamlandırabilme ve yorumlayabilme yeteneğini ölçmektedir. Yazılı iletişim, prosedür takibi, mevzuat yorumlama ve raporlama gibi işlevler bu kapasite üzerine inşa edilir.",
+  sayisal:  "Sayısal boyut, bireyin sayısal verileri analiz ederek neden-sonuç ilişkisi kurabilme ve yorumlayabilme yeteneğini ölçmektedir. Tablo ve grafik okuma, bütçe analizi, satış ve maliyet takibi gibi görevler bu kapasiteyle doğrudan ilişkilidir.",
+  analitik: "Analitik boyut, bireyin olaylar arasında neden-sonuç ilişkisi kurabilme ve muhakeme edebilme yeteneğini ölçmektedir. Karar alma, problem çözme, olası aksaklıkları öngörme ve çözüm planı oluşturma bu kapasitenin yansımalarıdır.",
+  dikkat:   "Dikkat boyutu, bireyin sayısal veya sözel verilerdeki farklılıkları ve hataları ayırt edebilme yeteneğini ölçmektedir. Veri doğrulama, evrak kontrolü ve hata toleransının düşük olduğu görevlerde bu kapasite belirleyici bir role sahiptir.",
+};
+
+// ── PUAN KATEGORİ METİNLERİ ──
+const METIN = {
+  sozel: {
+    dusuk:    "Sözel yeteneği düşük düzeyde olan biri, yazılı metinleri doğru anlamakta ve yorumlamakta güçlük çeker. Basit metinlerde bile sözcüklerin bağlamsal anlamını bütünsel olarak kavramak zorlaşabilir; bu durum yazılı iletişim ve metin tabanlı görevlerde performansı olumsuz etkileyebilir.",
+    ortalama: "Sözel yeteneği ortalama düzeyde olan biri, basit ve orta güçlükteki yazılı metinleri doğru anlayabilir ve yorumlayabilir. Aşina olduğu konularda yetkin bir performans sergiler; ancak yabancı olduğu alanlarda karmaşık içerikleri yorumlamak güçleşebilir.",
+    yuksek:   "Sözel yeteneği yüksek düzeyde olan biri, karmaşık ve uzun yazılı metinleri hızla anlayıp doğru yorumlayabilir. Sözcüklerin bağlam içindeki anlamını kolaylıkla kavrar; farklı kaynaklardan gelen bilgileri sentezleyerek etkili çıkarımlar üretir.",
+  },
+  sayisal: {
+    dusuk:    "Sayısal yeteneği düşük düzeyde olan biri, sayısal verilerden anlam çıkarmakta ve neden-sonuç ilişkisi kurmakta güçlük çeker. Tablo, grafik ve sayısal raporları yorumlamak zorlaşır; sayısal veriyle yoğun çalışma gerektiren görevlerde destek ihtiyacı doğabilir.",
+    ortalama: "Sayısal yeteneği ortalama düzeyde olan biri, basit sayısal veriler arasındaki temel ilişkileri anlayabilir ve bu ilişkilerden sonuçlar çıkarabilir. Ancak çok sayıda değişken içeren karmaşık veri setlerini çözümlemekte ve bu verilerden çıkarım yapmakta zorlanabilir.",
+    yuksek:   "Sayısal yeteneği yüksek düzeyde olan biri, karmaşık sayısal verileri hızla analiz edebilir; tablo ve grafiklerden doğru çıkarımlar yapabilir. Birden fazla değişkeni aynı anda takip ederek anlamlı örüntüler tespit eder ve sayısal veriye dayalı karar almada etkindir.",
+  },
+  analitik: {
+    dusuk:    "Analitik düşünme yeteneği düşük düzeyde olan biri, olaylar arasındaki neden-sonuç ilişkilerini fark etmekte ve mantıksal çıkarımlar yapmakta güçlük çeker. Karmaşık durumlarda tüm unsurları bir arada değerlendirmek zorlaşabilir; bu durum karar alma süreçlerini olumsuz etkileyebilir.",
+    ortalama: "Analitik düşünme yeteneği ortalama düzeyde olan biri, gündelik durumlar için gerekli neden-sonuç ilişkilerini kurabilir ve makul çıkarımlar yapabilir. Ancak birden fazla etkenin etkileşimini gerektiren karmaşık problemleri çözümlemek daha fazla zaman ve çevre desteği alabilir.",
+    yuksek:   "Analitik düşünme yeteneği yüksek düzeyde olan biri, olaylar arasındaki neden-sonuç ilişkilerini fark etmekte ve akılcı çıkarımlar yapmakta son derece başarılıdır. Bir duruma etki eden tüm unsurları görüp tanımlar, karmaşık problemlerin kökenine iner ve mantıklı gerekçelere dayalı çözümler üretir.",
+  },
+  dikkat: {
+    dusuk:    "Dikkat yeteneği düşük düzeyde olan biri, sayısal veya sözel verilerdeki hataları ve farklılıkları fark etmekte güçlük çeker. Detay gerektiren görevlerde ve veri doğrulama süreçlerinde hata riski yüksektir; kontrol mekanizmaları ve çift kontrol süreçleri önem kazanır.",
+    ortalama: "Dikkat yeteneği ortalama düzeyde olan biri, basit ve orta düzeydeki hataları ve farklılıkları çoğu zaman fark edebilir. Ancak yoğun iş temposu veya zaman baskısı altında dikkat kalitesi düşebilir; hata toleransının düşük olduğu görevlerde ek kontrol süreçleri önerilebilir.",
+    yuksek:   "Dikkat yeteneği yüksek düzeyde olan biri, sayısal veya sözel verilerdeki hataları ve farklılıkları fark etmekte son derece başarılıdır. Zaman baskısı altında bile hata yapmadan veri doğrulayabilir; detay gerektiren görevlerde güvenilir ve istikrarlı bir performans sergiler.",
+  },
+};
+
+// ── HIZ METİNLERİ ──
+const HIZ_METIN = {
+  dusuk:   "Testi norm grubuna kıyasla daha düşük hızda tamamlamıştır. Bu durum, söz konusu alanda dikkatli ve sistematik bir çalışma stiline işaret edebilir; ancak zaman kısıtlı ve yüksek tempolu iş ortamlarında bu potansiyelin tam yansımayabileceği göz önünde bulundurulmalıdır.",
+  orta:    "Testi norm grubuyla benzer sürede tamamlamıştır; başarı ve hız arasındaki denge tutarlı bir profil ortaya koymaktadır.",
+  yuksek:  "Testi norm grubuna kıyasla daha hızlı tamamlamıştır. Yüksek hız ile birlikte elde edilen bu başarı, söz konusu alanda güçlü ve otomatikleşmiş bir yetkinliğe işaret etmektedir.",
+};
+
+function getCat(v) { return v>=8?"yuksek":v>=4?"ortalama":"dusuk"; }
+function getCatLabel(v) { return v>=8?"Yüksek (8–10)":v>=4?"Ortalama (4–7)":"Düşük (1–3)"; }
+const CAT_COLOR = {yuksek:"#72AB24", ortalama:"#9E9E9E", dusuk:"#EF9A9A"};
+const CAT_TEXT  = {yuksek:"#2E7D32", ortalama:"#555",    dusuk:"#C62828"};
+
+// ── FORM OLUŞTUR ──
+function buildList(){
+  const list = document.getElementById("boyut-list");
+  BOYUTLAR.forEach(b => {
+    const row = document.createElement("div");
+    row.className = "boyut-row cat-" + getCat(scores[b.key]);
+    row.id = "row-" + b.key;
+    row.innerHTML = `
+      <div class="boyut-header">
+        <div class="boyut-name">${b.name}</div>
+        <input class="puan-input" id="inp-${b.key}" type="number" min="1" max="10" step="1" value="${scores[b.key]}"
+          oninput="onInput('${b.key}',this.value)" onblur="onBlur('${b.key}',this.value)"/>
+      </div>
+      <div class="hiz-row">
+        <span class="hiz-label">Test hızı:</span>
+        <select class="hiz-select" id="hiz-${b.key}" onchange="hizlar['${b.key}']=this.value; updateChart()">
+          <option value="dusuk" ${hizlar[b.key]==='dusuk'?'selected':''}>Düşük</option>
+          <option value="orta"  ${hizlar[b.key]==='orta' ?'selected':''}>Orta</option>
+          <option value="yuksek"${hizlar[b.key]==='yuksek'?'selected':''}>Yüksek</option>
+        </select>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function onInput(key,val){
+  const v=parseInt(val);
+  if(!isNaN(v)&&v>=1&&v<=10){ scores[key]=v; updateRowColor(key,v); updateChart(); }
+}
+function onBlur(key,val){
+  let v=parseInt(val); if(isNaN(v)||v<1)v=1; if(v>10)v=10;
+  scores[key]=v; document.getElementById("inp-"+key).value=v;
+  updateRowColor(key,v); updateChart();
+}
+function updateRowColor(key,v){
+  document.getElementById("row-"+key).className="boyut-row cat-"+getCat(v);
+}
+
+function updateChart(){
+  const vals = BOYUTLAR.map(b=>scores[b.key]);
+  const avg  = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+  document.getElementById("toplam-num").textContent = avg;
+  document.getElementById("chart-bars").innerHTML = BOYUTLAR.map(b=>{
+    const v=scores[b.key], cat=getCat(v), pct=(v/10*100).toFixed(0);
+    const hizTxt={dusuk:"↙ Düşük hız", orta:"→ Orta hız", yuksek:"↗ Yüksek hız"}[hizlar[b.key]];
+    return `<div class="chart-row">
+      <div class="chart-name">${b.name}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${CAT_COLOR[cat]};"></div></div>
+      <div class="chart-val" style="color:${CAT_TEXT[cat]};">${v}</div>
+      <div class="chart-hiz">${hizTxt}</div>
+    </div>`;
+  }).join("");
+}
+
+// ── AYRIŞMA TESPİTİ ──
+function getAyrismaMessages(){
+  const msgs = [];
+  const a=scores.analitik, s=scores.sayisal, sz=scores.sozel, d=scores.dikkat;
+
+  if(getCat(a)==="yuksek" && getCat(s)!=="yuksek" && a-s>=4)
+    msgs.push({baslik:"⚠ Analitik – Sayısal Ayrışması",
+      metin:"Analitik düşünme kapasitesi belirgin biçimde yüksek olmakla birlikte Sayısal boyuttaki puan daha düşük düzeydedir. Bu profil, mantıksal ve soyut muhakeme gücünün sayısal veri analizinden belirgin şekilde ayrıştığını göstermektedir. Büyük veri setleri, finansal modeller veya istatistiksel analiz gerektiren rollerde beklenti yönetimi dikkatli yapılmalıdır."});
+
+  if(getCat(a)==="yuksek" && getCat(sz)!=="yuksek" && a-sz>=4)
+    msgs.push({baslik:"⚠ Analitik – Sözel Ayrışması",
+      metin:"Analitik kapasite güçlü olmakla birlikte Sözel boyuttaki görece düşük puan, soyut düşünce ile sözel ifade arasında bir asimetri olduğuna işaret edebilir. Raporlama, sunum veya yazılı iletişim gerektiren görevlerde ek yapısal destek faydalı olabilir."});
+
+  if(getCat(d)==="yuksek" && getCat(a)==="yuksek")
+    msgs.push({baslik:"✦ Analitik + Dikkat Sinerjisi",
+      metin:"Hem Analitik hem Dikkat boyutlarındaki yüksek performans, ayrıntılı analiz gerektiren ve hata toleransının düşük olduğu iş ortamları için güçlü bir uyum sinyali vermektedir. Bu kombinasyon, kalite kontrol, denetim, araştırma ve strateji gibi alanlarda öne çıkan bir profili tanımlar."});
+
+  BOYUTLAR.forEach(b => {
+    if(getCat(scores[b.key])==="yuksek" && hizlar[b.key]==="dusuk")
+      msgs.push({baslik:`⚠ ${b.name}: Yüksek Başarı + Düşük Hız`,
+        metin:`${b.name} alanında yüksek başarı, düşük test hızıyla birleşmektedir. Bu profil, söz konusu alanda dikkatli ve sistematik bir çalışma stiline işaret eder; ancak zaman kısıtlı ve yoğun tempolu ortamlarda bu kapasitenin tam yansımayabileceği göz önünde bulundurulmalıdır.`});
+  });
+
+  return msgs;
+}
+
+// ── GENEL YORUM ──
+function getGenelYorum(ad){
+  const yuksek = BOYUTLAR.filter(b=>getCat(scores[b.key])==="yuksek").map(b=>b.name);
+  const ortalama= BOYUTLAR.filter(b=>getCat(scores[b.key])==="ortalama").map(b=>b.name);
+  const dusuk   = BOYUTLAR.filter(b=>getCat(scores[b.key])==="dusuk").map(b=>b.name);
+  const vals    = BOYUTLAR.map(b=>scores[b.key]);
+  const avg     = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+
+  let metin = "";
+  const isim = ad || "Danışan";
+
+  if(yuksek.length===4)
+    metin = `${isim}'ın genel yetenek profili, dört boyutun tamamında yüksek düzey bir performans sergilendiğini ortaya koymaktadır (Ortalama: ${avg}). Sözel, Sayısal, Analitik ve Dikkat boyutlarındaki bu güçlü tablo, bilişsel esneklik ve çok yönlü kapasite açısından norm grubunun belirgin üzerinde bir potansiyele işaret etmektedir.`;
+  else if(dusuk.length===4)
+    metin = `${isim}'ın genel yetenek profili, dört boyutun tamamında düşük düzey bir performans sergilendiğini göstermektedir (Ortalama: ${avg}). Bu profil, bilişsel kapasite gerektiren görevlerde yapısal destek ve yönlendirme ihtiyacının göz önünde bulundurulmasını önermektedir.`;
+  else {
+    const parcalar = [];
+    if(yuksek.length>0) parcalar.push(`${yuksek.join(" ve ")} boyutlarında yüksek düzey bir performans`);
+    if(ortalama.length>0) parcalar.push(`${ortalama.join(" ve ")} boyutlarında ortalama düzey bir kapasite`);
+    if(dusuk.length>0) parcalar.push(`${dusuk.join(" ve ")} boyutunda ise geliştirilmesi gereken bir alan`);
+    metin = `${isim}'ın genel yetenek profili (Ortalama: ${avg}), ${parcalar.join("; ")} sergilemektedir.`;
+
+    if(yuksek.length>0){
+      if(yuksek.includes("Analitik") && yuksek.includes("Dikkat"))
+        metin += " Analitik düşünme ile dikkat kapasitesinin bir arada güçlü olması, hata toleransının düşük, yapısal düşünmenin ön planda olduğu rollerde belirgin bir avantaj yaratmaktadır.";
+      else if(yuksek.includes("Analitik"))
+        metin += " Analitik kapasitenin güçlü olması, problem çözme ve karar alma süreçlerinde değerli bir potansiyele işaret etmektedir.";
+      else if(yuksek.includes("Dikkat"))
+        metin += " Dikkat kapasitesinin güçlü olması, veri doğrulama ve detay gerektiren görevlerde güvenilir bir performans anlamına gelmektedir.";
+    }
+    if(dusuk.length>0)
+      metin += ` ${dusuk.join(" ve ")} alanındaki görece düşük performans, bu boyutların yoğun kullanıldığı görevlerde çevre desteği ve yapısal araçlarla telafi edilmesini önermektedir.`;
+  }
+  return metin;
+}
+
+// ── RAPOR OLUŞTUR ──
+function generateRapor(){
+  const ad = document.getElementById("danisan-ad").value.trim();
+  const tarih = new Date().toLocaleDateString("tr-TR");
+  document.getElementById("rapor-alt").textContent = (ad||"Danışan") + " · " + tarih;
+
+  let html = "";
+
+  // 4 boyut bloku
+  BOYUTLAR.forEach(b => {
+    const v=scores[b.key], cat=getCat(v), lbl=getCatLabel(v);
+    const colMap={yuksek:"#2E7D32",ortalama:"#555",dusuk:"#C62828"};
+    html += `<div class="boyut-blok">
+      <div class="boyut-blok-baslik">${b.name}</div>
+      <div class="boyut-tanim">${TANIM[b.key]}</div>
+      <div class="seviye-kutu ${cat}">
+        <div class="seviye-etiket">Yetenek Seviyesi: ${lbl} — Sten ${v}</div>
+        <div class="seviye-metin">${METIN[b.key][cat]}</div>
+        <div class="hiz-notu">Hız: ${HIZ_METIN[hizlar[b.key]]}</div>
+      </div>
+    </div>`;
+  });
+
+  // Ayrışmalar
+  const ayrisma = getAyrismaMessages();
+  if(ayrisma.length>0){
+    html += `<div style="margin-bottom:20px;font-size:13px;font-weight:700;color:#3C3489;border-bottom:2px solid #EEEDFE;padding-bottom:8px;">Dikkat Gerektiren Kombinasyonlar</div>`;
+    ayrisma.forEach(a => {
+      html += `<div class="ayrisma-blok">
+        <div class="ayrisma-baslik">${a.baslik}</div>
+        <div class="ayrisma-metin">${a.metin}</div>
+      </div>`;
+    });
+  }
+
+  // Genel yorum
+  html += `<div class="genel-blok">
+    <div class="genel-baslik">Genel Yetenek Profili Değerlendirmesi</div>
+    <div class="genel-metin">${getGenelYorum(ad)}</div>
+  </div>`;
+
+  document.getElementById("rapor-icerik").innerHTML = html;
+  const sec = document.getElementById("rapor-section");
+  sec.style.display = "block";
+  sec.scrollIntoView({behavior:"smooth"});
+}
+
+buildList();
+updateChart();
+</script>
+</body>
+</html>
