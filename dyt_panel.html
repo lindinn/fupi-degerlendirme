@@ -345,10 +345,10 @@ function generateHTMLRapor(idx) {
     const tanim = DYT_TANIM[y.key] || '';
     const ytkAdi = DYT_YTK_ADI[y.key] || y.ad;
 
-    icerik += '<div style="margin-bottom:32px;">';
+    icerik += '<div style="margin-bottom:32px;page-break-inside:avoid;break-inside:avoid;">';
     icerik += '<div style="font-size:15px;font-weight:700;color:#222;margin-bottom:8px;">' + ytkAdi + '</div>';
     icerik += '<div style="font-size:13px;line-height:1.75;color:#444;margin-bottom:14px;">' + tanim + '</div>';
-    icerik += '<div style="border:2px solid ' + renk + ';border-radius:12px;padding:18px 24px;text-align:center;background:' + arkaplan + ';">';
+    icerik += '<div style="border:2px solid ' + renk + ';border-radius:12px;padding:18px 24px;text-align:center;background:' + arkaplan + ';page-break-inside:avoid;break-inside:avoid;">';
     icerik += '<div style="font-style:italic;font-weight:700;font-size:13px;color:' + renk + ';margin-bottom:10px;">Yetkinlik Seviyesi: ' + etiket + ' (' + pct + ')</div>';
     icerik += '<div style="font-size:13px;line-height:1.8;color:#333;">' + metin + '</div>';
     icerik += '</div></div>';
@@ -378,6 +378,7 @@ body{font-family:system-ui,Arial,sans-serif;background:#F0EFF8;color:#222;}
   .pdf-btn{display:none;}
   .rapor-wrap{padding:0;}
   .rapor-card{box-shadow:none;padding:20px;}
+  div[style*='page-break-inside']{page-break-inside:avoid!important;break-inside:avoid!important;}
   @page{margin:15mm;size:A4;}
 }
 </style>
