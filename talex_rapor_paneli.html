@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FUPİ — TALEX Rapor Paneli</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F0EFF8;font-family:system-ui,Arial,sans-serif;color:#222;}
+.header{background:#3C3489;padding:13px 24px;display:flex;align-items:center;gap:14px;}
+.logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:3px;}
+.logo-sub{font-size:7px;color:#bbb;letter-spacing:2px;margin-top:2px;}
+.header-title{color:#EEEDFE;font-size:13px;font-weight:600;border-left:2px solid #534AB7;padding-left:14px;}
+.wrap{max-width:1100px;margin:0 auto;padding:16px;}
+.card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(60,52,137,0.08);margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:700;color:#3C3489;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #EEEDFE;}
+.danisan-row{display:flex;gap:12px;margin-bottom:4px;}
+.danisan-row input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#222;}
+.danisan-row input:focus{outline:none;border-color:#3C3489;}
+.kategori-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.kategori-blok{background:#FAFAFA;border:1px solid #E8E8F0;border-radius:10px;padding:14px;}
+.kategori-baslik{font-size:11px;font-weight:700;color:#3C3489;letter-spacing:0.5px;margin-bottom:10px;text-transform:uppercase;}
+.boyut-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.boyut-ad{flex:1;font-size:11.5px;color:#333;}
+.puan-inp{width:52px;padding:4px 6px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-weight:700;text-align:center;font-family:inherit;}
+.puan-inp:focus{outline:none;border-color:#3C3489;}
+.puan-inp.high{color:#2E7D32;border-color:#72AB24;background:#F1F8E9;}
+.puan-inp.mid{color:#555;border-color:#bbb;background:#F5F5F5;}
+.puan-inp.low{color:#C62828;border-color:#EF9A9A;background:#FFEBEE;}
+.gen-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#3C3489;color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;}
+.gen-btn:hover{background:#534AB7;}
+/* RAPOR */
+.rapor-section{display:none;}
+.rapor-card{background:#fff;border-radius:12px;padding:28px 32px;box-shadow:0 2px 10px rgba(60,52,137,0.08);margin-bottom:14px;}
+.rapor-header{background:#3C3489;border-radius:10px;padding:18px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+.rapor-baslik{color:#fff;font-size:16px;font-weight:700;}
+.rapor-alt{color:#EEEDFE;font-size:12px;margin-top:3px;}
+.pdf-btn{padding:8px 20px;background:#fff;color:#3C3489;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.yon-baslik{font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #EEEDFE;}
+.yon-baslik.guclu{color:#2E7D32;}
+.yon-baslik.zayif{color:#C62828;}
+.boyut-kutu{padding:14px 18px;border-radius:10px;margin-bottom:12px;page-break-inside:avoid;break-inside:avoid;}
+.boyut-kutu.guclu{border:2px solid #72AB24;background:#F1F8E9;}
+.boyut-kutu.zayif{border:2px solid #D70F14;background:#FFF5F5;}
+.boyut-kutu-baslik{font-size:13.5px;font-weight:700;margin-bottom:6px;}
+.boyut-kutu.guclu .boyut-kutu-baslik{color:#2E7D32;}
+.boyut-kutu.zayif .boyut-kutu-baslik{color:#C62828;}
+.boyut-kutu-puan{font-size:11px;color:#999;margin-bottom:7px;}
+.boyut-kutu-metin{font-size:13px;line-height:1.8;color:#333;}
+.profil-ozet{background:#EEEDFE;border:2px solid #3C3489;border-radius:10px;padding:16px 20px;margin-bottom:14px;page-break-inside:avoid;}
+.profil-ozet-baslik{font-size:14px;font-weight:700;color:#3C3489;margin-bottom:10px;}
+.profil-ozet-metin{font-size:13px;line-height:1.85;color:#333;}
+.kategori-ozet-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px;}
+.kat-badge{text-align:center;padding:10px 6px;border-radius:8px;border:1.5px solid #ddd;background:#FAFAFA;}
+.kat-badge-ad{font-size:9.5px;font-weight:700;color:#555;margin-bottom:4px;}
+.kat-badge-puan{font-size:18px;font-weight:900;}
+.rapor-footer{margin-top:32px;padding-top:12px;border-top:1px solid #ddd;text-align:center;font-size:11px;color:#aaa;}
+@media print{
+  body{background:#fff;}
+  .wrap > .card{display:none!important;}
+  .rapor-section{display:block!important;}
+  .rapor-card{box-shadow:none;padding:16px 0;}
+  @page{margin:15mm;size:A4;}
+}
+@media(max-width:700px){.kategori-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><div class="logo">FUPİ</div><div class="logo-sub">KARİYER TASARIMI</div></div>
+  <div class="header-title">TALEX — Potansiyel Envanteri Rapor Paneli</div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="card-title">👤 Danışan</div>
+    <div class="danisan-row">
+      <input type="text" id="danisan-ad" placeholder="Ad Soyad"/>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 TALEX Puanları <span style="font-size:10px;font-weight:400;color:#999;">— 1–10 arası sten puanı</span></div>
+    <div class="kategori-grid" id="kategori-grid"></div>
+    <button class="gen-btn" onclick="generateRapor()" style="margin-top:14px;">📄 Raporu Oluştur</button>
+  </div>
+
+  <div class="rapor-section" id="rapor-section">
+    <div class="rapor-card">
+      <div class="rapor-header">
+        <div>
+          <div class="rapor-baslik">TALEX Potansiyel Envanteri — Kariyer Danışmanlığı Raporu</div>
+          <div class="rapor-alt" id="rapor-alt"></div>
+        </div>
+        <button class="pdf-btn" onclick="window.print()">🖨 PDF Kaydet</button>
+      </div>
+      <div id="rapor-icerik"></div>
+      <div class="rapor-footer">© FUPİ Kariyer Tasarımı — Bu rapor değerlendirme amacıyla hazırlanmıştır. | www.fupi.com.tr</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KATEGORILER = [
+  {
+    baslik: "Motivasyon — İlerleme Arzusu",
+    boyutlar: [
+      {key:"guc", ad:"Güç Sahibi Olma Arzusu"},
+      {key:"prestij", ad:"Prestij Sahibi Olma Arzusu"},
+      {key:"etki_birakma", ad:"Etki Bırakma Arzusu"},
+    ]
+  },
+  {
+    baslik: "Motivasyon — Zorluklarla Başa Çıkma",
+    boyutlar: [
+      {key:"optimizm", ad:"Optimizm"},
+      {key:"olumsuz_duygu", ad:"Olumsuz Duyguları Düzenleme"},
+      {key:"sosyal_kaynak", ad:"Sosyal Kaynaklardan Yararlanma"},
+    ]
+  },
+  {
+    baslik: "Motivasyon — Adanmışlık",
+    boyutlar: [
+      {key:"ise_baglilik", ad:"İşe Bağlılık"},
+      {key:"is_motivasyonu", ad:"İş Motivasyonu"},
+      {key:"sirkete_baglilik", ad:"Şirkete Bağlılık"},
+    ]
+  },
+  {
+    baslik: "Proaktiflik — Etki Yaratma",
+    boyutlar: [
+      {key:"fark_yaratma", ad:"Fark Yaratma İsteği"},
+      {key:"faydali_olma", ad:"Faydalı Olma Arzusu"},
+      {key:"icsel_motivasyon", ad:"İçsel Motivasyon"},
+    ]
+  },
+  {
+    baslik: "Proaktiflik — Harekete Geçme",
+    boyutlar: [
+      {key:"bagimsiz_hareket", ad:"Bağımsız Hareket Etme İsteği"},
+      {key:"kader_belirleme", ad:"Kendi Kaderini Belirleme Arzusu"},
+      {key:"oz_yeterlilik", ad:"Öz Yeterlilik"},
+    ]
+  },
+  {
+    baslik: "Proaktiflik — Sorumluluk Üstlenme",
+    boyutlar: [
+      {key:"basari_gudusu", ad:"Başarı Güdüsü"},
+      {key:"risk_alma", ad:"Risk Almaya Yatkınlık"},
+      {key:"cok_calisma", ad:"Çok Çalışma İsteği"},
+    ]
+  },
+  {
+    baslik: "Öğrenme — Öğrenme Çevikliği",
+    boyutlar: [
+      {key:"ogrenme_meraki", ad:"Öğrenme Merakı"},
+      {key:"ogrendiklerini_hayata", ad:"Öğrendiklerini Hayata Geçirme"},
+      {key:"deneyimden_ogrenme", ad:"Deneyimlerinden Öğrenme"},
+    ]
+  },
+  {
+    baslik: "Öğrenme — Değişime Açık Olma",
+    boyutlar: [
+      {key:"belirsizlik_tolerans", ad:"Belirsizliğe Karşı Tolerans"},
+      {key:"degisime_aciklik", ad:"Değişime Açıklık"},
+      {key:"degisim_firsat", ad:"Değişimi Fırsat Olarak Görme"},
+    ]
+  },
+  {
+    baslik: "Öğrenme — Esneklik",
+    boyutlar: [
+      {key:"uyum_yeteneği", ad:"Uyum Yeteneği"},
+      {key:"zihinsel_esneklik", ad:"Zihinsel Esneklik"},
+      {key:"yenilikci_cozum", ad:"Yenilikçi Çözüm Üretme"},
+    ]
+  },
+  {
+    baslik: "Bilişsel — Eleştirel Düşünme",
+    boyutlar: [
+      {key:"analiz_yeteneği", ad:"Analiz Yeteneği"},
+      {key:"varsayim_kavrama", ad:"Varsayımları Kavrama"},
+      {key:"akil_yurutme", ad:"Akıl Yürütme"},
+    ]
+  },
+  {
+    baslik: "Bilişsel — Geniş Perspektif",
+    boyutlar: [
+      {key:"durum_farkindaligi", ad:"Durum Farkındalığı"},
+      {key:"genis_bakis", ad:"Geniş Bakış Açısı"},
+      {key:"ortuk_baglantilar", ad:"Örtük Bağlantıları Görebilme"},
+    ]
+  },
+  {
+    baslik: "Bilişsel — Konusuna Hakim Olma",
+    boyutlar: [
+      {key:"is_detaylari", ad:"İşinin Detaylarına Hakim Olma"},
+      {key:"bilgi_pratik", ad:"Bilgisini Pratiğe Dökme"},
+      {key:"uzmanlik_gelistirme", ad:"Uzmanlığını Geliştirme"},
+    ]
+  },
+  {
+    baslik: "Sosyal — Başkalarına Özen",
+    boyutlar: [
+      {key:"empati", ad:"Empati"},
+      {key:"baskalarına_duyarli", ad:"Başkalarına Duyarlı Olma"},
+      {key:"farklilik_saygi", ad:"Farklılıklara Saygı"},
+    ]
+  },
+  {
+    baslik: "Sosyal — İş Birliği",
+    boyutlar: [
+      {key:"isbirligi_yatkinlik", ad:"İşbirliğine Yatkınlık"},
+      {key:"alcakgonullilik", ad:"Alçakgönüllülük"},
+      {key:"anlasmazlik_yonetme", ad:"Anlaşmazlıkları Yönetme"},
+    ]
+  },
+  {
+    baslik: "Sosyal — Etkileme ve İkna",
+    boyutlar: [
+      {key:"ikna", ad:"İkna Yeteneği"},
+      {key:"etkileme", ad:"Etkileme"},
+      {key:"politik_farkindalik", ad:"Politik Farkındalık"},
+    ]
+  },
+];
+
+// 90 kariyer yorumu
+const YORUMLAR = {
+  guc: {
+    yuksek: "Liderlik ve otorite gerektiren rollerde güçlü bir eğilim var. Yöneticilik, ekip liderliği, program direktörlüğü gibi pozisyonlar doğal tercih olabilir. Kariyer planında hiyerarşik yükseliş motive edici bir hedef olarak kullanılabilir.",
+    dusuk: "Liderlik ve güç sahibi olmak bu kişi için bir motivasyon kaynağı değil. Uzman, danışman veya bağımsız bireysel katkı rolleri çok daha uygun. Yöneticilik yönünde baskı ters etki yaratabilir."
+  },
+  prestij: {
+    yuksek: "Toplumsal saygınlık ve statü bu kişi için önemli bir itici güç. Unvan, marka ve prestij kariyer tercihlerini şekillendiriyor. Sektörün veya kurumun bilinirliği işe bağlılığı doğrudan etkiler.",
+    dusuk: "Statü ve tanınma bu kişiyi motive etmiyor. İşin içeriği ve anlamı ön planda. Küçük ama anlamlı işler yapan kurumlar veya roller bu profil için daha uygun olabilir."
+  },
+  etki_birakma: {
+    yuksek: "Fikirlerinin hayata geçmesini ve çevresini etkilemesini güçlü istiyor. Vizyon gerektiren, görünür etki yaratan rollerde tatmin bulur. Danışmanlık, eğitim, strateji gibi alanlar bu eğilimi besler.",
+    dusuk: "Etki bırakma ve yönlendirme bu kişi için öncelikli değil. Arka planda, teknik veya destekleyici rollerde çok daha iyi çalışabilir. Sahne almak zorunda olmadığı görevler uygundur."
+  },
+  optimizm: {
+    yuksek: "Zor dönemlerde bile olumlu bakış açısını koruyor. Bu özellik, değişim yönetimi, kriz ortamları ve yüksek belirsizlikli rollerde kritik bir avantaj. Zorlu kariyer geçişlerinde dayanıklılığını destekler.",
+    dusuk: "Zorluklar karşısında olumsuz senaryolara odaklanma eğilimi var. Kariyer danışmanlığında 'en kötü ne olur' düşüncesiyle başlamak işe yarayabilir. Riski düşük, yapılandırılmış kariyer adımları bu profil için daha güvenli."
+  },
+  olumsuz_duygu: {
+    yuksek: "Stres altında duygusal dengesini koruyabiliyor. Baskılı, hızlı tempolu veya belirsizlik içeren ortamlarda sürdürülebilir performans sergileyebilir. Yüksek stresli roller bu profil için aşılabilir.",
+    dusuk: "Stres altında duygusal kontrol zorlanıyor. Yüksek baskılı, hızlı karar gerektiren veya çatışmalı ortamlar bu kişide tükenmişlik riskini artırır. Yapılandırılmış, öngörülebilir ve destekleyici ortamlar öncelikli seçenek olmalı."
+  },
+  sosyal_kaynak: {
+    yuksek: "Zorlandığında çevresinden destek almayı biliyor ve bunu etkili kullanabiliyor. Mentorluk ilişkisine açık, destekleyici bir kültürün olduğu ortamlar bu kişide çok daha iyi çalışır.",
+    dusuk: "Zorluklarla baş etmede sosyal destek arayışı zayıf. Bağımsız problem çözücü olabilir; ancak izole ortamlarda tıkandığında destek aramayı öğrenmek önemli bir gelişim hedefi."
+  },
+  ise_baglilik: {
+    yuksek: "İşe içsel bağlılık güçlü, yaptığı şeye anlam yükleyebiliyor. Bu durum uzun vadeli kariyer sürdürülebilirliği için kritik. Anlam ve katkı hissi yüksek olan rollerde verimliliği de artar.",
+    dusuk: "İş şu an sadece gelir kaynağı olarak görülüyor. Kariyer danışmanlığında 'bu kişi için ne anlam ifade ediyor?' sorusu seansların odağında olmalı. Anlam bulamadan motivasyon sorunu çözülmez."
+  },
+  is_motivasyonu: {
+    yuksek: "Çalışırken enerji ve ilgi yüksek tutuluyor. Çalışma süreci içinde motive kalabiliyor. Bu özellik, özellikle uzun ve zorlu projelerde kritik fark yaratır.",
+    dusuk: "İşe yönelik enerji ve ilgi düşük. Dikkat dağılması ve motivasyon kayıpları olası. Kısa döngülü, somut çıktılar veren görevler; net hedefler ve düzenli geri bildirim bu profilde bağlılığı artırır."
+  },
+  sirkete_baglilik: {
+    yuksek: "Kurumun misyon ve değerlerini benimsemiş, kurumun başarısını kendi başarısı olarak görüyor. Kurumsal aidiyet yüksek. Değerlerin birbiriyle örtüşmesi işe alım ve kariyer planlamasında kritik.",
+    dusuk: "Kurumsal aidiyet zayıf. Bu bir zayıflık değil, iş-anlam uyumunun henüz kurulamamış olduğunun sinyali. Değer uyumu yüksek bir kurumla eşleşme öncelikli adım olmalı."
+  },
+  fark_yaratma: {
+    yuksek: "Projede görünür ve anlamlı bir rol üstlenmek istiyor. Fikirlerinin hayata geçmesini önemsiyor. Proje liderliği, girişimcilik, yaratıcı roller bu eğilimi besler.",
+    dusuk: "Fark yaratma ve öne çıkma güdüsü zayıf. Destekleyici, koordinasyon veya uygulama odaklı rollerde daha konforlu. Bu kişiye 'görünür olması' için baskı yapmak ters etki yaratabilir."
+  },
+  faydali_olma: {
+    yuksek: "Başkalarına yardım etmek ve faydalı olmak güçlü bir motivasyon kaynağı. İnsan odaklı roller: eğitim, sağlık, sosyal hizmet, danışmanlık, müşteri ilişkileri bu profil için uygun.",
+    dusuk: "Başkalarına yardım etme motivasyonu durumsal ve koşullu. Bireysel çıktı odaklı, teknik veya analitik roller bu profil için daha uygun olabilir."
+  },
+  icsel_motivasyon: {
+    yuksek: "Kendi kendini motive edebiliyor, dışsal teşvike bağımlılığı az. Bağımsız çalışma, serbest meslek, uzaktan çalışma ve girişimcilik için güçlü bir temel. Özerk yapılar bu kişiyi besler.",
+    dusuk: "Dışsal teşvik olmadan motive olamıyor. Bağımsız çalışma, proje bazlı iş, girişimcilik bu profil için yüksek risk. Yapılandırılmış, anlık geri bildirim veren, ödüllendirmenin görünür olduğu ortamlar şart."
+  },
+  bagimsiz_hareket: {
+    yuksek: "Kendi alanında inisiyatif alabiliyor ve bağımsız karar verebiliyor. Otorite gerektirmeyen, güven temelli çalışma ortamları bu kişiyi besler. Mikro yönetim ters etki yaratır.",
+    dusuk: "Kendi alanı dışında yönlendirme ve onay ihtiyacı var. Yapılandırılmış, net rol tanımlı ve düzenli destek sağlayan ortamlar bu profil için uygundur. Mentörlük ilişkisi değer katar."
+  },
+  kader_belirleme: {
+    yuksek: "Hayatının kontrolünün kendi elinde olduğuna inanıyor. Bu iç kontrol odağı, uzun vadeli kariyer planlamasında güçlü bir temel. Girişimcilik ve liderlik için önemli bir özellik.",
+    dusuk: "Olayları dış faktörlere bağlama eğilimi var. Kariyer planlamasında 'neyi kontrol edebilirsin, neyi edemezsin?' sorusu üzerine çalışmak faydalı. Küçük kazanımlar özgünlük hissini güçlendirir."
+  },
+  oz_yeterlilik: {
+    yuksek: "Hedeflerine ulaşabileceğine dair inancı güçlü. Bu öz-güven, kariyer geçişlerinde, yeni rol denemelerinde ve zorlu dönemlerde itici güç işlevi görür.",
+    dusuk: "Kendi bilgi ve becerilerine güven zayıf, sık kendini sorgulama var. Kariyer danışmanlığında kanıta dayalı güçlü yönleri görünür kılmak öncelikli çalışma. Küçük başarı deneyimleri birikmeli."
+  },
+  basari_gudusu: {
+    yuksek: "Zorlu hedefler üstlenmeye istekli, başarma güdüsü yüksek. Rekabetçi, sonuç odaklı ve ölçülebilir hedeflerin olduğu ortamlarda çok iyi çalışır. Hedef bazlı kariyer planı bu profille uyumlu.",
+    dusuk: "İlgisi olmayan konularda zorluk üstlenmekten kaçınıyor. İlgi alanıyla örtüşen görevlerde bu güdü açılabiliyor. Kariyer seçiminde 'neye ilgisi var?' sorusu belirleyici."
+  },
+  risk_alma: {
+    yuksek: "Belirsiz sonuçlara rağmen harekete geçebiliyor. Girişimcilik, startup, yeni pazar açma, liderlik gibi risk gerektiren kariyer adımları bu profil için uygun. Temkinli olmak yeterince onurlandırılmıyor olabilir.",
+    dusuk: "Belirsizlik karşısında aşırı endişe ve temkin hakim. Kariyer geçişleri küçük ve düşük riskli adımlarla planlanmalı. Sonuçları öngörülebilir rollerde bu profil en iyi performansı gösterir."
+  },
+  cok_calisma: {
+    yuksek: "Hedefe ulaşmak için ekstra çaba göstermeye hazır. Yoğun tempo, uzun proje süreçleri ve özveri gerektiren dönemler bu kişi için aşılabilir engeller. Tükenmişlik riski düzenli takiple yönetilebilir.",
+    dusuk: "Ekstra çaba gösterme eğilimi zayıf, iş-yaşam dengesi önemli. Bu kişi için esnek çalışma saatleri, net iş sınırları ve sürdürülebilir tempolu roller öncelikli tercih olmalı."
+  },
+  ogrenme_meraki: {
+    yuksek: "Yeni bilgiye açık ve öğrenme fikri motive edici. Sürekli gelişim kültürü olan, eğitime yatırım yapan kurumlar bu kişiyi besler. Öğrenme fırsatlarının bol olduğu roller avantaj.",
+    dusuk: "Yeni bilgilere kapalılık ve öğrenme motivasyonunun yokluğu kritik bir engeldir. Kariyer danışmanlığında önce 'öğrenmek ne işine yarar?' sorusu ele alınmalı. Pratik ve somut faydası görünen öğrenme içerikleri daha kabul görür."
+  },
+  ogrendiklerini_hayata: {
+    yuksek: "Öğrendiklerini hızla pratiğe döküyor, bilgiden davranışa geçiş güçlü. Eğitim yatırımlarının geri dönüşü yüksek. Gelişim programları bu profilde gerçek etki yaratır.",
+    dusuk: "Öğrenilen bilgiyi uygulamaya geçirmek zorlaşıyor. Soyut eğitimler ve teorik içerikler bu profil için zayıf etki. Uygulamalı, deneyim bazlı öğrenme yöntemleri daha işlevsel."
+  },
+  deneyimden_ogrenme: {
+    yuksek: "Hatalarını fırsat olarak görüyor, deneyimlerinden ders çıkarıyor. Bu özellik kariyer geçişlerinde ve yeni rollerde hızlı uyum sağlamayı destekler.",
+    dusuk: "Hatalardan öğrenme mekanizması zayıf, aynı döngüler tekrarlanabiliyor. Kariyer danışmanlığında 'bu deneyimden ne öğrendim?' sorusu düzenli gündeme gelmeli. Yansıtma pratiği geliştirici."
+  },
+  belirsizlik_tolerans: {
+    yuksek: "Belirsizlik ortamlarında sakinliğini koruyabiliyor. Startup, proje bazlı çalışma, danışmanlık gibi belirsizliğin yüksek olduğu ortamlar bu profil için uygun. Değişken işler tercih edilebilir.",
+    dusuk: "Her türlü belirsizlik aşırı stres yaratıyor. Net rol tanımı, yazılı prosedürler ve öngörülebilir iş akışları bu kişi için zorunlu. Kariyer geçişleri çok iyi planlanmalı ve sürprizsiz yönetilmeli."
+  },
+  degisime_aciklik: {
+    yuksek: "Değişim bu kişiyi korkutmuyor, yeni deneyimlere açık. Dönüşüm süreçleri, reorganizasyonlar ve kariyer pivotları bu profil için aşılabilir. Değişim temsilcisi rolleri uygun.",
+    dusuk: "Bilmediği ve deneyimlemediği her durumdan kaçınıyor. Kariyer geçişleri için 'tanıdık ile yeninin kesiştiği' adımlar güvenli başlangıç noktası. Kademeli geçiş planı önemli."
+  },
+  degisim_firsat: {
+    yuksek: "Değişimi kendini geliştirme fırsatı olarak görüyor. Bu bakış açısı kariyer gelişimini hızlandırır ve yeni rollere uyumu kolaylaştırır. Büyüme zihniyeti güçlü.",
+    dusuk: "Değişim tehdidi olarak algılanıyor, direnç var. Kariyer danışmanlığında değişimi küçük, yönetilebilir adımlara bölmek kritik. Her başarılı adım sonraki için zemin hazırlar."
+  },
+  uyum_yeteneği: {
+    yuksek: "Değişen şartlara uyum sağlama kapasitesi yüksek. Farklı sektörler, görevler ve çalışma koşulları arasında geçiş yapabilir. Çeşitli deneyimler kariyer portföyünü zenginleştirir.",
+    dusuk: "Değişen şartlara uyum zorlu. Kariyer planlamasında istikrar ön planda tutulmalı. Benzer yapıdaki rollerde derinleşmek, sürekli değişen ortamlardan kaçınmak bu profil için koruyucu."
+  },
+  zihinsel_esneklik: {
+    yuksek: "Hızla değişen şartlarda kararlarını revize edebiliyor. Dinamik ortamlar, kriz yönetimi ve hızlı karar alma gerektiren roller bu kişi için uygun. Pivotlama becerisi güçlü.",
+    dusuk: "Eski alışkanlıklardan vazgeçmek zorlanıyor. Kariyer danışmanlığında 'bu yol işe yaramıyor' farkındalığı oluşturmak öncelikli. Alternatif çözüm üretme pratik alıştırmalarla desteklenebilir."
+  },
+  yenilikci_cozum: {
+    yuksek: "Beklenmedik durumlar karşısında yaratıcı çözümler üretebiliyor. Problem çözme gücü güçlü. İnovasyon, ar-ge, yeni ürün geliştirme gibi yaratıcılık gerektiren alanlar bu profil için uygun.",
+    dusuk: "Yaratıcı çözüm üretme kapasitesi zayıf, standart yollarla ilerleniyor. Bu kişi için net prosedürler, önceden tanımlanmış süreçler ve uygulama odaklı görevler çok daha verimli."
+  },
+  analiz_yeteneği: {
+    yuksek: "Sorunların kökenine iniyor, detaylı analiz yapabiliyor. Araştırma, strateji, kalite yönetimi, veri analizi gibi derinlikli düşünce gerektiren roller bu profil için güçlü eşleşme.",
+    dusuk: "Analitik derinlik zayıf, yüzeysel yaklaşımlar öne çıkıyor. Rutin, standart işlemlerin hâkim olduğu, derin analiz gerektirmeyen görevler bu profil için daha uygun. Analitik karar gerektiren roller dikkatli yönetilmeli."
+  },
+  varsayim_kavrama: {
+    yuksek: "Bir argümanın temelindeki varsayımları görebiliyor. Eleştirel düşünce güçlü. Hukuk, strateji danışmanlığı, akademi, risk yönetimi gibi alanlar bu kapasiteyi değerlendirir.",
+    dusuk: "Argümanların altındaki varsayımları kavramak zorlanıyor. Derin analiz gerektirmeyen, uygulamaya odaklı rollerde bu sınırlılık daha az belirginleşir."
+  },
+  akil_yurutme: {
+    yuksek: "Kendi uzmanlık alanında kanıtları etkili değerlendiriyor. Bilgi tabanı güçlü olduğu alanlarda akıl yürütme kalitesi yüksek. Uzmanlık geliştirildikçe bu kapasite genişler.",
+    dusuk: "Kanıtları değerlendirme ve akıl yürütme zayıf. Bu kişi için kararları destekleyecek net veri ve yapılandırılmış çerçeveler sunulmalı. Sezgisel değil, sistematik karar alma alışkanlığı kazandırılabilir."
+  },
+  durum_farkindaligi: {
+    yuksek: "Çevresindeki değişiklikleri fark ediyor, sosyal ortamı okuyabiliyor. İnsan ve ilişki dinamiklerinin önemli olduğu rollerde bu özellik değer taşır. Yöneticilik ve koordinasyon rolleri için iyi zemin.",
+    dusuk: "Çevresel değişiklikleri ve sosyal dinamikleri okumak zorlanıyor. Bağımsız, kendi başına yürütülen teknik görevler bu profil için daha uygun. Sosyal ortam karmaşıklığı yüksek roller dikkatli yönetilmeli."
+  },
+  genis_bakis: {
+    yuksek: "Olayları birden fazla perspektiften ele alabiliyor. Strateji, politika, proje yönetimi gibi geniş resmi görmeyi gerektiren roller bu profil için güçlü eşleşme.",
+    dusuk: "Dar bakış açısı hâkim, farklı perspektifler zorlanıyor. Uzman rolü ve derinleşme bu profil için daha uygun. Geniş paydaş yönetimi gerektiren liderlik rolleri dikkatli yaklaşımla ele alınmalı."
+  },
+  ortuk_baglantilar: {
+    yuksek: "Farklı bilgiler arasındaki gizli bağlantıları görebiliyor. Sistem düşüncesi güçlü. Araştırma, inovasyon, strateji ve kompleks problem çözme gerektiren roller bu kapasiteyi değerlendirir.",
+    dusuk: "Farklı alanlar arasındaki ilişkileri kurmak zorlanıyor. Sektör değişikliği veya multidisipliner roller yerine derinleşme ve uzmanlık bu profil için daha güvenli kariyer yolu."
+  },
+  is_detaylari: {
+    yuksek: "İşinin detaylarına hâkim, kritik ayrıntıları atlamıyor. Kalite, hassasiyet ve hata toleransının düşük olduğu rollerde güçlü performans. Kontrol ve uyum gerektiren pozisyonlar uygun.",
+    dusuk: "Önemli detaylar gözden kaçabiliyor. Detay takibi gerektiren, hata toleransı düşük görevlerde çift kontrol mekanizmaları ve yapılandırılmış süreçler kritik destek sağlar."
+  },
+  bilgi_pratik: {
+    yuksek: "Teorik bilgiyi işine yansıtabiliyor. Uzmanlık alanında yenilikçi çözümler üretme kapasitesi var. Danışmanlık, eğitim ve uzman pozisyonlar bu profil için değerli eşleşme.",
+    dusuk: "Uzmanlık bilgisini işe yansıtmak zorlanıyor. Uygulamalı mentorluk, iş başı eğitim ve yaparak öğrenme bu profil için çok daha etkili gelişim yolu."
+  },
+  uzmanlik_gelistirme: {
+    yuksek: "Uzmanlığını geliştirme arzusu yüksek, alanda derinleşme motivasyonu var. Uzman kariyer yolu, akademi, teknik liderlik bu profil için güçlü seçenekler.",
+    dusuk: "Uzmanlık geliştirme için özel istek yok, mevcut bilgiyle yetinme eğilimi var. Kariyer danışmanlığında 'neden daha fazlasını öğrenmeli?' sorusu somut faydalarla yanıtlanmalı."
+  },
+  empati: {
+    yuksek: "Karşısındakinin duygularını anlama kapasitesi yüksek. Terapi, danışmanlık, liderlik, müşteri ilişkileri gibi derin insan temasının olduğu roller bu profil için güçlü eşleşme.",
+    dusuk: "Başkalarının ruh halini okumak zorlanıyor. Güçlü insan ilişkisi gerektiren, duygusal temas yüksek roller bu profil için yorucu. Teknik, analitik veya bağımsız çalışma daha uygun."
+  },
+  baskalarına_duyarli: {
+    yuksek: "Yakın gördüğü kişilerin hislerine duyarlı. Bu özellik güven ortamı oluşturuyor ve takım uyumunu destekliyor. Yeni ve farklı kişilere bu duyarlılığı genişletmek gelişim alanı.",
+    dusuk: "Başkalarının ihtiyaçlarına duyarlılık durumsal ve koşullu. Bağımsız çalışma veya teknik roller bu profil için daha az yorucu. Güçlü insan teması gerektiren rollerde ek destek önemli."
+  },
+  farklilik_saygi: {
+    yuksek: "Farklı kültür ve düşüncelere saygı güçlü. Uluslararası çalışma ortamları, çeşitlilik yüksek ekipler ve kültürlerarası roller bu profil için uygun. Çeşitlilik yönetimi kapasitesi var.",
+    dusuk: "Farklılıklara saygı zorlanıyor, önyargılı davranışlar riski mevcut. Homojen ve tanıdık ekip yapıları bu kişi için daha konforlu. Uluslararası ve çok kültürlü ortamlar dikkatli yönetilmeli."
+  },
+  isbirligi_yatkinlik: {
+    yuksek: "Takım çalışmasına yatkın, ortak hedefe katkı sunmaya istekli. Proje ekipleri, matriks organizasyonlar ve iş birliğinin ön planda olduğu roller bu profil için güçlü eşleşme.",
+    dusuk: "İş birliği yalnızca güvenilen kişilerle işliyor. Yeni ekip üyeleriyle uyum zaman alabilir. Kariyer danışmanlığında 'farklı kişilerle çalışmak için ne gerekiyor?' sorusu üzerinde çalışmak değerli."
+  },
+  alcakgonullilik: {
+    yuksek: "Başkalarını kendisiyle denk görüyor, dikkat çekmek için ekstra çaba harcamıyor. Bu özellik ekip güvenini artırıyor ve ortak çalışmayı kolaylaştırıyor. Liderlikte güçlü temel.",
+    dusuk: "Bazı durumlarda kendini beğenen ve gösteriş yapma eğilimi var. Liderlik ve ekip rollerinde bu davranış fark edilir ve ilişki kurmayı zorlaştırabilir. Farkındalık ve geri bildirim önemli."
+  },
+  anlasmazlik_yonetme: {
+    yuksek: "Tanıdığı kişiler arasındaki çatışmayı tarafsız olarak yönetebiliyor. Arabuluculuk, insan kaynakları, müzakere gerektiren roller için uygun zemin. Bu kapasiteyi yabancı kişilere genişletmek gelişim hedefi.",
+    dusuk: "Anlaşmazlık yönetimi zayıf veya seçici. Çatışma ortamları bu kişide yüksek stres yaratır. Uyum ve uzlaşı kültürü güçlü, çatışmanın düşük olduğu yapılar bu profil için uygundur."
+  },
+  ikna: {
+    yuksek: "İkna edici, karşı tarafın itirazlarını öngörerek etkili yanıtlar verebiliyor. Satış, müzakere, liderlik, politika ve savunuculuk rolleri bu kapasiteyi en iyi değerlendiren alanlardır.",
+    dusuk: "İkna becerisi zayıf, argümanlar güçsüz kalabiliyor. Güçlü ikna gerektirmeyen, teknik veya destekleyici rollerde bu sınırlılık daha az belirginleşir. Sunum ve iletişim eğitimi destek sağlayabilir."
+  },
+  etkileme: {
+    yuksek: "Karşı tarafı nasıl etkileyeceğini biliyor ve buna göre yaklaşımını şekillendiriyor. Liderlik, müzakere, kamu ilişkileri ve strateji rolleri için güçlü bir özellik.",
+    dusuk: "Başkalarını etkileme kapasitesi zayıf. Kendi uzmanlığıyla öne çıkan, teknik güvenilirliğe dayanan roller bu profil için daha uygun. Etkileme gerektiren rollerde yapılandırılmış destek ve hazırlık kritik."
+  },
+  politik_farkindalik: {
+    yuksek: "Tanıdık ortamlarda güç ilişkilerini ve dinamikleri iyi okuyor. Kurumsal ortamlarda bu beceri kariyer ilerlemesini hızlandırır. Farklı ortamlara genişletmek gelişim alanı.",
+    dusuk: "Ortam dinamiklerini ve güç ilişkilerini okumak zorlanıyor. Kurumsal politikaya dahil olmayan, saf teknik veya uzmanlık odaklı roller bu profil için daha güvenli."
+  }
+};
+
+// Ana kategoriler için renk
+const KAT_RENKLER = {
+  "Motivasyon": "#0097A7",
+  "Proaktiflik": "#F2940F",
+  "Öğrenme": "#72AB24",
+  "Bilişsel": "#3C3489",
+  "Sosyal": "#A22E7F"
+};
+
+const scores = {};
+
+function buildGrid(){
+  const grid = document.getElementById("kategori-grid");
+  KATEGORILER.forEach(kat => {
+    const blok = document.createElement("div");
+    blok.className = "kategori-blok";
+    blok.innerHTML = `<div class="kategori-baslik">${kat.baslik}</div>` +
+      kat.boyutlar.map(b => `
+        <div class="boyut-row">
+          <div class="boyut-ad">${b.ad}</div>
+          <input class="puan-inp mid" id="inp-${b.key}" type="number" min="1" max="10" step="1" value="5"
+            oninput="onInput('${b.key}',this.value)" onblur="onBlur('${b.key}',this.value)"/>
+        </div>`).join("");
+    grid.appendChild(blok);
+    kat.boyutlar.forEach(b => scores[b.key] = 5);
+  });
+}
+
+function onInput(key,val){
+  const v=parseInt(val);
+  if(!isNaN(v)&&v>=1&&v<=10){ scores[key]=v; updateInputColor(key,v); }
+}
+function onBlur(key,val){
+  let v=parseInt(val); if(isNaN(v)||v<1)v=1; if(v>10)v=10;
+  scores[key]=v; document.getElementById("inp-"+key).value=v; updateInputColor(key,v);
+}
+function updateInputColor(key,v){
+  const el=document.getElementById("inp-"+key);
+  el.className="puan-inp "+(v>=7?"high":v>=4?"mid":"low");
+}
+
+function generateRapor(){
+  const ad = document.getElementById("danisan-ad").value.trim();
+  const tarih = new Date().toLocaleDateString("tr-TR");
+  document.getElementById("rapor-alt").textContent = (ad||"Danışan") + " · " + tarih;
+
+  // Tüm boyutları puana göre sırala
+  const tumBoyutlar = KATEGORILER.flatMap(k => k.boyutlar.map(b => ({...b, puan: scores[b.key]})));
+  const sirali = [...tumBoyutlar].sort((a,b) => b.puan - a.puan);
+  const gucluler = sirali.slice(0,3);
+  const zayiflar = sirali.slice(-3).reverse();
+
+  // Kategori ortalamaları
+  const katOrta = {
+    "Motivasyon": ortalama(["guc","prestij","etki_birakma","optimizm","olumsuz_duygu","sosyal_kaynak","ise_baglilik","is_motivasyonu","sirkete_baglilik"]),
+    "Proaktiflik": ortalama(["fark_yaratma","faydali_olma","icsel_motivasyon","bagimsiz_hareket","kader_belirleme","oz_yeterlilik","basari_gudusu","risk_alma","cok_calisma"]),
+    "Öğrenme": ortalama(["ogrenme_meraki","ogrendiklerini_hayata","deneyimden_ogrenme","belirsizlik_tolerans","degisime_aciklik","degisim_firsat","uyum_yeteneği","zihinsel_esneklik","yenilikci_cozum"]),
+    "Bilişsel": ortalama(["analiz_yeteneği","varsayim_kavrama","akil_yurutme","durum_farkindaligi","genis_bakis","ortuk_baglantilar","is_detaylari","bilgi_pratik","uzmanlik_gelistirme"]),
+    "Sosyal": ortalama(["empati","baskalarına_duyarli","farklilik_saygi","isbirligi_yatkinlik","alcakgonullilik","anlasmazlik_yonetme","ikna","etkileme","politik_farkindalik"]),
+  };
+
+  // En güçlü ana kategori
+  const enGucluKat = Object.entries(katOrta).sort((a,b)=>b[1]-a[1])[0];
+  const enZayifKat = Object.entries(katOrta).sort((a,b)=>a[1]-b[1])[0];
+
+  let html = "";
+
+  // Kategori özet
+  html += `<div style="margin-bottom:20px;">
+    <div style="font-size:13px;font-weight:700;color:#3C3489;margin-bottom:10px;">Ana Kategori Profili</div>
+    <div class="kategori-ozet-grid">`;
+  Object.entries(katOrta).forEach(([kat,ort])=>{
+    const renk = KAT_RENKLER[kat]||"#3C3489";
+    html += `<div class="kat-badge">
+      <div class="kat-badge-ad">${kat}</div>
+      <div class="kat-badge-puan" style="color:${renk};">${ort}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // En güçlü 3
+  html += `<div class="yon-baslik guclu">✦ En Güçlü 3 Alan — Kariyer Danışmanlığı Yorumu</div>`;
+  gucluler.forEach(b => {
+    const yorum = YORUMLAR[b.key];
+    if(!yorum) return;
+    html += `<div class="boyut-kutu guclu">
+      <div class="boyut-kutu-baslik">${b.ad}</div>
+      <div class="boyut-kutu-puan">Sten ${b.puan} — Güçlü Alan</div>
+      <div class="boyut-kutu-metin">${yorum.yuksek}</div>
+    </div>`;
+  });
+
+  // En zayıf 3
+  html += `<div class="yon-baslik zayif" style="margin-top:22px;">⚠ Öncelikli Gelişim Alanları — Kariyer Danışmanlığı Yorumu</div>`;
+  zayiflar.forEach(b => {
+    const yorum = YORUMLAR[b.key];
+    if(!yorum) return;
+    html += `<div class="boyut-kutu zayif">
+      <div class="boyut-kutu-baslik">${b.ad}</div>
+      <div class="boyut-kutu-puan">Sten ${b.puan} — Öncelikli Gelişim Odağı</div>
+      <div class="boyut-kutu-metin">${yorum.dusuk}</div>
+    </div>`;
+  });
+
+  // Genel profil özeti
+  const genelYorum = buildGenelYorum(ad, enGucluKat, enZayifKat, gucluler, zayiflar);
+  html += `<div class="profil-ozet" style="margin-top:22px;">
+    <div class="profil-ozet-baslik">Genel Potansiyel Profili</div>
+    <div class="profil-ozet-metin">${genelYorum}</div>
+  </div>`;
+
+  document.getElementById("rapor-icerik").innerHTML = html;
+  const sec = document.getElementById("rapor-section");
+  sec.style.display = "block";
+  sec.scrollIntoView({behavior:"smooth"});
+}
+
+function ortalama(keys){
+  const vals = keys.map(k => scores[k]||5);
+  return (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+}
+
+function buildGenelYorum(ad, enGuclu, enZayif, gucluler, zayiflar){
+  const isim = ad || "Danışan";
+  const gAdlar = gucluler.map(b=>b.ad).join(", ");
+  const zAdlar = zayiflar.map(b=>b.ad).join(", ");
+  return `${isim}'ın TALEX profili, ${enGuclu[0]} alanında belirgin bir güç yoğunlaşması (Ort. ${enGuclu[1]}) göstermektedir. Bireysel güçlü alanlar incelendiğinde <strong>${gAdlar}</strong> boyutları öne çıkmaktadır; bu kombinasyon kariyer danışmanlığı sürecinde tercih edilen rol yapısı ve çalışma ortamı seçimleri için önemli bir rehber işlevi görmektedir. Öte yandan <strong>${zAdlar}</strong> boyutlarındaki düşük puanlar kariyer planlamasında dikkat gerektiren kısıtlar olarak değerlendirilmelidir; bu alanlar ya gelişim hedefi olarak çalışılabilir ya da bu kapasitelerin yoğun kullanılmadığı rol yapıları öncelikli tercih olarak belirlenebilir. ${enGuclu[0]} ile ${enZayif[0]} alanları arasındaki zıtlık (${enGuclu[1]} vs ${enZayif[1]}) bu profilin belirgin güçleri olan ancak bazı alanlarda yapısal kısıtlar taşıyan bir tablo sergilediğini ortaya koymaktadır.`;
+}
+
+buildGrid();
+</script>
+</body>
+</html>
