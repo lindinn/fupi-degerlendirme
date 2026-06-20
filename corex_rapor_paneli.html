@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FUPİ — COREX & FUPİ Uygulama Rapor Paneli</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F0EFF8;font-family:system-ui,Arial,sans-serif;color:#222;}
+.header{background:#3C3489;padding:13px 24px;display:flex;align-items:center;gap:14px;}
+.logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:3px;}
+.logo-sub{font-size:7px;color:#bbb;letter-spacing:2px;margin-top:2px;}
+.header-title{color:#EEEDFE;font-size:13px;font-weight:600;border-left:2px solid #534AB7;padding-left:14px;}
+.wrap{max-width:1100px;margin:0 auto;padding:16px;}
+.card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(60,52,137,0.08);margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:700;color:#3C3489;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #EEEDFE;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.danisan-input{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#222;}
+.danisan-input:focus{outline:none;border-color:#3C3489;}
+.boyut-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.boyut-ad{flex:1;font-size:12px;color:#333;line-height:1.3;}
+.boyut-eslesme{font-size:9.5px;color:#aaa;margin-top:1px;}
+.puan-inp{width:58px;padding:5px 7px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;font-weight:700;text-align:center;font-family:inherit;flex-shrink:0;}
+.puan-inp:focus{outline:none;}
+.puan-inp.c1{color:#C62828;border-color:#EF9A9A;background:#FFEBEE;}
+.puan-inp.c2{color:#E65100;border-color:#F2940F;background:#FFF8E1;}
+.puan-inp.c3{color:#555;border-color:#bbb;background:#F5F5F5;}
+.puan-inp.c4{color:#2E7D32;border-color:#72AB24;background:#F1F8E9;}
+.puan-inp.c5{color:#1B5E20;border-color:#388E3C;background:#E8F5E9;}
+.seviye-badge{font-size:9px;color:#999;white-space:nowrap;min-width:80px;}
+.gen-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#3C3489;color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;}
+.gen-btn:hover{background:#534AB7;}
+/* RAPOR */
+.rapor-section{display:none;}
+.rapor-card{background:#fff;border-radius:12px;padding:28px 32px;box-shadow:0 2px 10px rgba(60,52,137,0.08);margin-bottom:14px;}
+.rapor-header{background:#3C3489;border-radius:10px;padding:18px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+.rapor-baslik{color:#fff;font-size:16px;font-weight:700;}
+.rapor-alt{color:#EEEDFE;font-size:12px;margin-top:3px;}
+.pdf-btn{padding:8px 20px;background:#fff;color:#3C3489;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+/* YETKİNLİK BLOK */
+.ytk-blok{margin-bottom:26px;page-break-inside:avoid;break-inside:avoid;}
+.ytk-blok-baslik{font-size:15px;font-weight:700;color:#222;margin-bottom:10px;}
+.puanlar-satir{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.puan-chip{padding:6px 14px;border-radius:20px;font-size:11.5px;font-weight:600;border:1.5px solid;}
+.puan-chip.corex{border-color:#3C3489;background:#EEEDFE;color:#3C3489;}
+.puan-chip.fupi{border-color:#0097A7;background:#E0F7FA;color:#006064;}
+.tutarlilik-kutu{padding:13px 16px;border-radius:9px;border-left:4px solid;margin-bottom:10px;}
+.tutarlilik-kutu.tutarli-guclu{border-color:#72AB24;background:#F1F8E9;}
+.tutarlilik-kutu.tutarli-zayif{border-color:#D70F14;background:#FFF5F5;}
+.tutarlilik-kutu.tutarli-orta{border-color:#9E9E9E;background:#F5F5F5;}
+.tutarlilik-kutu.farkindalik{border-color:#F2940F;background:#FFF8E1;}
+.tutarlilik-kutu.mutevazi{border-color:#534AB7;background:#EEEDFE;}
+.tutarlilik-etiket{font-size:11px;font-weight:700;margin-bottom:5px;}
+.tutarlilik-kutu.tutarli-guclu .tutarlilik-etiket{color:#2E7D32;}
+.tutarlilik-kutu.tutarli-zayif .tutarlilik-etiket{color:#C62828;}
+.tutarlilik-kutu.tutarli-orta .tutarlilik-etiket{color:#555;}
+.tutarlilik-kutu.farkindalik .tutarlilik-etiket{color:#E65100;}
+.tutarlilik-kutu.mutevazi .tutarlilik-etiket{color:#3C3489;}
+.yorum-metin{font-size:13px;line-height:1.8;color:#333;}
+/* YalnızCOREX */
+.ek-blok{background:#FAFAFA;border:1px solid #E0E0E8;border-radius:10px;padding:14px 16px;margin-bottom:14px;page-break-inside:avoid;}
+.ek-baslik{font-size:13px;font-weight:700;color:#555;margin-bottom:10px;}
+.ek-satir{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.ek-ad{flex:1;font-size:12px;color:#333;}
+/* GENEL */
+.genel-blok{background:#EEEDFE;border:2px solid #3C3489;border-radius:10px;padding:16px 20px;margin-top:6px;page-break-inside:avoid;}
+.genel-baslik{font-size:14px;font-weight:700;color:#3C3489;margin-bottom:10px;}
+.genel-metin{font-size:13px;line-height:1.85;color:#333;}
+.rapor-footer{margin-top:32px;padding-top:12px;border-top:1px solid #ddd;text-align:center;font-size:11px;color:#aaa;}
+@media print{
+  body{background:#fff;}
+  .wrap>.card{display:none!important;}
+  .rapor-section{display:block!important;}
+  .rapor-card{box-shadow:none;padding:16px 0;}
+  @page{margin:15mm;size:A4;}
+}
+@media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><div class="logo">FUPİ</div><div class="logo-sub">KARİYER TASARIMI</div></div>
+  <div class="header-title">COREX & FUPİ Uygulama — Karşılaştırmalı Rapor Paneli</div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="card-title">👤 Danışan</div>
+    <input class="danisan-input" id="danisan-ad" type="text" placeholder="Ad Soyad"/>
+  </div>
+
+  <div class="grid2">
+    <!-- COREX -->
+    <div class="card">
+      <div class="card-title">📋 COREX Puanları <span style="font-size:10px;font-weight:400;color:#999;">— 1–10 arası</span></div>
+      <div id="corex-list"></div>
+    </div>
+    <!-- FUPİ UYGULAMA -->
+    <div class="card">
+      <div class="card-title">🎯 FUPİ Uygulama Puanları <span style="font-size:10px;font-weight:400;color:#999;">— 1–5 arası</span></div>
+      <div id="fupi-list"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <button class="gen-btn" onclick="generateRapor()">📄 Raporu Oluştur</button>
+  </div>
+
+  <div class="rapor-section" id="rapor-section">
+    <div class="rapor-card">
+      <div class="rapor-header">
+        <div>
+          <div class="rapor-baslik">COREX & FUPİ Uygulama — Karşılaştırmalı Yetkinlik Raporu</div>
+          <div class="rapor-alt" id="rapor-alt"></div>
+        </div>
+        <button class="pdf-btn" onclick="window.print()">🖨 PDF Kaydet</button>
+      </div>
+      <div id="rapor-icerik"></div>
+      <div class="rapor-footer">© FUPİ Kariyer Tasarımı — Bu rapor değerlendirme amacıyla hazırlanmıştır. | www.fupi.com.tr</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// COREX boyutları ve FUPİ yetkinlik eşleşmeleri
+const COREX_BOYUTLAR = [
+  {key:"sonuc",    ad:"Sonuç Odaklılık",      fupi:"basarma"},
+  {key:"analiz",   ad:"Analiz Yeteneği",       fupi:"analiz"},
+  {key:"ticari",   ad:"Ticari Bakış Açısı",    fupi:null},
+  {key:"detay",    ad:"Detaylara Hakim Olma",  fupi:"analiz"},
+  {key:"ikna",     ad:"İkna Edici İletişim",   fupi:"iletisim"},
+  {key:"isbirligi",ad:"İşbirliği ve Uyum",     fupi:"isbirligi"},
+  {key:"iliski",   ad:"İlişki Geliştirme",     fupi:"isbirligi"},
+  {key:"musteri",  ad:"Müşteri Odaklılık",     fupi:null},
+  {key:"degisim",  ad:"Değişime Uyum",         fupi:"degisim"},
+  {key:"ogrenme",  ad:"Sürekli Öğrenme",       fupi:"degisim"},
+];
+
+const FUPI_YTK = [
+  {key:"analiz",    ad:"Analiz ve Problem Çözme",      corexKeys:["analiz","detay"]},
+  {key:"isbirligi", ad:"İş Birliği Geliştirme",        corexKeys:["isbirligi","iliski"]},
+  {key:"degisim",   ad:"Değişime Uyum ve Çeviklik",    corexKeys:["degisim","ogrenme"]},
+  {key:"iletisim",  ad:"Etkili İletişim ve Müzakere",  corexKeys:["ikna"]},
+  {key:"basarma",   ad:"Başarma Arzusu",               corexKeys:["sonuc"]},
+  {key:"yenilikcilik", ad:"Yenilikçilik ve Teknoloji", corexKeys:[]},
+];
+
+const COREX_SEVIYELERI = {
+  1:"Etkisiz",2:"Etkisiz",
+  3:"Gelişime İhtiyacı Var",4:"Gelişime İhtiyacı Var",
+  5:"Çoğunlukla Etkili",6:"Çoğunlukla Etkili",7:"Çoğunlukla Etkili",
+  8:"Etkili",9:"Etkili",
+  10:"Çok Etkili"
+};
+const FUPI_SEVIYELERI = {
+  1:"Etkisiz",2:"Gelişime İhtiyacı Var",
+  3:"Çoğunlukla Etkili",4:"Etkili",5:"Çok Etkili"
+};
+
+// COREX puanını 1-5 skalasına normalize et
+function corexNorm(v){
+  if(v<=2)return 1; if(v<=4)return 2; if(v<=7)return 3; if(v<=9)return 4; return 5;
+}
+
+function corexClass(v){
+  if(v<=2)return"c1"; if(v<=4)return"c2"; if(v<=7)return"c3"; if(v<=9)return"c4"; return"c5";
+}
+function fupiClass(v){
+  return["","c1","c2","c3","c4","c5"][v]||"c3";
+}
+
+const cScores={}, fScores={};
+COREX_BOYUTLAR.forEach(b=>cScores[b.key]=5);
+FUPI_YTK.forEach(y=>fScores[y.key]=3);
+
+// Form oluştur
+function buildForms(){
+  const cList=document.getElementById("corex-list");
+  COREX_BOYUTLAR.forEach(b=>{
+    cList.innerHTML+=`<div class="boyut-row">
+      <div class="boyut-ad">${b.ad}${b.fupi?'<div class="boyut-eslesme">→ FUPİ: '+getFupiAd(b.fupi)+'</div>':'<div class="boyut-eslesme">Ayrıca değerlendirilir</div>'}</div>
+      <input class="puan-inp c3" id="c-${b.key}" type="number" min="1" max="10" step="1" value="5"
+        oninput="onCInput('${b.key}',this.value)" onblur="onCBlur('${b.key}',this.value)"/>
+      <div class="seviye-badge" id="cb-${b.key}">Çoğunlukla Etkili</div>
+    </div>`;
+  });
+
+  const fList=document.getElementById("fupi-list");
+  FUPI_YTK.forEach(y=>{
+    fList.innerHTML+=`<div class="boyut-row">
+      <div class="boyut-ad">${y.ad}${y.corexKeys.length>0?'<div class="boyut-eslesme">← COREX: '+getCorexAdlar(y.corexKeys)+'</div>':'<div class="boyut-eslesme">COREX\'te ölçülmüyor</div>'}</div>
+      <input class="puan-inp c3" id="f-${y.key}" type="number" min="1" max="5" step="1" value="3"
+        oninput="onFInput('${y.key}',this.value)" onblur="onFBlur('${y.key}',this.value)"/>
+      <div class="seviye-badge" id="fb-${y.key}">Çoğunlukla Etkili</div>
+    </div>`;
+  });
+}
+
+function getFupiAd(key){ return FUPI_YTK.find(y=>y.key===key)?.ad||""; }
+function getCorexAdlar(keys){ return keys.map(k=>COREX_BOYUTLAR.find(b=>b.key===k)?.ad||"").join(", "); }
+
+function onCInput(key,val){ const v=parseInt(val); if(!isNaN(v)&&v>=1&&v<=10){cScores[key]=v; updateCBadge(key,v);} }
+function onCBlur(key,val){ let v=parseInt(val); if(isNaN(v)||v<1)v=1; if(v>10)v=10; cScores[key]=v; document.getElementById("c-"+key).value=v; updateCBadge(key,v); }
+function onFInput(key,val){ const v=parseInt(val); if(!isNaN(v)&&v>=1&&v<=5){fScores[key]=v; updateFBadge(key,v);} }
+function onFBlur(key,val){ let v=parseInt(val); if(isNaN(v)||v<1)v=1; if(v>5)v=5; fScores[key]=v; document.getElementById("f-"+key).value=v; updateFBadge(key,v); }
+
+function updateCBadge(key,v){
+  const el=document.getElementById("c-"+key);
+  el.className="puan-inp "+corexClass(v);
+  document.getElementById("cb-"+key).textContent=COREX_SEVIYELERI[v];
+}
+function updateFBadge(key,v){
+  const el=document.getElementById("f-"+key);
+  el.className="puan-inp "+fupiClass(v);
+  document.getElementById("fb-"+key).textContent=FUPI_SEVIYELERI[v];
+}
+
+// COREX ortalama hesapla
+function corexOrtalama(keys){
+  const vals=keys.map(k=>cScores[k]||5);
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+
+// Tutarlılık tespiti
+function getTutarlilik(cNorm, fPuan){
+  const fark = cNorm - fPuan;
+  if(Math.abs(fark)<=1){
+    if(fPuan>=4) return "tutarli-guclu";
+    if(fPuan<=2) return "tutarli-zayif";
+    return "tutarli-orta";
+  }
+  if(fark>1) return "farkindalik";
+  return "mutevazi";
+}
+
+const TUTARLILIK_ETIKET = {
+  "tutarli-guclu":"✦ Tutarlı — Güçlü Alan",
+  "tutarli-zayif":"⚠ Tutarlı — Gelişim Alanı",
+  "tutarli-orta":"→ Tutarlı — Orta Düzey",
+  "farkindalik":"⚡ Farkındalık Boşluğu",
+  "mutevazi":"↑ Güçlü Yan — Görünür Kılınmalı"
+};
+
+// Yorum metinleri
+const YORUMLAR = {
+  analiz:{
+    "tutarli-guclu":"Her iki kaynak da analitik kapasitenin güçlü olduğunu teyit ediyor. Sorgulayıcı yaklaşım ve sistematik problem çözme davranışsal olarak tutarlı biçimde gözlemlendi. Kariyer planında analiz gerektiren roller için güvenilir bir temel.",
+    "tutarli-zayif":"Her iki kaynak da bu alanda gelişim ihtiyacını teyit ediyor. Yapılandırılmış problem çözme desteği ve analitik araçlar bu kişiye yol gösterici olur. Derin analiz gerektiren roller dikkatli yönetilmeli.",
+    "tutarli-orta":"Her iki kaynak da orta düzey bir analitik performans gösteriyor. Rutin problemleri çözebiliyor; ancak karmaşık ve baskılı durumlarda sınırlar beliriyor. Gelişim için sistematik analiz alışkanlıkları kazandırılabilir.",
+    "farkindalik":"Öz beyan gözlem sonucunun üzerinde — kişi analitik kapasitesini gerçekte olduğundan daha güçlü görüyor. Bu farkındalık boşluğunun nazikçe ele alınması önemli. Analitik düşünce gerektiren rollerde beklenti yönetimi dikkatli yapılmalı.",
+    "mutevazi":"Gözlem öz beyanın üzerinde — kişi analitik kapasitesini hafife alıyor. Bu güçlü yanın görünür kılınması ve özgüveni beslemesi için aktif olarak çalışılabilir. COREX'te görünmeyen ama davranışta var olan bir kapasite."
+  },
+  isbirligi:{
+    "tutarli-guclu":"Her iki kaynak da iş birliği kapasitesini güçlü olarak teyit ediyor. Farklı kişilerle uyumlu çalışma ve ilişki geliştirme davranışsal olarak belirgin. Kariyer planında ekip ve iş birliği odaklı roller için çok güvenilir bir temel.",
+    "tutarli-zayif":"Her iki kaynak da bu alanda güçlük olduğunu gösteriyor. Ekip dinamiklerine katılım ve iş birliği için yapısal destek önemli. Takım çalışmasının yoğun olduğu roller dikkatli yönetilmeli.",
+    "tutarli-orta":"İş birliği çoğunlukla işliyor; ancak her durumda ve her kişiyle aynı düzeyde gerçekleşmiyor. Farklı kişi ve bağlamlara bu kapasiteyi genişletmek gelişim hedefi.",
+    "farkindalik":"Kişi iş birliği konusunda kendini gözlemden daha güçlü görüyor. Özellikle yeni veya farklı kişilerle çalışma durumlarında gerçek kapasite sınırlanıyor olabilir. Bu boşluk kariyer danışmanlığında ele alınmalı.",
+    "mutevazi":"Davranışsal gözlem öz beyanı aşıyor — kişi iş birliği konusundaki gerçek kapasitesini fark etmeyebilir. Bu güç, özgüven geliştirme çalışmalarında aktif olarak kullanılabilir."
+  },
+  degisim:{
+    "tutarli-guclu":"Her iki kaynak da değişime uyum kapasitesini güçlü olarak teyit ediyor. Yeni durumlar ve esneklik gerektiren ortamlar bu kişi için aşılabilir. Kariyer geçişleri ve dönüşüm süreçleri bu profil için uygun.",
+    "tutarli-zayif":"Her iki kaynak da değişime uyum alanında gelişim ihtiyacını gösteriyor. Öngörülebilir, yapılandırılmış ve istikrarlı iş ortamları bu profil için öncelikli. Değişim yönetimi gerektiren roller dikkatli ele alınmalı.",
+    "tutarli-orta":"Değişime uyum çoğunlukla sağlanıyor; ancak ani, yoğun veya dayatılan değişimlerde sınırlar beliriyor. Değişimin anlamını ve gerekçesini görmek bu kişide uyumu kolaylaştıran temel faktör.",
+    "farkindalik":"Kişi değişime uyum konusunda kendini gözlemden belirgin şekilde daha güçlü görüyor — bu profilin en kritik farkındalık boşluğu olabilir. Gerçek koşullarda bu kapasitenin sınırlandığı durumların nazikçe paylaşılması önemli bir kariyer danışmanlığı çalışması.",
+    "mutevazi":"Davranışsal gözlem, kişinin değişime uyum konusunda öz beyanından daha güçlü bir profil ortaya koyuyor. Bu kapasitenin farkına varılması ve özgüvenin beslenmesi kariyer danışmanlığında değerli bir çalışma alanı."
+  },
+  iletisim:{
+    "tutarli-guclu":"Her iki kaynak da iletişim ve ikna kapasitesini güçlü olarak teyit ediyor. Karşısındakini anlayarak konuşma, iletişim tarzını adapte etme ve ikna davranışsal olarak belirgin. Profilin en güvenilir güçlü alanlarından biri.",
+    "tutarli-zayif":"Her iki kaynak da iletişim ve müzakere alanında gelişim ihtiyacını gösteriyor. Yapılandırılmış iletişim desteği ve pratik sunum/müzakere alıştırmaları bu kişi için faydalı. İkna gerektiren rollerde yapısal araçlar kritik.",
+    "tutarli-orta":"İletişim çoğunlukla yeterli düzeyde; ancak müzakere, zor konuşmalar ve güç dengelerinin olduğu iletişimde tutarsızlık gözlemlenebiliyor. Bu alanlarda bilinçli pratik gelişimi destekler.",
+    "farkindalik":"Kişi iletişim kapasitesini gözlemden daha güçlü görüyor. Özellikle müzakere ve ikna gerektiren durumlarda gerçek kapasite sınırlanıyor olabilir. Bu boşluk özellikle satış veya müzakere odaklı rollerde belirginleşir.",
+    "mutevazi":"Davranışsal gözlem öz beyanı aşıyor — kişi iletişim gücünün farkında değil. Bu kapasitenin görünür kılınması ve aktif olarak kullanılması kariyer planında önemli bir adım."
+  },
+  basarma:{
+    "tutarli-guclu":"Her iki kaynak da başarma arzusu ve sonuç odaklılığı güçlü olarak teyit ediyor. Hedef bazlı, performans odaklı ve ölçülebilir çıktıların olduğu roller bu profil için güçlü eşleşme.",
+    "tutarli-zayif":"Her iki kaynak da başarma arzusu ve sonuç odaklılığın zayıf olduğunu gösteriyor. Bu yapısal bir eğilim — geliştirme gündeminden çok rol seçim kriteri olarak değerlendirilmeli. İçsel motive eden görevler ve anlamlı çalışma bu kısıtı yönetmenin yolu.",
+    "tutarli-orta":"Başarma arzusu belirli alanlarda ve koşullarda devreye giriyor; ancak tutarlı değil. İlgi alanıyla örtüşen görevlerde bu güdü açılabiliyor. Kariyer seçiminde ilgi-anlam uyumu belirleyici.",
+    "farkindalik":"Kişi başarma arzusu konusunda kendini gözlemden daha güçlü görüyor. Gerçek ortamda zorluklar karşısında pes etme veya ekstra çaba göstermeme gözlemleniyor. Bu boşluk kariyer danışmanlığında doğrudan ele alınmalı.",
+    "mutevazi":"Davranışsal gözlem öz beyanı aşıyor — kişi başarma arzusunu hafife alıyor. Bu güçlü yanı fark ettirmek ve doğru bağlamda tetiklemek kariyer danışmanlığında değerli."
+  },
+  yenilikcilik:{
+    "tutarli-guclu":"Yenilikçilik ve teknoloji kullanımı gözlemde belirgin biçimde öne çıktı. COREX bu boyutu ölçmüyor; ancak FUPİ gözlemi bu alanın güçlü bir yetkinlik olduğunu ortaya koyuyor. Yaratıcılık ve teknoloji odaklı roller için uygun profil.",
+    "tutarli-zayif":"Yenilikçilik ve teknoloji kullanımı gözlemde zayıf kaldı. COREX bu boyutu ölçmüyor. Standart süreçlerin hâkim olduğu, yaratıcılık baskısının düşük olduğu roller bu profil için daha uygun.",
+    "tutarli-orta":"Yenilikçilik ve teknoloji kullanımı çoğunlukla yeterli; ancak her durumda tutarlı değil. COREX bu boyutu ölçmüyor. Pratik ve somut inovasyon adımları bu kapasiteyi geliştirebilir.",
+    "farkindalik":"FUPİ gözlemi bu alanda beklenenden düşük bir performans gösteriyor. COREX karşılığı olmadığı için öz beyan değerlendirmesi yapılamıyor; ancak gözlem gelişim ihtiyacına işaret ediyor.",
+    "mutevazi":"FUPİ gözlemi bu alanda güçlü bir kapasite ortaya koyuyor. COREX karşılığı olmadığı için öz beyan karşılaştırması yapılamıyor; ancak davranışsal kapasite mevcut."
+  }
+};
+
+function generateRapor(){
+  const ad = document.getElementById("danisan-ad").value.trim();
+  const tarih = new Date().toLocaleDateString("tr-TR");
+  document.getElementById("rapor-alt").textContent = (ad||"Danışan") + " · " + tarih;
+
+  let html = "";
+
+  // Her FUPİ yetkinliği için karşılaştırmalı blok
+  FUPI_YTK.forEach(ytk => {
+    const fupiPuan = fScores[ytk.key];
+    const fupiLabel = FUPI_SEVIYELERI[fupiPuan];
+
+    let corexOrta = null;
+    let corexLabel = "";
+    let cNorm = null;
+
+    if(ytk.corexKeys.length > 0){
+      const avg = corexOrtalama(ytk.corexKeys);
+      corexOrta = avg.toFixed(1);
+      const avgInt = Math.round(avg);
+      corexLabel = COREX_SEVIYELERI[Math.min(10,Math.max(1,avgInt))];
+      cNorm = corexNorm(avg);
+    }
+
+    const tutarlilik = cNorm ? getTutarlilik(cNorm, fupiPuan) : (fupiPuan>=4?"tutarli-guclu":fupiPuan<=2?"tutarli-zayif":"tutarli-orta");
+    const etiket = TUTARLILIK_ETIKET[tutarlilik];
+    const yorum = YORUMLAR[ytk.key][tutarlilik];
+
+    html += `<div class="ytk-blok">
+      <div class="ytk-blok-baslik">${ytk.ad}</div>
+      <div class="puanlar-satir">`;
+
+    if(cNorm){
+      html += `<div class="puan-chip corex">COREX Ort. ${corexOrta} — ${corexLabel}</div>`;
+    } else {
+      html += `<div class="puan-chip corex" style="opacity:0.5;">COREX ölçmüyor</div>`;
+    }
+    html += `<div class="puan-chip fupi">FUPİ Uygulama ${fupiPuan}/5 — ${fupiLabel}</div>
+      </div>
+      <div class="tutarlilik-kutu ${tutarlilik}">
+        <div class="tutarlilik-etiket">${etiket}</div>
+        <div class="yorum-metin">${yorum}</div>
+      </div>
+    </div>`;
+  });
+
+  // Ek COREX boyutları
+  const ekBoyutlar = COREX_BOYUTLAR.filter(b=>b.fupi===null);
+  if(ekBoyutlar.length>0){
+    html += `<div class="ek-blok">
+      <div class="ek-baslik">📌 Ek COREX Boyutları — Ayrıca Değerlendirilir</div>`;
+    ekBoyutlar.forEach(b => {
+      const v = cScores[b.key];
+      const lbl = COREX_SEVIYELERI[v];
+      const cls = corexClass(v);
+      html += `<div class="ek-satir">
+        <div class="ek-ad">${b.ad}</div>
+        <span class="puan-inp ${cls}" style="display:inline-block;padding:4px 10px;border-radius:6px;border:1.5px solid;">${v}</span>
+        <span style="font-size:11px;color:#777;">${lbl}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Genel değerlendirme
+  html += `<div class="genel-blok">
+    <div class="genel-baslik">Genel Değerlendirme</div>
+    <div class="genel-metin">${buildGenel(ad)}</div>
+  </div>`;
+
+  document.getElementById("rapor-icerik").innerHTML = html;
+  const sec = document.getElementById("rapor-section");
+  sec.style.display = "block";
+  sec.scrollIntoView({behavior:"smooth"});
+}
+
+function buildGenel(ad){
+  const isim = ad||"Danışan";
+  const gucluler = FUPI_YTK.filter(y=>fScores[y.key]>=4).map(y=>y.ad);
+  const zayiflar = FUPI_YTK.filter(y=>fScores[y.key]<=2).map(y=>y.ad);
+  const farkindaliklar = FUPI_YTK.filter(y=>{
+    if(y.corexKeys.length===0) return false;
+    const avg = corexOrtalama(y.corexKeys);
+    const cN = corexNorm(avg);
+    return (cN - fScores[y.key]) > 1;
+  }).map(y=>y.ad);
+
+  let metin = `${isim}'ın karşılaştırmalı profili incelendiğinde`;
+
+  if(gucluler.length>0) metin += ` <strong>${gucluler.join(", ")}</strong> yetkinliklerinde her iki kaynağın örtüşen güçlü bir tablo ortaya koyduğu görülmektedir`;
+  if(zayiflar.length>0) metin += `; buna karşın <strong>${zayiflar.join(", ")}</strong> alanlarında her iki kaynak da gelişim ihtiyacını teyit etmektedir`;
+  metin += ".";
+
+  if(farkindaliklar.length>0){
+    metin += ` Özellikle <strong>${farkindaliklar.join(", ")}</strong> alanında öz beyan ile gözlem arasında belirgin bir fark dikkat çekmektedir — kişi bu alanlarda kendini gerçekte olduğundan daha güçlü değerlendiriyor. Bu farkındalık boşluğu kariyer danışmanlığında öncelikli gündem maddesi olmalıdır.`;
+  }
+
+  metin += " Güçlü yetkinliklerin ön planda olduğu, gelişim alanlarındaki kapasiteleri zorlamayan rol yapıları bu profil için en sürdürülebilir kariyer çizgisini oluşturacaktır.";
+  return metin;
+}
+
+buildForms();
+</script>
+</body>
+</html>
