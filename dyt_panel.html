@@ -327,13 +327,117 @@ const DYT_YTK_ADI = {
   'Y7_Basarma_%':      'Başarma Arzusu ve Girişimcilik'
 };
 
+
+const YETKINLIK_RENKLERI = {
+  'Y1_Analiz_%':       '#F2940F',
+  'Y2_Isbirligi_%':    '#72AB24',
+  'Y3_Degisim_%':      '#6192C5',
+  'Y4_Iletisim_%':     '#D4900A',
+  'Y5_Yenilikcilik_%': '#A22E7F',
+  'Y6_Teknoloji_%':    '#0097A7',
+  'Y7_Basarma_%':      '#3C3489',
+};
+
+const DYT_KISA_METIN = {
+  'Y1_Analiz_%': {
+    guclu:          'Sorunların nedenlerini sistematik biçimde araştırır, veri odaklı kararlar alır ve alternatif çözümler üretir.',
+    gelistirilebilir:'Temel problem çözme yaklaşımlarını sergiler; analitik derinliği artırmak için gelişim fırsatları mevcuttur.',
+    oncelikli:      'Yapılandırılmış problem çözme ve analitik düşünme bu dönemde öncelikli gelişim odağıdır.'
+  },
+  'Y2_Isbirligi_%': {
+    guclu:          'Ekip içi dinamiklere duyarlıdır, farklı bakış açılarını entegre eder ve iş birliği ortamı yaratır.',
+    gelistirilebilir:'Temel iş birliği davranışlarını sergiler; farklı ekip dinamiklerine uyum kapasitesini güçlendirmek önceliklidir.',
+    oncelikli:      'Ortak çalışma ve iş birliği geliştirme bu dönemde öncelikli gelişim odağıdır.'
+  },
+  'Y3_Degisim_%': {
+    guclu:          'Değişen koşullara hızla uyum sağlar, belirsizlik ortamında alternatif planlar geliştirebilir.',
+    gelistirilebilir:'Temel uyum davranışlarını sergiler; değişim süreçlerinde çevikliği artırmak için gelişim fırsatları mevcuttur.',
+    oncelikli:      'Değişime uyum ve çeviklik bu dönemde öncelikli gelişim odağıdır.'
+  },
+  'Y4_Iletisim_%': {
+    guclu:          'Düşüncelerini açık ve ikna edici biçimde ifade eder, etkin dinleme ve müzakere becerilerine hakimdir.',
+    gelistirilebilir:'Temel iletişim becerilerini sergiler; müzakere ve ikna kapasitesini güçlendirmek için gelişim fırsatları mevcuttur.',
+    oncelikli:      'Etkili iletişim ve müzakere becerileri bu dönemde öncelikli gelişim odağıdır.'
+  },
+  'Y5_Yenilikcilik_%': {
+    guclu:          'Alışıldık dışında çözümler üretir, mevcut süreçleri sorgular ve yeni yaklaşımlar benimsemekten çekinmez.',
+    gelistirilebilir:'Belirli durumlarda yaratıcı çözümler üretebilir; yenilikçi düşünceyi tutarlı kılmak için gelişim fırsatları mevcuttur.',
+    oncelikli:      'Yenilikçi düşünce ve özgün çözüm üretme bu dönemde öncelikli gelişim odağıdır.'
+  },
+  'Y6_Teknoloji_%': {
+    guclu:          'Dijital araçlara hakimdir, bilgi ihtiyacını doğru kaynaklardan karşılar ve yeni teknolojilere hızla uyum sağlar.',
+    gelistirilebilir:'Temel teknoloji kullanım becerilerini sergiler; dijital araçları daha etkin kullanmak için gelişim fırsatları mevcuttur.',
+    oncelikli:      'Teknoloji ve bilgi okuryazarlığı bu dönemde öncelikli gelişim odağıdır.'
+  },
+  'Y7_Basarma_%': {
+    guclu:          'Hedef odaklı çalışır, engellerle karşılaştığında motivasyonunu korur ve sorumluluk almaktan çekinmez.',
+    gelistirilebilir:'Belirli hedeflere odaklanabiliyor; motivasyonu sürdürmek ve sorumluluk üstlenmek için gelişim fırsatları mevcuttur.',
+    oncelikli:      'Başarma arzusu ve sonuç odaklı çalışma bu dönemde öncelikli gelişim odağıdır.'
+  }
+};
+
 function generateHTMLRapor(idx) {
   const r = window._filteredData[idx];
   if (!r) return;
   const ad = r['Ad Soyad'] || 'Danışan';
   const tarih = new Date().toLocaleDateString('tr-TR');
 
-  let icerik = '';
+  // ── ÖZET SAYFASI ──
+  var toplamPuan = 0;
+  var ytk_sayisi = 0;
+  YETKINLIKLER.forEach(function(y) {
+    var p = parseFloat(r[y.key]) || 0;
+    toplamPuan += p;
+    ytk_sayisi++;
+  });
+  var genelPuan = ytk_sayisi > 0 ? Math.round(toplamPuan / ytk_sayisi) : 0;
+  var genelSv = seviye(genelPuan);
+  var genelRenk = genelSv.key === 'guclu' ? '#0097A7' : genelSv.key === 'gelistirilebilir' ? '#F2940F' : '#D70F14';
+
+  var ozet = '<div style="page-break-after:always;">';
+  // Katılımcı + Genel Durum yan yana
+  ozet += '<div style="display:flex;align-items:center;gap:24px;background:#F8F8F8;padding:16px 20px;margin-bottom:20px;border-radius:6px;">';
+  ozet += '<div style="min-width:190px;">';
+  ozet += '<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Katılımcı</div>';
+  ozet += '<div style="font-size:22px;font-weight:700;color:#222;line-height:1.2;">' + ad + '</div>';
+  ozet += '<div style="font-size:10px;color:#aaa;margin-top:4px;">Uygulama Tarihi: ' + tarih + '</div>';
+  ozet += '</div>';
+  ozet += '<div style="flex:1;">';
+  ozet += '<div style="font-size:9px;font-weight:700;color:#999;letter-spacing:1px;margin-bottom:6px;">GENEL DURUM</div>';
+  ozet += '<div style="display:flex;align-items:center;gap:12px;">';
+  ozet += '<div style="flex:1;height:16px;background:#E8E8E8;border-radius:3px;overflow:hidden;">';
+  ozet += '<div style="width:' + genelPuan + '%;height:100%;background:' + genelRenk + ';border-radius:3px;"></div></div>';
+  ozet += '<div style="font-size:28px;font-weight:900;color:' + genelRenk + ';min-width:48px;text-align:right;">' + genelPuan + '</div>';
+  ozet += '</div>';
+  ozet += '<div style="color:' + genelRenk + ';font-weight:700;font-size:11px;margin-top:3px;">' + genelSv.label + '</div>';
+  ozet += '</div>';
+  ozet += '</div>';
+  // Yetkinlik Bazında Sonuçlar
+
+  var ytk_no = 1;
+  YETKINLIKLER.forEach(function(y) {
+    var pct = parseFloat(r[y.key]) || 0;
+    var sv = seviye(pct);
+    var renk = YETKINLIK_RENKLERI[y.key] || '#3C3489';
+    var svRenk = sv.key === 'guclu' ? '#2E7D32' : sv.key === 'gelistirilebilir' ? '#E65100' : '#C62828';
+    var ytkAdi = DYT_YTK_ADI[y.key] || y.ad;
+    var kisa = DYT_KISA_METIN[y.key] ? (DYT_KISA_METIN[y.key][sv.key] || '') : '';
+    ozet += '<div style="margin-bottom:8px;">';
+    ozet += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">';
+    ozet += '<div style="font-size:15px;font-weight:700;color:' + renk + ';">' + ytk_no + '. ' + ytkAdi + '</div>';
+    ozet += '<div style="font-size:22px;font-weight:900;color:' + renk + ';">' + pct + '</div>';
+    ozet += '</div>';
+    ozet += '<div style="height:6px;background:#EEEEEE;border-radius:3px;overflow:hidden;margin-bottom:3px;">';
+    ozet += '<div style="width:' + pct + '%;height:100%;background:' + renk + ';border-radius:3px;"></div></div>';
+    ozet += '<div style="font-size:10px;font-weight:700;color:' + svRenk + ';margin-bottom:2px;">' + sv.label + '</div>';
+    ozet += '<div style="font-size:11px;color:#444;line-height:1.4;">' + kisa + '</div>';
+    ozet += '<div style="border-bottom:1px solid #E8E8E8;margin-top:6px;"></div>';
+    ozet += '</div>';
+    ytk_no++;
+  });
+  ozet += '</div>'; // page-break div kapanışı
+
+  let icerik = ozet;
   YETKINLIKLER.forEach(function(y) {
     const pct = parseFloat(r[y.key]) || 0;
     const sv = seviye(pct);
