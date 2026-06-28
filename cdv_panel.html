@@ -85,7 +85,7 @@ const PASSWORD = 'Claude2026!';
 const DIMS = ['Azim','Çeşitlilik','Çevresel Sürdürülebilirlik','Geleneksel Değerler',
   'İş Sağlığı ve Güvenliği','Kurallara Saygı','Otorite','Özerklik',
   'Sosyal Adalet','Yardım Etmek ve Desteklemek','Zevk Alma',
-  'Kariyer Güvencesi','Sosyal Prestij'];
+  'Güvence','Sosyal Prestij'];
 
 function scoreLabel(s){
   if(s>=4.5) return 'Çok Yüksek';
@@ -158,15 +158,52 @@ function renderResults(row){
     </div>`;
 }
 
+function safeTR(s){
+  return (s||'')
+    .replace(/İ/g,'I').replace(/ı/g,'i').replace(/Ş/g,'S').replace(/ş/g,'s')
+    .replace(/Ğ/g,'G').replace(/ğ/g,'g').replace(/Ü/g,'U').replace(/ü/g,'u')
+    .replace(/Ö/g,'O').replace(/ö/g,'o').replace(/Ç/g,'C').replace(/ç/g,'c');
+}
+
+async function loadFont(doc){
+  const urls=[
+    'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf',
+    'https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf',
+  ];
+  for(const url of urls){
+    try{
+      const bytes=await fetch(url).then(r=>{ if(!r.ok) throw new Error(); return r.arrayBuffer(); });
+      return await doc.embedFont(bytes,{subset:true});
+    }catch(e){ continue; }
+  }
+  return null; // will use Helvetica + safeTR
+}
+
 async function generatePDF(idx){
+  const btn=document.querySelector('.btn-pdf');
+  const origText=btn.textContent;
+  btn.textContent='Oluşturuluyor…'; btn.disabled=true;
+  try{
+    await _buildPDF(idx);
+  }catch(e){
+    console.error('PDF hatası:',e);
+    alert('PDF oluşturulamadı. Hata: '+e.message);
+  }finally{
+    btn.textContent=origText; btn.disabled=false;
+  }
+}
+
+async function _buildPDF(idx){
   const row=allData[idx];
-  const {PDFDocument,rgb}=PDFLib;
-  let fontBytes;
-  try{ fontBytes=await fetch('https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf').then(r=>r.arrayBuffer()); }
-  catch(e){ fontBytes=null; }
+  const {PDFDocument,rgb,StandardFonts}=PDFLib;
   const doc=await PDFDocument.create();
   doc.registerFontkit(fontkit);
-  const font=fontBytes ? await doc.embedFont(fontBytes,{subset:true}) : await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+  const customFont=await loadFont(doc);
+  const fallback=await doc.embedFont(StandardFonts.Helvetica);
+  const useCustom=!!customFont;
+  const font=customFont||fallback;
+  const T=(s)=> useCustom ? (s||'') : safeTR(s);
 
   let logoImg=null;
   try{
@@ -187,12 +224,12 @@ async function generatePDF(idx){
     page.drawImage(logoImg,{x:M,y:height-74,width:s.width,height:s.height});
   }
   page.drawText('FUPI',{x:M+58,y:height-42,size:22,font,color:rgb(0.235,0.204,0.537)});
-  page.drawText('Calisma Degerleri Olcegi',{x:M+58,y:height-60,size:11,font,color:rgb(0.5,0.5,0.6)});
+  page.drawText(T('Çalışma Değerleri Ölçeği'),{x:M+58,y:height-60,size:11,font,color:rgb(0.5,0.5,0.6)});
   page.drawRectangle({x:0,y:height-86,width,height:4,color:rgb(0.235,0.204,0.537)});
 
   // Participant
-  page.drawText(row['Ad Soyad']||'',{x:M,y:height-118,size:17,font,color:rgb(0.149,0.133,0.533)});
-  page.drawText(row['Tarih']||row['Zaman Damgasi']||'',{x:M,y:height-137,size:10,font,color:rgb(0.55,0.55,0.65)});
+  page.drawText(T(row['Ad Soyad']||''),{x:M,y:height-118,size:17,font,color:rgb(0.149,0.133,0.533)});
+  page.drawText(T(row['Tarih']||row['Zaman Damgasi']||''),{x:M,y:height-137,size:10,font,color:rgb(0.55,0.55,0.65)});
   page.drawLine({start:{x:M,y:height-149},end:{x:width-M,y:height-149},thickness:0.5,color:rgb(0.87,0.87,0.99)});
 
   // Bars
@@ -204,12 +241,12 @@ async function generatePDF(idx){
     const y=BY-i*RH;
     const c=COLORS_PDF[i%COLORS_PDF.length];
     const barC=rgb(c[0],c[1],c[2]);
-    const dn=d.name.length>27?d.name.substring(0,26)+'.':d.name;
-    page.drawCircle({x:M-8,y:y+7,size:4,color:barC});
+    const dn=T(d.name.length>27?d.name.substring(0,26)+'.':d.name);
+    page.drawRectangle({x:M-12,y:y+3,width:8,height:8,color:barC,borderRadius:4});
     page.drawText(dn,{x:M,y:y+3,size:9,font,color:rgb(0.15,0.13,0.2)});
     page.drawRectangle({x:BX,y:y,width:BW,height:13,color:rgb(0.93,0.92,0.97),borderRadius:3});
     page.drawRectangle({x:BX,y:y,width:Math.max(4,(d.score/5)*BW),height:13,color:barC,opacity:0.85,borderRadius:3});
-    const lbl=scoreLabel(d.score);
+    const lbl=T(scoreLabel(d.score));
     let lc=rgb(0.3,0.27,0.6);
     if(d.score>=4.5) lc=rgb(0.1,0.48,0.29);
     else if(d.score>=3.75) lc=rgb(0.08,0.39,0.75);
