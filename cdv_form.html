@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPİ — Çalışma Değerleri Ölçeği</title>
+<style>
+  :root {
+    --dark:#3C3489; --med:#534AB7; --deep:#26215C;
+    --light:#EEEDFE; --white:#FFFFFF; --text:#1A1A2E;
+    --gray:#F7F7F7; --border:#CCCCCC; --success:#1A7A4A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#F4F3FC;color:var(--text);min-height:100vh;}
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg,var(--deep),var(--med));color:var(--white);padding:32px 24px 28px;text-align:center;}
+  .header .logo{font-size:28px;font-weight:800;letter-spacing:2px;margin-bottom:4px;}
+  .header h1{font-size:18px;font-weight:400;opacity:.88;margin-bottom:0;}
+
+  /* PROGRESS */
+  .progress-wrap{background:var(--white);padding:12px 24px;border-bottom:1px solid #E0DEF5;position:sticky;top:0;z-index:99;box-shadow:0 2px 8px rgba(60,52,137,.08);}
+  .progress-bar-track{background:#E0DEF5;border-radius:8px;height:8px;}
+  .progress-bar-fill{background:var(--med);height:8px;border-radius:8px;transition:width .3s;}
+  .progress-label{font-size:13px;color:var(--med);font-weight:600;margin-top:4px;text-align:right;}
+
+  /* CONTAINER */
+  .container{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+
+  /* INTRO CARD */
+  .intro-card{background:var(--white);border-radius:14px;padding:28px;margin-bottom:24px;box-shadow:0 2px 12px rgba(60,52,137,.08);border-left:5px solid var(--med);}
+  .intro-card h2{font-size:17px;color:var(--dark);margin-bottom:10px;}
+  .intro-card p{font-size:14px;color:#444;line-height:1.7;}
+
+  /* SCALE LEGEND */
+  .scale-legend{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin:16px 0 0;}
+  .scale-legend .sl-item{flex:1;text-align:center;padding:8px 4px;font-size:12px;line-height:1.3;background:var(--gray);}
+  .scale-legend .sl-item .sl-num{font-weight:700;font-size:15px;color:var(--med);display:block;}
+  .scale-legend .sl-item:not(:last-child){border-right:1px solid var(--border);}
+
+  /* IDENTITY FIELDS */
+  .identity{background:var(--white);border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 2px 12px rgba(60,52,137,.08);}
+  .identity label{display:block;font-size:13px;font-weight:600;color:var(--deep);margin-bottom:6px;}
+  .identity input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:15px;color:var(--text);transition:border-color .2s;}
+  .identity input:focus{outline:none;border-color:var(--med);}
+  .identity .field{margin-bottom:16px;}
+  .identity .field:last-child{margin-bottom:0;}
+
+  /* ITEM CARD */
+  .item-card{background:var(--white);border-radius:12px;padding:20px 22px;margin-bottom:12px;box-shadow:0 1px 6px rgba(60,52,137,.07);transition:box-shadow .2s;}
+  .item-card:hover{box-shadow:0 3px 14px rgba(60,52,137,.13);}
+  .item-card.answered{border-left:4px solid var(--med);}
+  .item-card.unanswered-error{border-left:4px solid #C0392B;background:#FFF5F5;}
+
+  .item-num{font-size:11px;font-weight:700;color:var(--med);margin-bottom:6px;letter-spacing:.5px;}
+  .item-text{font-size:15px;color:var(--text);font-weight:500;margin-bottom:16px;line-height:1.5;}
+
+  /* RADIO ROW */
+  .radio-row{display:flex;gap:6px;}
+  .radio-option{flex:1;position:relative;}
+  .radio-option input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
+  .radio-option label{
+    display:flex;flex-direction:column;align-items:center;
+    border:1.5px solid var(--border);border-radius:8px;padding:8px 4px 6px;
+    cursor:pointer;transition:all .15s;background:var(--gray);
+    font-size:11px;color:#888;text-align:center;line-height:1.2;
+    user-select:none;
+  }
+  .radio-option label .r-num{font-size:16px;font-weight:700;color:var(--border);margin-bottom:2px;transition:color .15s;}
+  .radio-option input:checked + label{background:var(--light);border-color:var(--med);}
+  .radio-option input:checked + label .r-num{color:var(--med);}
+  .radio-option label:hover{border-color:var(--med);background:var(--light);}
+
+  /* SUBMIT */
+  .submit-wrap{text-align:center;margin-top:32px;}
+  .btn-submit{background:linear-gradient(135deg,var(--dark),var(--med));color:var(--white);border:none;border-radius:12px;padding:16px 48px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(60,52,137,.3);}
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(60,52,137,.4);}
+  .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+  .error-msg{color:#C0392B;font-size:13px;margin-top:10px;display:none;}
+
+  /* SUCCESS */
+  .success-screen{display:none;background:var(--white);border-radius:16px;padding:48px 32px;text-align:center;box-shadow:0 4px 24px rgba(60,52,137,.12);margin-top:32px;}
+  .success-screen .icon{font-size:56px;margin-bottom:16px;}
+  .success-screen h2{color:var(--dark);font-size:22px;margin-bottom:8px;}
+  .success-screen p{color:#555;font-size:15px;line-height:1.6;}
+
+  @media(max-width:540px){
+    .radio-row{gap:4px;}
+    .radio-option label{padding:6px 2px 5px;font-size:10px;}
+    .radio-option label .r-num{font-size:14px;}
+    .item-text{font-size:14px;}
+    .header .logo{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">FUPİ</div>
+  <h1>Çalışma Değerleri Ölçeği</h1>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 65 tamamlandı</div>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="intro-card">
+    <h2>Bu ölçek nasıl çalışır?</h2>
+    <p>Aşağıdaki ifadeler, çalışma hayatında insanların önem verdiği farklı değerleri tanımlamaktadır. Her ifadeyi <strong>sizin için ne kadar önemli olduğunu</strong> düşünerek değerlendirin. Doğru ya da yanlış cevap yoktur — ilk aklınıza gelen değerlendirmeyi seçin.</p>
+    <div class="scale-legend">
+      <div class="sl-item"><span class="sl-num">1</span>Hiç önemli değil</div>
+      <div class="sl-item"><span class="sl-num">2</span>Az önemli</div>
+      <div class="sl-item"><span class="sl-num">3</span>Orta düzeyde</div>
+      <div class="sl-item"><span class="sl-num">4</span>Önemli</div>
+      <div class="sl-item"><span class="sl-num">5</span>Çok önemli</div>
+    </div>
+  </div>
+
+  <!-- IDENTITY -->
+  <div class="identity">
+    <div class="field">
+      <label for="name">Ad Soyad *</label>
+      <input type="text" id="name" placeholder="Adınızı ve soyadınızı yazın" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- ITEMS -->
+  <div id="itemsContainer"></div>
+
+  <!-- SUBMIT -->
+  <div class="submit-wrap">
+    <button class="btn-submit" id="submitBtn" onclick="submitForm()">Gönder</button>
+    <div class="error-msg" id="errorMsg">Lütfen tüm soruları yanıtlayın ve adınızı girin.</div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="icon">✅</div>
+    <h2>Teşekkürler!</h2>
+    <p>Yanıtlarınız başarıyla kaydedildi.<br>Eğitmeniz sonuçlarınızı sizinle paylaşacaktır.</p>
+  </div>
+
+</div>
+
+<script>
+// ─── WEBHOOK ────────────────────────────────────────────────────────────────
+// !! BURAYA CDV WEBHOOK URL'İNİ YAPIŞTIRINIZ !!
+const WEBHOOK_URL = 'https://script.google.com/macros/s/BURAYA_CDV_WEBHOOK_URL/exec';
+
+// ─── TÜM MADDELER ────────────────────────────────────────────────────────────
+const ALL_ITEMS = [
+  // Azim
+  {id:1,  text:"Kariyerimi ilerletmek için",                                                               dim:"Azim"},
+  {id:2,  text:"Başarılı olarak görülmek için",                                                            dim:"Azim"},
+  {id:3,  text:"Terfi almak için",                                                                         dim:"Azim"},
+  {id:4,  text:"Kazanma gücümü artırmak için",                                                             dim:"Azim"},
+  {id:5,  text:"Azimli olmak için",                                                                        dim:"Azim"},
+  // Çeşitlilik
+  {id:6,  text:"Farklı zorlukları deneyimlemek için",                                                      dim:"Çeşitlilik"},
+  {id:7,  text:"Tekrardan sıkılmamak için",                                                                dim:"Çeşitlilik"},
+  {id:8,  text:"İşimde çeşitlilik elde etmek için",                                                       dim:"Çeşitlilik"},
+  {id:9,  text:"Değişik işler yapmak için",                                                                dim:"Çeşitlilik"},
+  {id:10, text:"Geniş çeşitliliğe sahip işleri deneyimlemek için",                                        dim:"Çeşitlilik"},
+  // Çevresel Sürdürülebilirlik
+  {id:11, text:"Çevreyi korumak için",                                                                     dim:"Çevresel Sürdürülebilirlik"},
+  {id:12, text:"Doğaya saygı duymak için",                                                                 dim:"Çevresel Sürdürülebilirlik"},
+  {id:13, text:"Çevre kirliliğini önlemek için",                                                           dim:"Çevresel Sürdürülebilirlik"},
+  {id:14, text:"Çevresel sürdürülebilirliğe katkıda bulunmak için",                                       dim:"Çevresel Sürdürülebilirlik"},
+  {id:15, text:"Doğayla uyum ve bütünlük içinde olmak için",                                               dim:"Çevresel Sürdürülebilirlik"},
+  // Geleneksel Değerler
+  {id:16, text:"Dini inançlarıma uyumlu bir iş yapmak için",                                              dim:"Geleneksel Değerler"},
+  {id:17, text:"Geleneksel olarak onaylanan bir iş yapmak için",                                           dim:"Geleneksel Değerler"},
+  {id:18, text:"Ailemin değerlerine uyumlu çalışabilmek için",                                             dim:"Geleneksel Değerler"},
+  {id:19, text:"Toplumun destekleyeceği bir iş yapmak için",                                               dim:"Geleneksel Değerler"},
+  {id:20, text:"İşte, toplumsal geleneklerimi destekleyebilmek için",                                      dim:"Geleneksel Değerler"},
+  // İş Sağlığı ve Güvenliği
+  {id:21, text:"İşyerini daha güvenli hale getirmek için",                                                 dim:"İş Sağlığı ve Güvenliği"},
+  {id:22, text:"Çalışma arkadaşlarımın güvenliğine katkıda bulunmak için",                                dim:"İş Sağlığı ve Güvenliği"},
+  {id:23, text:"İş güvenliğine olumlu katkıda bulunmak için",                                              dim:"İş Sağlığı ve Güvenliği"},
+  {id:24, text:"Tehlikenin en aza indirildiğinden emin olmak için",                                        dim:"İş Sağlığı ve Güvenliği"},
+  {id:25, text:"İşyerinin güvenliğini en üst seviyeye çıkarmak için",                                     dim:"İş Sağlığı ve Güvenliği"},
+  // Kurallara Saygı
+  {id:26, text:"Düzenli bir işyerinde çalışmak için",                                                     dim:"Kurallara Saygı"},
+  {id:27, text:"Kimse görmese dahi kurallara saygı duyan çalışma arkadaşlarıyla birlikte çalışmak için", dim:"Kurallara Saygı"},
+  {id:28, text:"Kurumun politikalarını hepimizin desteklediği bir grupta çalışmak için",                   dim:"Kurallara Saygı"},
+  {id:29, text:"Kuralların önemli olduğuna inanan insanların olduğu bir grupta çalışmak için",             dim:"Kurallara Saygı"},
+  {id:30, text:"Kurumun kurallarına saygı duyulmasına katkıda bulunabileceğim bir işte çalışmak için",    dim:"Kurallara Saygı"},
+  // Otorite
+  {id:31, text:"İnsanlar üzerinde yetki sahibi olmak için",                                                dim:"Otorite"},
+  {id:32, text:"Diğerlerinin çalışma programları üzerinde yetki sahibi olmak için",                       dim:"Otorite"},
+  {id:33, text:"Paranın nasıl harcanacağını belirlemek için",                                              dim:"Otorite"},
+  {id:34, text:"Kısıtlı kaynaklar üzerinde yetki sahibi olmak için",                                      dim:"Otorite"},
+  {id:35, text:"Kimin ne yapacağına karar vermek için",                                                    dim:"Otorite"},
+  // Özerklik
+  {id:36, text:"İşimde kendi önceliklerime karar vermek için",                                             dim:"Özerklik"},
+  {id:37, text:"İşte ne yapacağıma karar vermek için",                                                    dim:"Özerklik"},
+  {id:38, text:"Kendi işimi yönetebilmek için",                                                            dim:"Özerklik"},
+  {id:39, text:"Günümü nasıl geçireceğimi belirlemek için",                                                dim:"Özerklik"},
+  {id:40, text:"İşimde kendi kararlarımı vermek için",                                                    dim:"Özerklik"},
+  // Sosyal Adalet
+  {id:41, text:"Dünyayı daha adil bir yer haline getirmek için",                                           dim:"Sosyal Adalet"},
+  {id:42, text:"Sosyal adaleti sürdürmek için",                                                            dim:"Sosyal Adalet"},
+  {id:43, text:"Dezavantajlı insanları desteklemek için",                                                  dim:"Sosyal Adalet"},
+  {id:44, text:"Dünyayı daha iyi bir yer haline getirmek için",                                            dim:"Sosyal Adalet"},
+  {id:45, text:"Toplumun gelişmesine katkıda bulunmak için",                                               dim:"Sosyal Adalet"},
+  // Yardım Etmek ve Desteklemek
+  {id:46, text:"Başkalarına destek olmak için",                                                            dim:"Yardım Etmek ve Desteklemek"},
+  {id:47, text:"Temas ettiğim insanlara yardım etmek için",                                               dim:"Yardım Etmek ve Desteklemek"},
+  {id:48, text:"Başkalarına yardım eden işler yapmak için",                                               dim:"Yardım Etmek ve Desteklemek"},
+  {id:49, text:"İşte tanıştığım insanları desteklemek için",                                               dim:"Yardım Etmek ve Desteklemek"},
+  {id:50, text:"İşimde karşılaştığım insanların yaşamlarını iyileştirmek için",                           dim:"Yardım Etmek ve Desteklemek"},
+  // Zevk Alma
+  {id:51, text:"Kendimi iyi hissedeceğim şeyler yapmak için",                                             dim:"Zevk Alma"},
+  {id:52, text:"Keyfini çıkarmak için",                                                                   dim:"Zevk Alma"},
+  {id:53, text:"Eğlenmek için",                                                                           dim:"Zevk Alma"},
+  {id:54, text:"İşimde geçirdiğim zamandan keyif almak için",                                             dim:"Zevk Alma"},
+  {id:55, text:"Keyifli deneyimler yaşamak için",                                                         dim:"Zevk Alma"},
+  // Kariyer Güvencesi (YENİ)
+  {id:56, text:"İş güvencesine sahip olmak için",                                                         dim:"Kariyer Güvencesi"},
+  {id:57, text:"Ekonomik açıdan güvenceli bir konumda olmak için",                                        dim:"Kariyer Güvencesi"},
+  {id:58, text:"Kariyer istikrarını sağlamak için",                                                       dim:"Kariyer Güvencesi"},
+  {id:59, text:"İşimi kaybetme kaygısı yaşamamak için",                                                   dim:"Kariyer Güvencesi"},
+  {id:60, text:"Uzun vadede finansal güvence elde etmek için",                                            dim:"Kariyer Güvencesi"},
+  // Sosyal Prestij (YENİ)
+  {id:61, text:"Toplumda saygın bir statüye sahip olmak için",                                            dim:"Sosyal Prestij"},
+  {id:62, text:"Çevremde mesleki saygınlık kazanmak için",                                               dim:"Sosyal Prestij"},
+  {id:63, text:"Ailem ve yakınlarımın gurur duyduğu bir işte çalışmak için",                             dim:"Sosyal Prestij"},
+  {id:64, text:"Başkalarının gözünde değerli bir konumda olmak için",                                    dim:"Sosyal Prestij"},
+  {id:65, text:"Toplumsal açıdan prestijli kabul edilen bir pozisyona sahip olmak için",                 dim:"Sosyal Prestij"},
+];
+
+const LABELS = ['','Hiç önemli değil','Az önemli','Orta düzeyde','Önemli','Çok önemli'];
+
+// ─── RANDOMIZE ────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const SHUFFLED = shuffle(ALL_ITEMS);
+
+// ─── RENDER ITEMS ─────────────────────────────────────────────────────────────
+function renderItems() {
+  const container = document.getElementById('itemsContainer');
+  SHUFFLED.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.id = `card-${item.id}`;
+
+    const radios = [1,2,3,4,5].map(v => `
+      <div class="radio-option">
+        <input type="radio" name="q${item.id}" id="q${item.id}_${v}" value="${v}" onchange="onAnswer(${item.id}, this)">
+        <label for="q${item.id}_${v}">
+          <span class="r-num">${v}</span>${LABELS[v]}
+        </label>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="item-num">MADDE ${idx + 1}</div>
+      <div class="item-text">${item.text}</div>
+      <div class="radio-row">${radios}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ─── PROGRESS ─────────────────────────────────────────────────────────────────
+let answeredCount = 0;
+const answered = {};
+
+function onAnswer(id, el) {
+  if (!answered[id]) { answeredCount++; answered[id] = true; }
+  answered[id] = el.value;
+  document.getElementById(`card-${id}`).classList.add('answered');
+  document.getElementById(`card-${id}`).classList.remove('unanswered-error');
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = Math.round((answeredCount / 65) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = answeredCount + ' / 65 tamamlandı';
+}
+
+// ─── DIMENSION SCORES ────────────────────────────────────────────────────────
+function calcDimScores(responses) {
+  const dims = {};
+  ALL_ITEMS.forEach(item => {
+    if (!dims[item.dim]) dims[item.dim] = [];
+    const val = responses[`q${item.id}`];
+    if (val) dims[item.dim].push(parseInt(val));
+  });
+  const scores = {};
+  Object.entries(dims).forEach(([dim, vals]) => {
+    scores[dim] = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2) : '';
+  });
+  return scores;
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+function submitForm() {
+  const name = document.getElementById('name').value.trim();
+  const btn  = document.getElementById('submitBtn');
+  const errEl = document.getElementById('errorMsg');
+
+  // Validate name
+  if (!name) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Lütfen adınızı ve soyadınızı girin.';
+    document.getElementById('name').focus();
+    return;
+  }
+
+  // Collect responses & check completeness
+  const responses = {};
+  const missing = [];
+  ALL_ITEMS.forEach(item => {
+    const sel = document.querySelector(`input[name="q${item.id}"]:checked`);
+    if (sel) {
+      responses[`q${item.id}`] = sel.value;
+    } else {
+      missing.push(item.id);
+    }
+  });
+
+  if (missing.length > 0) {
+    errEl.style.display = 'block';
+    errEl.textContent = `Lütfen tüm ${missing.length} maddeyi yanıtlayın.`;
+    // Highlight unanswered
+    missing.forEach(id => {
+      const card = document.getElementById(`card-${id}`);
+      if (card) card.classList.add('unanswered-error');
+    });
+    // Scroll to first missing
+    const firstCard = document.getElementById(`card-${missing[0]}`);
+    if (firstCard) firstCard.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Gönderiliyor…';
+
+  // Build data
+  const dimScores = calcDimScores(responses);
+  const payload = {
+    'Ad Soyad': name,
+    'Tarih': new Date().toLocaleString('tr-TR'),
+    ...dimScores
+  };
+  // Add individual item scores
+  ALL_ITEMS.forEach(item => {
+    payload[`M${item.id}`] = responses[`q${item.id}`] || '';
+  });
+
+  // Send to webhook
+  fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+    mode: 'no-cors'
+  })
+  .then(() => {
+    document.getElementById('itemsContainer').style.display = 'none';
+    document.querySelector('.intro-card').style.display = 'none';
+    document.querySelector('.identity').style.display = 'none';
+    document.querySelector('.submit-wrap').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+    document.getElementById('successScreen').scrollIntoView({behavior:'smooth'});
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.textContent = 'Gönder';
+    errEl.style.display = 'block';
+    errEl.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderItems();
+</script>
+</body>
+</html>
