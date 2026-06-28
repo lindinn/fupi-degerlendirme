@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUPİ — CDV Danışman Paneli</title>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
+<style>
+:root{--dark:#3C3489;--med:#534AB7;--deep:#26215C;--light:#EEEDFE;--white:#fff;--text:#1A1A2E;--gray:#F4F4F4;--border:#CCCCCC;--success:#1A7A4A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F0EFF9;color:var(--text);}
+
+/* LOCK */
+#lockScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.lock-card{background:var(--white);border-radius:16px;padding:40px 36px;max-width:380px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(60,52,137,.15);}
+.lock-logo{font-size:28px;font-weight:800;color:var(--dark);letter-spacing:2px;margin-bottom:4px;}
+.lock-sub{font-size:14px;color:#888;margin-bottom:28px;}
+.lock-card input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;font-size:15px;text-align:center;margin-bottom:14px;letter-spacing:3px;}
+.lock-card input:focus{outline:none;border-color:var(--med);}
+.lock-btn{width:100%;background:linear-gradient(135deg,var(--dark),var(--med));color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;}
+.lock-err{color:#C0392B;font-size:13px;margin-top:8px;display:none;}
+
+/* MAIN */
+#mainPanel{display:none;height:100vh;display:none;flex-direction:column;}
+.top-bar{background:linear-gradient(135deg,var(--deep),var(--med));color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.top-bar .logo{font-size:20px;font-weight:800;letter-spacing:2px;}
+.top-bar .title{font-size:14px;opacity:.85;}
+.top-bar .badge{margin-left:auto;background:rgba(255,255,255,.15);border-radius:20px;padding:4px 14px;font-size:12px;}
+
+.panel-body{display:flex;flex:1;overflow:hidden;}
+
+/* LEFT */
+.sidebar{width:280px;background:var(--white);border-right:1px solid #E0DEF5;display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-header{padding:14px 16px;border-bottom:1px solid #E0DEF5;font-size:13px;font-weight:700;color:var(--deep);}
+.participant-list{overflow-y:auto;flex:1;}
+.p-item{padding:12px 16px;border-bottom:1px solid #F0EFF9;cursor:pointer;transition:background .15s;}
+.p-item:hover{background:var(--light);}
+.p-item.active{background:var(--light);border-left:3px solid var(--med);}
+.p-item .p-name{font-size:14px;font-weight:600;color:var(--text);}
+.p-item .p-date{font-size:11px;color:#888;margin-top:2px;}
+.empty-list{padding:24px 16px;text-align:center;color:#AAA;font-size:13px;}
+
+/* RIGHT */
+.results-area{flex:1;overflow-y:auto;padding:24px;}
+.placeholder{display:flex;align-items:center;justify-content:center;height:100%;color:#AAA;font-size:15px;}
+
+.result-card{background:var(--white);border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(60,52,137,.08);max-width:740px;}
+.rc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.rc-name{font-size:20px;font-weight:700;color:var(--dark);}
+.rc-date{font-size:13px;color:#888;margin-top:3px;}
+.btn-pdf{background:linear-gradient(135deg,var(--dark),var(--med));color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-pdf:hover{opacity:.9;}
+
+/* DIM BARS */
+.dim-section-title{font-size:12px;font-weight:700;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;}
+.dim-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.dim-badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.dim-badge.top{background:#EAFAF1;color:var(--success);}
+.dim-badge.bot{background:#FDEDEC;color:#E74C3C;}
+.dim-badge.mid{background:var(--gray);color:#999;}
+.dim-name{width:230px;font-size:13px;font-weight:500;flex-shrink:0;}
+.dim-bar-wrap{flex:1;background:#E8E6F5;border-radius:6px;height:14px;overflow:hidden;}
+.dim-bar-fill{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--med),var(--dark));}
+.dim-score{width:36px;text-align:right;font-size:13px;font-weight:700;color:var(--dark);flex-shrink:0;}
+.dim-label{width:80px;font-size:11px;color:#888;flex-shrink:0;}
+
+.legend{display:flex;gap:16px;margin-top:20px;padding-top:16px;border-top:1px solid #F0EFF9;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#666;}
+.legend-dot{width:16px;height:16px;border-radius:50%;}
+
+@media(max-width:640px){
+  .sidebar{width:100%;max-width:none;position:fixed;bottom:0;left:0;z-index:10;height:220px;border-top:1px solid #E0DEF5;border-right:none;}
+  .results-area{padding-bottom:240px;}
+  .dim-name{width:160px;font-size:12px;}
+  .dim-label{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-logo">FUPİ</div>
+    <div class="lock-sub">CDV Danışman Paneli</div>
+    <input type="password" id="pwInput" placeholder="Şifre" onkeydown="if(event.key==='Enter') checkPw()">
+    <button class="lock-btn" onclick="checkPw()">Giriş</button>
+    <div class="lock-err" id="pwErr">Hatalı şifre.</div>
+  </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div id="mainPanel" style="display:none; height:100vh; flex-direction:column;">
+  <div class="top-bar">
+    <div class="logo">FUPİ</div>
+    <div class="title">Çalışma Değerleri — Danışman Paneli</div>
+    <div class="badge" id="countBadge">— katılımcı</div>
+  </div>
+  <div class="panel-body">
+    <div class="sidebar">
+      <div class="sidebar-header">Katılımcılar</div>
+      <div class="participant-list" id="participantList">
+        <div class="empty-list">Yükleniyor…</div>
+      </div>
+    </div>
+    <div class="results-area" id="resultsArea">
+      <div class="placeholder">← Katılımcı seçin</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WEBHOOK = 'https://script.google.com/macros/s/AKfycbydtIT2zn2ocMzokLdZUaEFKAj7n4ZksmdJwxtKy-s5RjOi5BfEtDvISz0nG6qxibUq/exec';
+const PASSWORD = 'Claude2026!';
+
+const DIMS = [
+  'Azim','Çeşitlilik','Çevresel Sürdürülebilirlik','Geleneksel Değerler',
+  'İş Sağlığı ve Güvenliği','Kurallara Saygı','Otorite','Özerklik',
+  'Sosyal Adalet','Yardım Etmek ve Desteklemek','Zevk Alma',
+  'Kariyer Güvencesi','Sosyal Prestij'
+];
+
+function scoreLabel(s) {
+  if (s >= 4.5) return 'Çok Yüksek';
+  if (s >= 3.5) return 'Yüksek';
+  if (s >= 2.5) return 'Orta';
+  if (s >= 1.5) return 'Düşük';
+  return 'Çok Düşük';
+}
+
+function checkPw() {
+  const v = document.getElementById('pwInput').value;
+  if (v === PASSWORD) {
+    document.getElementById('lockScreen').style.display = 'none';
+    const mp = document.getElementById('mainPanel');
+    mp.style.display = 'flex';
+    loadData();
+  } else {
+    document.getElementById('pwErr').style.display = 'block';
+  }
+}
+
+let allData = [];
+let selectedIdx = null;
+
+function loadData() {
+  fetch(WEBHOOK)
+    .then(r => r.json())
+    .then(rows => {
+      allData = rows;
+      document.getElementById('countBadge').textContent = rows.length + ' katılımcı';
+      renderList();
+    })
+    .catch(() => {
+      document.getElementById('participantList').innerHTML = '<div class="empty-list">Veri yüklenemedi.</div>';
+    });
+}
+
+function renderList() {
+  const el = document.getElementById('participantList');
+  if (!allData.length) {
+    el.innerHTML = '<div class="empty-list">Henüz veri yok.</div>';
+    return;
+  }
+  el.innerHTML = allData.map((row, i) => `
+    <div class="p-item${selectedIdx === i ? ' active' : ''}" onclick="selectParticipant(${i})">
+      <div class="p-name">${row['Ad Soyad'] || '—'}</div>
+      <div class="p-date">${row['Tarih'] || row['Zaman Damgası'] || ''}</div>
+    </div>
+  `).join('');
+}
+
+function selectParticipant(idx) {
+  selectedIdx = idx;
+  renderList();
+  renderResults(allData[idx]);
+}
+
+function renderResults(row) {
+  // Build sorted dim list
+  const dimData = DIMS.map(d => ({ name: d, score: parseFloat(row[d]) || 0 }));
+  dimData.sort((a, b) => b.score - a.score);
+
+  const rows = dimData.map((d, i) => {
+    let badgeClass = 'mid', badgeText = '';
+    if (i < 3) { badgeClass = 'top'; badgeText = '▲'; }
+    else if (i >= dimData.length - 3) { badgeClass = 'bot'; badgeText = '▼'; }
+    const pct = ((d.score / 5) * 100).toFixed(0);
+    return `
+      <div class="dim-row">
+        <div class="dim-badge ${badgeClass}">${badgeText}</div>
+        <div class="dim-name">${d.name}</div>
+        <div class="dim-bar-wrap"><div class="dim-bar-fill" style="width:${pct}%"></div></div>
+        <div class="dim-score">${d.score.toFixed(2)}</div>
+        <div class="dim-label">${scoreLabel(d.score)}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('resultsArea').innerHTML = `
+    <div class="result-card">
+      <div class="rc-header">
+        <div>
+          <div class="rc-name">${row['Ad Soyad'] || '—'}</div>
+          <div class="rc-date">${row['Tarih'] || row['Zaman Damgası'] || ''}</div>
+        </div>
+        <button class="btn-pdf" onclick="generatePDF(${selectedIdx})">PDF İndir</button>
+      </div>
+      <div class="dim-section-title">13 Çalışma Değeri — Büyükten Küçüğe</div>
+      ${rows}
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#EAFAF1;border:1px solid #1A7A4A;"></div>Baskın değer (ilk 3)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FDEDEC;border:1px solid #E74C3C;"></div>Düşük değer (son 3)</div>
+      </div>
+    </div>`;
+}
+
+// ─── PDF ─────────────────────────────────────────────────────────────────────
+async function generatePDF(idx) {
+  const row = allData[idx];
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+  // Fetch font
+  let fontBytes;
+  try {
+    fontBytes = await fetch('https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf').then(r => r.arrayBuffer());
+  } catch(e) { fontBytes = null; }
+
+  const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
+
+  let font;
+  if (fontBytes) {
+    font = await doc.embedFont(fontBytes, { subset: true });
+  } else {
+    font = await doc.embedFont(StandardFonts.Helvetica);
+  }
+
+  const page = doc.addPage([595, 842]); // A4
+  const { width, height } = page.getSize();
+  const M = 48; // margin
+
+  // Header bar
+  page.drawRectangle({ x: 0, y: height - 70, width, height: 70, color: rgb(0.149, 0.133, 0.533) });
+  page.drawText('FUPI', { x: M, y: height - 44, size: 22, font, color: rgb(1,1,1) });
+  page.drawText('Calisma Degerleri Olcegi — Sonuc Raporu', { x: M + 80, y: height - 44, size: 12, font, color: rgb(0.87,0.87,1) });
+
+  // Participant info
+  const name = row['Ad Soyad'] || '';
+  const date = row['Tarih'] || row['Zaman Damgasi'] || '';
+  page.drawText(name, { x: M, y: height - 100, size: 16, font, color: rgb(0.149, 0.133, 0.533) });
+  page.drawText(date, { x: M, y: height - 120, size: 11, font, color: rgb(0.5,0.5,0.5) });
+
+  // Divider
+  page.drawLine({ start: { x: M, y: height - 132 }, end: { x: width - M, y: height - 132 }, thickness: 1, color: rgb(0.88, 0.87, 0.99) });
+
+  // Section title
+  page.drawText('13 Calisma Degeri — Buyukten Kucuge', { x: M, y: height - 156, size: 10, font, color: rgb(0.5,0.5,0.5) });
+
+  // Dim bars
+  const dimData = DIMS.map(d => ({ name: d, score: parseFloat(row[d]) || 0 }));
+  dimData.sort((a, b) => b.score - a.score);
+
+  const BAR_START_Y = height - 180;
+  const ROW_H = 30;
+  const BAR_X = M + 200;
+  const BAR_W = width - M - BAR_X - 60;
+
+  dimData.forEach((d, i) => {
+    const y = BAR_START_Y - i * ROW_H;
+    const isTop = i < 3;
+    const isBot = i >= dimData.length - 3;
+    const barColor = isTop ? rgb(0.102, 0.478, 0.29) : isBot ? rgb(0.753, 0.224, 0.169) : rgb(0.325, 0.29, 0.718);
+    const trackColor = isTop ? rgb(0.91, 0.98, 0.94) : isBot ? rgb(0.99, 0.93, 0.93) : rgb(0.906, 0.902, 0.965);
+
+    // Dim name (truncate if needed)
+    const dimName = d.name.length > 26 ? d.name.substring(0,25) + '.' : d.name;
+    page.drawText(dimName, { x: M, y: y + 4, size: 9.5, font, color: rgb(0.1, 0.1, 0.15) });
+
+    // Track
+    page.drawRectangle({ x: BAR_X, y: y, width: BAR_W, height: 14, color: trackColor, borderRadius: 4 });
+    // Fill
+    const fillW = Math.max(4, (d.score / 5) * BAR_W);
+    page.drawRectangle({ x: BAR_X, y: y, width: fillW, height: 14, color: barColor, borderRadius: 4 });
+    // Score
+    page.drawText(d.score.toFixed(2), { x: BAR_X + BAR_W + 8, y: y + 3, size: 9.5, font, color: rgb(0.149, 0.133, 0.533) });
+  });
+
+  // Footer
+  page.drawLine({ start: { x: M, y: 48 }, end: { x: width - M, y: 48 }, thickness: 0.5, color: rgb(0.87,0.87,0.99) });
+  page.drawText('FUPi Kariyer Tasarimi — fupi.com.tr', { x: M, y: 32, size: 9, font, color: rgb(0.6,0.6,0.7) });
+  page.drawText('Bu rapor kisisel kullanim icin hazirlanmistir.', { x: width - M - 220, y: 32, size: 9, font, color: rgb(0.6,0.6,0.7) });
+
+  const pdfBytes = await doc.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `CDV_${(row['Ad Soyad'] || 'rapor').replace(/\s+/g,'_')}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
