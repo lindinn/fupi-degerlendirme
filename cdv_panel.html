@@ -195,8 +195,11 @@ function safeTR(s){
     .replace(/Ö/g,'O').replace(/ö/g,'o').replace(/Ç/g,'C').replace(/ç/g,'c');
 }
 
-async function loadFont(doc){
-  const urls=[
+async function loadFont(doc, bold=false){
+  const urls = bold ? [
+    'https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Bold.ttf',
+    'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc4.ttf',
+  ] : [
     'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf',
     'https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf',
   ];
@@ -206,7 +209,7 @@ async function loadFont(doc){
       return await doc.embedFont(bytes,{subset:true});
     }catch(e){ continue; }
   }
-  return null; // will use Helvetica + safeTR
+  return null;
 }
 
 async function generatePDF(idx){
@@ -229,10 +232,12 @@ async function _buildPDF(idx){
   const doc=await PDFDocument.create();
   doc.registerFontkit(fontkit);
 
-  const customFont=await loadFont(doc);
+  const customFont=await loadFont(doc, false);
+  const boldFont=await loadFont(doc, true);
   const fallback=await doc.embedFont(StandardFonts.Helvetica);
   const useCustom=!!customFont;
   const font=customFont||fallback;
+  const bFont=boldFont||font;
   const T=(s)=> useCustom ? (s||'') : safeTR(s);
 
   let logoImg=null;
@@ -256,7 +261,7 @@ async function _buildPDF(idx){
     page.drawImage(logoImg,{x:M,y:height-80,width:lw,height:lh});
     titleX=M+lw+18;
   }
-  page.drawText(T('Calisma Degerleri Olcegi'),{x:titleX,y:height-44,size:18,font,color:rgb(1,1,1)});
+  page.drawText(T('Çalışma Değerleri Ölçeği'),{x:titleX,y:height-44,size:18,font,color:rgb(1,1,1)});
   // Participant
   page.drawText(T(row['Ad Soyad']||''),{x:M,y:height-116,size:17,font,color:rgb(0.149,0.133,0.533)});
   page.drawText(T(row['Tarih']||row['Zaman Damgasi']||''),{x:M,y:height-136,size:10,font,color:rgb(0.55,0.55,0.65)});
@@ -291,31 +296,34 @@ async function _buildPDF(idx){
   const botThree = dimData.slice(-3);
 
   const boxW = Math.floor((width - 2*M - 10) / 2);
-  const boxH = 130;
+  const boxH = 155;
   const lastBarBottom = BY - 12*RH - 4;
   const boxTopY = lastBarBottom - 24;  // top-left corner Y of boxes
   const box1X = M;
   const box2X = M + boxW + 10;
 
   function drawSummaryBox(bx, by, bw, bh, items, title, headerBg, headerFg, bodyBg, dimFg) {
-    // Body bg
-    page.drawRectangle({x:bx, y:by, width:bw, height:bh, color:bodyBg, borderRadius:4});
-    // Header band
-    page.drawRectangle({x:bx, y:by+bh-22, width:bw, height:22, color:headerBg, borderRadius:4});
-    page.drawText(T(title), {x:bx+10, y:by+bh-15, size:9, font, color:headerFg});
+    // Body bg with rounded corners
+    page.drawRectangle({x:bx, y:by, width:bw, height:bh, color:bodyBg, borderRadius:8});
+    // Header band with rounded corners (top only feel)
+    page.drawRectangle({x:bx, y:by+bh-26, width:bw, height:26, color:headerBg, borderRadius:8});
+    // Cover bottom-half rounding of header to get flat bottom edge
+    page.drawRectangle({x:bx, y:by+bh-26, width:bw, height:13, color:headerBg});
+    // Title: bold, slightly larger
+    page.drawText(T(title), {x:bx+12, y:by+bh-17, size:11, font:bFont, color:headerFg});
 
-    let itemY = by + bh - 34;
+    let itemY = by + bh - 42;
     items.forEach(d => {
-      const name = T(d.name.length > 28 ? d.name.substring(0,27)+'.' : d.name);
-      page.drawText(name, {x:bx+10, y:itemY, size:8.5, font, color:dimFg});
-      itemY -= 11;
+      const name = T(d.name.length > 30 ? d.name.substring(0,29)+'.' : d.name);
+      page.drawText(name, {x:bx+12, y:itemY, size:9, font:bFont, color:dimFg});
+      itemY -= 13;
       const desc = T(DIM_DESCS[d.name] || '');
-      const lines = wrapText(desc, Math.floor(bw / 4.6));
+      const lines = wrapText(desc, Math.floor(bw / 4.4));
       lines.slice(0,2).forEach(line => {
-        page.drawText(line, {x:bx+10, y:itemY, size:7.5, font, color:rgb(0.35,0.33,0.45)});
-        itemY -= 10;
+        page.drawText(line, {x:bx+12, y:itemY, size:8, font, color:rgb(0.30,0.28,0.42)});
+        itemY -= 11;
       });
-      itemY -= 4;
+      itemY -= 8;
     });
   }
 
